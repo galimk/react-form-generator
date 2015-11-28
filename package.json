@@ -16,9 +16,11 @@
     "gulp-connect": "^2.2.0",
     "gulp-less": "^3.0.5",
     "gulp-minify": "0.0.5",
+    "jquery": "^2.1.4",
     "react": "^0.14.3",
     "react-dom": "^0.14.3",
     "reactify": "^1.1.1",
+    "underscore": "^1.8.3",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   }

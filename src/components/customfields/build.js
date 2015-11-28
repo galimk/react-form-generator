@@ -27,14 +27,7 @@ var ModulesPath = getPathObject('./node_modules/bootstrap/dist/css/', {
 });
 
 module.exports = function (gulp) {
-    gulp.task('customfields-build', function () {
-        browserify(MainPath.BootstrapperFile)
-            .transform('reactify')
-            .on('error', console.error.bind(console))
-            .bundle()
-            .pipe(source('build.js'))
-            .pipe(gulp.dest(MainPath.DistDir)).pipe(connect.reload());
-
+    gulp.task('customfields-files-copy', function () {
         gulp.src(MainPath.IndexHtmlFile)
             .pipe(gulp.dest(MainPath.DistDir));
 
@@ -46,7 +39,19 @@ module.exports = function (gulp) {
 
         gulp.src(ModulesPath.BootstrapThemeMinFile)
             .pipe(gulp.dest(MainPath.DistDir))
+    });
 
+    gulp.task('customfields-build', ['customfields-files-copy'], function () {
+        browserify(MainPath.BootstrapperFile)
+            .transform('reactify')
+            .on('error', console.error.bind(console))
+            .bundle()
+            .pipe(source('build.js'))
+            .pipe(gulp.dest(MainPath.DistDir));
+    });
+
+    gulp.task('customfields-reload', function () {
+        gulp.src(MainPath.IndexHtmlFile).pipe(connect.reload());
     });
 
     gulp.task('customfields-connect', function () {
@@ -64,6 +69,8 @@ module.exports = function (gulp) {
     });
 
     gulp.task('customfields', ['customfields-build', 'customfields-open'], function () {
-        return gulp.watch(MainPath.AllFilesMask, ['customfields-build']);
+        gulp.watch(MainPath.AllFilesMask, ['customfields-build', 'customfields-reload']);
+        gulp.watch(MainPath.IndexHtmlFile, ['customfields-files-copy', 'customfields-reload']);
+        gulp.watch(MainPath.LessFile, ['customfields-files-copy', 'customfields-reload']);
     });
 };

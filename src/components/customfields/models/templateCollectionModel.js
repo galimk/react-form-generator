@@ -1,3 +1,8 @@
-/**
- * Created by gkaudinov on 11/27/2015.
- */
+var TemplateModel = require('./templateModel');
+var Backbone = require('backbone');
+
+var TemplatesCollectionModel = Backbone.Collection.extend({
+    model: TemplateModel
+});
+
+module.exports = TemplatesCollectionModel;

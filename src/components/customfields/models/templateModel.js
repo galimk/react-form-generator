@@ -1,3 +1,14 @@
-/**
- * Created by gkaudinov on 11/27/2015.
- */
+var Backbone = require('backbone');
+
+var TemplateModel = Backbone.Model.extend({
+    defaults: {
+        id: 3,
+        field_label: '',
+        field_name: '',
+        type: 'text',
+        placeholder: '',
+        is_required: false
+    }
+});
+
+module.exports = TemplateModel;
