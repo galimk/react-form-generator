@@ -1,19 +1,69 @@
-var gulp = require('gulp');
 var less = require('gulp-less');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
+var connect = require('gulp-connect');
+var open = require('gulp-open');
 
-module.exports = function () {
-    browserify('./src/components/customfields/mainControllerView.js')
-        .transform('reactify')
-        .on('error', console.error.bind(console))
-        .bundle()
-        .pipe(source('build.js'))
-        .pipe(gulp.dest('./src/components/customfields/dest'));
+function getPathObject(basePath, configuration) {
+    var resultObject = {};
+    for (var key in configuration) {
+        resultObject[key] = basePath + configuration[key];
+    }
+    return resultObject;
+}
 
-    gulp.src('./src/components/customfields/index.html')
-        .pipe(gulp.dest('./src/components/customfields/dest'));
+var MainPath = getPathObject('./src/components/customfields/', {
+    BootstrapperFile: 'bootstrapper.js',
+    DistDir: 'dist',
+    IndexHtmlFile: 'index.html',
+    DistIndexHtmlFile: 'dist/index.html',
+    LessFile: 'less/styles.less',
+    AllFilesMask: 'components/**/*.*'
+});
 
-    gulp.src('./src/components/customfields/less/styles.less').pipe(less())
-        .pipe(gulp.dest('./src/components/customfields/dest'));
+var ModulesPath = getPathObject('./node_modules/bootstrap/dist/css/', {
+    BootstrapMinFile: 'bootstrap.min.css',
+    BootstrapThemeMinFile: 'bootstrap-theme.min.css'
+});
+
+module.exports = function (gulp) {
+    gulp.task('customfields-build', function () {
+        browserify(MainPath.BootstrapperFile)
+            .transform('reactify')
+            .on('error', console.error.bind(console))
+            .bundle()
+            .pipe(source('build.js'))
+            .pipe(gulp.dest(MainPath.DistDir)).pipe(connect.reload());
+
+        gulp.src(MainPath.IndexHtmlFile)
+            .pipe(gulp.dest(MainPath.DistDir));
+
+        gulp.src(MainPath.LessFile).pipe(less())
+            .pipe(gulp.dest(MainPath.DistDir));
+
+        gulp.src(ModulesPath.BootstrapMinFile)
+            .pipe(gulp.dest(MainPath.DistDir));
+
+        gulp.src(ModulesPath.BootstrapThemeMinFile)
+            .pipe(gulp.dest(MainPath.DistDir))
+
+    });
+
+    gulp.task('customfields-connect', function () {
+        connect.server({
+            root: MainPath.DistDir,
+            port: 9005,
+            base: 'http://localhost',
+            livereload: true
+        });
+    });
+
+    gulp.task('customfields-open', ['customfields-connect'], function () {
+        gulp.src(MainPath.DistIndexHtmlFile)
+            .pipe(open({uri: 'http://localhost:9005/'}));
+    });
+
+    gulp.task('customfields', ['customfields-build', 'customfields-open'], function () {
+        return gulp.watch(MainPath.AllFilesMask, ['customfields-build']);
+    });
 };

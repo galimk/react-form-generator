@@ -4,7 +4,7 @@ var reactify = require('reactify');
 var source = require('vinyl-source-stream');
 var minify = require('gulp-minify');
 var buffer = require('vinyl-buffer');
-var customfieldsBuildTask = require('./src/components/customfields/build');
+var CustomFields = require('./src/components/customfields/build');
 
 gulp.task('browserify', function () {
     browserify('./src/registry.js')
@@ -14,9 +14,9 @@ gulp.task('browserify', function () {
         .pipe(source('neon-react-components.js'))
         .pipe(buffer())
         .pipe(minify())
-        .pipe(gulp.dest('dest'));
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('default', ['browserify']);
 
-gulp.task('customfields', customfieldsBuildTask);
+CustomFields(gulp);

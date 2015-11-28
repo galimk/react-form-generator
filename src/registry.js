@@ -1,4 +1,4 @@
-var CustomFieldsWizard = require('./components/customfields/mainControllerView');
+var CustomFieldsWizard = require('./components/customfields/components/mainControllerView');
 var ReactDOM = require('react-dom');
 var React = require('React');
 
