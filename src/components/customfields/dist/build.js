@@ -32108,9 +32108,42 @@ var MainControllerView = React.createClass({displayName: "MainControllerView",
 
 module.exports = MainControllerView;
 
-},{"../models/templateCollectionModel":322,"../models/templateModel":323,"./templatePanel":321,"React":156,"underscore":318}],321:[function(require,module,exports){
+},{"../models/templateCollectionModel":323,"../models/templateModel":324,"./templatePanel":322,"React":156,"underscore":318}],321:[function(require,module,exports){
 var React = require('react');
 
+var Template = React.createClass({displayName: "Template",
+
+    propTypes: {
+        template: React.PropTypes.object.isRequired
+    },
+
+    render: function () {
+        return (
+            React.createElement("li", {className: "template"}, 
+                React.createElement("div", {className: "template-header"}, 
+                    React.createElement("span", null, 
+                         this.props.template.get('field_label')
+                    ), 
+                    React.createElement("a", {href: "#"}, 
+                        React.createElement("i", {className: "fa fa-inverse fa-pencil fa-fw edit"})
+                    ), 
+                    React.createElement("a", {href: "#"}, 
+                        React.createElement("i", {className: "fa fa-inverse fa-trash fa-fw delete"})
+                    )
+                )
+
+
+            )
+        )
+    }
+});
+
+
+module.exports = Template;
+
+},{"react":317}],322:[function(require,module,exports){
+var React = require('react');
+var Template = require('./template');
 
 var TemplatePanel = React.createClass({displayName: "TemplatePanel",
 
@@ -32119,11 +32152,11 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
     },
 
     render: function () {
-
-        var showItem = function (item) {
-            return (React.createElement("li", {href: "#"}, item.get('field_label')))
+        var showItem = function (template) {
+            return (
+                React.createElement(Template, {key: template.get('field_label'), template: template})
+            );
         };
-
 
         return (
             React.createElement("div", null, 
@@ -32133,13 +32166,15 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
                     )
                 ), 
 
-                React.createElement("div", {className: "col-md-6"}, 
-                    React.createElement("button", {className: "btn btn-default action-button"}, "Create Custom Field")
-                ), 
-
-                React.createElement("div", {className: "col-md-6"}, 
-                    React.createElement("button", {className: "btn btn-default action-button"}, "Used Saved Fields")
+                React.createElement("div", {className: "action-button-panel"}, 
+                    React.createElement("div", {className: "col-md-6  action-button left"}, 
+                        React.createElement("button", {className: "btn btn-default"}, "Create Custom Field")
+                    ), 
+                    React.createElement("div", {className: "col-md-6 action-button right"}, 
+                        React.createElement("button", {className: "btn btn-default "}, "Used Saved Fields")
+                    )
                 )
+
             )
         );
     }
@@ -32147,7 +32182,7 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
 
 module.exports = TemplatePanel;
 
-},{"react":317}],322:[function(require,module,exports){
+},{"./template":321,"react":317}],323:[function(require,module,exports){
 var TemplateModel = require('./templateModel');
 var Backbone = require('backbone');
 
@@ -32157,7 +32192,7 @@ var TemplatesCollectionModel = Backbone.Collection.extend({
 
 module.exports = TemplatesCollectionModel;
 
-},{"./templateModel":323,"backbone":157}],323:[function(require,module,exports){
+},{"./templateModel":324,"backbone":157}],324:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var TemplateModel = Backbone.Model.extend({

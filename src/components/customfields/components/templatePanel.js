@@ -1,5 +1,5 @@
 var React = require('react');
-
+var Template = require('./template');
 
 var TemplatePanel = React.createClass({
 
@@ -8,11 +8,11 @@ var TemplatePanel = React.createClass({
     },
 
     render: function () {
-
-        var showItem = function (item) {
-            return (<li href="#">{item.get('field_label')}</li>)
+        var showItem = function (template) {
+            return (
+                <Template key={template.get('field_label')} template={template}/>
+            );
         };
-
 
         return (
             <div>
@@ -22,13 +22,15 @@ var TemplatePanel = React.createClass({
                     </ul>
                 </div>
 
-                <div className="col-md-6">
-                    <button className="btn btn-default action-button">Create Custom Field</button>
+                <div className="action-button-panel">
+                    <div className="col-md-6  action-button left">
+                        <button className="btn btn-default">Create Custom Field</button>
+                    </div>
+                    <div className="col-md-6 action-button right">
+                        <button className="btn btn-default ">Used Saved Fields</button>
+                    </div>
                 </div>
 
-                <div className="col-md-6">
-                    <button className="btn btn-default action-button">Used Saved Fields</button>
-                </div>
             </div>
         );
     }

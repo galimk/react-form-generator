@@ -15,15 +15,18 @@ function getPathObject(basePath, configuration) {
 var MainPath = getPathObject('./src/components/customfields/', {
     BootstrapperFile: 'bootstrapper.js',
     DistDir: 'dist',
+    FontsFolder: 'dist/fonts',
     IndexHtmlFile: 'index.html',
     DistIndexHtmlFile: 'dist/index.html',
     LessFile: 'less/styles.less',
     AllFilesMask: 'components/**/*.*'
 });
 
-var ModulesPath = getPathObject('./node_modules/bootstrap/dist/css/', {
-    BootstrapMinFile: 'bootstrap.min.css',
-    BootstrapThemeMinFile: 'bootstrap-theme.min.css'
+var ModulesPath = getPathObject('./node_modules/', {
+    BootstrapMinFile: 'bootstrap/dist/css/bootstrap.min.css',
+    BootstrapThemeMinFile: 'bootstrap/dist/css/bootstrap-theme.min.css',
+    FontAwesomeCss: 'font-awesome/css/font-awesome.css',
+    FontsFolder: 'font-awesome/fonts/**/*.*'
 });
 
 module.exports = function (gulp) {
@@ -38,7 +41,14 @@ module.exports = function (gulp) {
             .pipe(gulp.dest(MainPath.DistDir));
 
         gulp.src(ModulesPath.BootstrapThemeMinFile)
-            .pipe(gulp.dest(MainPath.DistDir))
+            .pipe(gulp.dest(MainPath.DistDir));
+
+        gulp.src(ModulesPath.FontsFolder)
+            .pipe(gulp.dest(MainPath.FontsFolder));
+
+        gulp.src(ModulesPath.FontAwesomeCss)
+            .pipe(gulp.dest(MainPath.DistDir));
+
     });
 
     gulp.task('customfields-build', ['customfields-files-copy'], function () {
