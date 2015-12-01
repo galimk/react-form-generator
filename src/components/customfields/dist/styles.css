@@ -1,8 +1,5 @@
-.custom-fields-component .action-button {
-  padding: 0px;
-}
-.custom-fields-component .action-button button {
-  width: 100%;
+.custom-fields-component button.action-button {
+  width: 100% !important;
 }
 @media screen and (min-width: 992px) {
   .custom-fields-component .right {
@@ -27,6 +24,9 @@
   color: #fff;
   background-color: #337ab7;
 }
+.custom-fields-component .template-header-editing {
+  background-color: #449d44;
+}
 .custom-fields-component .template-header {
   padding: 10px;
   position: relative;
@@ -40,4 +40,11 @@
   position: absolute;
   right: 15px;
   top: 12px;
+}
+.custom-fields-component .header-input {
+  margin-right: 50px;
+}
+.custom-fields-component .panel-body-animation {
+  visibility: hidden;
+  transition: visibility 1000ms;
 }

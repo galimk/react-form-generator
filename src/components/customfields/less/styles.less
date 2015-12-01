@@ -1,11 +1,6 @@
 .custom-fields-component {
-  .action-button {
-    padding:0px;
-    button {
-      width: 100%;
-    }
-
-
+  button.action-button {
+    width: 100% !important;
   }
 
   @media screen and(min-width: 992px) {
@@ -39,20 +34,32 @@
     background-color: #337ab7;
   }
 
+  .template-header-editing {
+    background-color: #449d44;
+  }
+
   .template-header {
-    padding:10px;
+    padding: 10px;
     position: relative;
   }
-  
+
   .edit {
     position: absolute;
     right: 35px;
-    top:12px;
+    top: 12px;
   }
 
   .delete {
     position: absolute;
     right: 15px;
-    top:12px
+    top: 12px
+  }
+
+  .header-input {
+    margin-right: 50px;
+  }
+  .panel-body-animation {
+    visibility: hidden;
+    transition: visibility 1000ms;
   }
 }

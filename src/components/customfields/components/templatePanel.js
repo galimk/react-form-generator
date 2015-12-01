@@ -17,18 +17,10 @@ var TemplatePanel = React.createClass({
         return (
             <div>
                 <div>
-                    <ul className="nav nav-pills nav-stacked">
-                        {this.props.templates.models.map(showItem, this)}
-                    </ul>
+                    {this.props.templates.models.map(showItem, this)}
                 </div>
-
                 <div className="action-button-panel">
-                    <div className="col-md-6  action-button left">
-                        <button className="btn btn-default">Create Custom Field</button>
-                    </div>
-                    <div className="col-md-6 action-button right">
-                        <button className="btn btn-default ">Used Saved Fields</button>
-                    </div>
+                    <button className="btn btn-default action-button">add new field</button>
                 </div>
 
             </div>
