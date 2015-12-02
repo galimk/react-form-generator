@@ -1,5 +1,5 @@
 var React = require('React');
-var TemplatePanel = require('./templatePanel');
+var TemplatePanel = require('./templateView');
 var TemplateCollectionModel = require('../models/templateCollectionModel');
 var TemplateModel = require('../models/templateModel');
 var _ = require('underscore');

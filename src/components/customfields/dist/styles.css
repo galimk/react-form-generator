@@ -44,7 +44,3 @@
 .custom-fields-component .header-input {
   margin-right: 50px;
 }
-.custom-fields-component .panel-body-animation {
-  visibility: hidden;
-  transition: visibility 1000ms;
-}
