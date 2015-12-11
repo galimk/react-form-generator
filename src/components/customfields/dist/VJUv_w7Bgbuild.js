@@ -32783,7 +32783,7 @@ var InputText = React.createClass({displayName: "InputText",
 
         return (
             React.createElement("div", {className: wrapperClass}, 
-                React.createElement("label", {htmlFor: this.props.name}, this.props.label), 
+                React.createElement("label", {className: "control-label", htmlFor: this.props.name}, this.props.label), 
                 React.createElement("div", {className: "field"}, 
                     React.createElement("input", {type: "text", 
                            name: this.props.name, 
@@ -32794,7 +32794,12 @@ var InputText = React.createClass({displayName: "InputText",
                            onChange: this.props.onChange}
                         ), 
 
-                    React.createElement("div", {className: "input"}, this.props.error)
+                    React.createElement("div", {className: "help-block"}, 
+                        React.createElement("ul", {className: "list-unstyled"}, 
+                            React.createElement("li", null, this.props.error)
+                        )
+                    )
+
                 )
             )
         );
@@ -32928,22 +32933,23 @@ var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
 var TemplatePanelBody = require('./templatePanelBody');
 
-var _subscriptionToken = null;
 
 var TemplatePanel = React.createClass({displayName: "TemplatePanel",
     propTypes: {
-        template: React.PropTypes.object.isRequired
+        template: React.PropTypes.object.isRequired,
+        onRemove: React.PropTypes.func.isRequired
     },
 
     getInitialState: function () {
         return {
-            isEditing: false
+            isEditing: false,
+            fieldName: this.props.template.get('field_name')
         };
     },
 
     componentDidMount: function () {
         var component = this;
-        _subscriptionToken = PubSub.subscribe('turn_off_editing', function (topic, triggeringComponent) {
+        this.subscriptionToken = PubSub.subscribe('turn_off_editing', function (topic, triggeringComponent) {
             if (triggeringComponent == component) {
                 return;
             }
@@ -32952,10 +32958,16 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
                 isEditing: false
             });
         });
+        this.props.template.on('change', this.fieldLabelChanged, this);
     },
 
-    componentWillUnmount() {
-        PubSub.unsubscribe(_subscriptionToken);
+    componentWillUnmount: function () {
+        PubSub.unsubscribe(this.subscriptionToken);
+        this.props.template.off('change', this.fieldLabelChanged, this);
+    },
+
+    fieldLabelChanged: function () {
+        this.setState({fieldName: this.props.template.get('field_name')});
     },
 
     switchToEdit: function () {
@@ -32971,12 +32983,16 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
         });
     },
 
+    invokeRemove: function() {
+      this.props.onRemove(this.props.template);
+    },
+
     render: function () {
         var templateClass = "template-header";
 
         var header = (
             React.createElement("span", null, 
-                this.props.template.get('field_label')
+                this.props.template.get('field_name')
             )
         );
 
@@ -32991,7 +33007,7 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
 
             header = (
                 React.createElement("span", null, 
-                    this.props.template.get('field_label'), " - Editing"
+                    this.state.fieldName, " - Editing"
                 )
             );
 
@@ -33020,7 +33036,7 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
                     React.createElement("div", {className: "pull-right"}, 
                         React.createElement("div", {className: "btn-group"}, 
                             editCloseLink, 
-                            React.createElement("button", {href: "#", className: "btn btn-xs btn-default"}, 
+                            React.createElement("button", {onClick: this.invokeRemove, href: "#", className: "btn btn-xs btn-default"}, 
                                 React.createElement("i", {className: "fa fa-trash fa-fw"})
                             )
                         )
@@ -33057,7 +33073,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
             template: {
                 field_name: {
                     value: this.props.template.get('field_name'),
-                    errors: []
+                    error: this.props.template.get('field_name_error')
                 }
             }
         };
@@ -33077,12 +33093,8 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
 
     onChange: function (e) {
         var setter = {};
-
         var errorMessages = this.props.template.preValidate(e.target.name, e.target.value);
-
-
-        console.log(errorMessages);
-
+        setter[e.target.name + '_error'] = errorMessages ? errorMessages : undefined;
         setter[e.target.name] = e.target.value;
         this.props.template.set(setter);
     },
@@ -33094,7 +33106,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
                        label: "Field Name", 
                        placeholder: "Field Name", 
                        value: this.state.template.field_name.value, 
-                       errors: this.state.template.field_name.errors, 
+                       error: this.state.template.field_name.error, 
                        onChange: this.onChange})
             )
         );
@@ -33107,29 +33119,66 @@ module.exports = TemplatePanelBody;
 },{"../../common/inputText":321,"react":319}],326:[function(require,module,exports){
 var React = require('react');
 var TemplatePanel = require('./templatePanel');
+var TemplateModel = require('../models/templateModel');
 
 var TemplateView = React.createClass({displayName: "TemplateView",
-
     propTypes: {
         templates: React.PropTypes.object.isRequired
+    },
+
+    addNewField: function () {
+        var templates = this.props.templates;
+
+        var lastId = 1;
+
+        if (templates.length > 0) {
+            latestId = templates.models[templates.length - 1].get('id');
+            latestId += 1;
+        }
+
+        templates.add(new TemplateModel({
+            id: latestId
+        }));
+    },
+
+    getInitialState: function () {
+        return {templates: this.props.templates};
+    },
+
+    componentDidMount: function () {
+        this.props.templates.on('change rest add remove', this.templatesCollectionChanged, this);
+    },
+
+    componentWillUnmount: function () {
+        this.props.templates.off('change rest add remove', this.templatesCollectionChanged, this);
+    },
+
+    templatesCollectionChanged: function () {
+        this.setState({templates: this.props.templates});
+    },
+
+    onRemove: function (template) {
+        this.props.templates.remove(template);
+        this.templatesCollectionChanged();
     },
 
     render: function () {
         var showItem = function (template) {
             return (
-                React.createElement(TemplatePanel, {key: template.get('id'), template: template})
+                React.createElement(TemplatePanel, {onRemove: this.onRemove, key: template.get('id'), template: template})
             );
         };
 
         return (
             React.createElement("div", null, 
                 React.createElement("div", null, 
-                    this.props.templates.models.map(showItem, this)
+                    this.state.templates.models.map(showItem, this)
                 ), 
                 React.createElement("div", {className: "action-button-panel"}, 
-                    React.createElement("button", {className: "btn btn-default action-button"}, "add new field")
+                    React.createElement("button", {className: "btn btn-default action-button", onClick: this.addNewField}, 
+                        "add new field"
+                    )
                 )
-
             )
         );
     }
@@ -33137,7 +33186,7 @@ var TemplateView = React.createClass({displayName: "TemplateView",
 
 module.exports = TemplateView;
 
-},{"./templatePanel":324,"react":319}],327:[function(require,module,exports){
+},{"../models/templateModel":328,"./templatePanel":324,"react":319}],327:[function(require,module,exports){
 var TemplateModel = require('./templateModel');
 var Backbone = require('backbone');
 

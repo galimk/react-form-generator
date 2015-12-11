@@ -16,7 +16,7 @@ var TemplatePanelBody = React.createClass({
             template: {
                 field_name: {
                     value: this.props.template.get('field_name'),
-                    errors: []
+                    error: this.props.template.get('field_name_error')
                 }
             }
         };
@@ -36,12 +36,8 @@ var TemplatePanelBody = React.createClass({
 
     onChange: function (e) {
         var setter = {};
-
         var errorMessages = this.props.template.preValidate(e.target.name, e.target.value);
-
-
-        console.log(errorMessages);
-
+        setter[e.target.name + '_error'] = errorMessages ? errorMessages : undefined;
         setter[e.target.name] = e.target.value;
         this.props.template.set(setter);
     },
@@ -53,7 +49,7 @@ var TemplatePanelBody = React.createClass({
                        label="Field Name"
                        placeholder="Field Name"
                        value={this.state.template.field_name.value}
-                       errors={this.state.template.field_name.errors}
+                       error={this.state.template.field_name.error}
                        onChange={this.onChange}/>
             </div>
         );

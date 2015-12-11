@@ -105,12 +105,12 @@ module.exports = function (gulp) {
     });
 
     gulp.task('customfields-build-open', function (callback) {
-        return runSequence(['customfields-clean', 'customfields-build-js'], 'customfields-files-copy',
+        return runSequence(['customfields-clean', 'customfields-build-js', 'customfields-files-copy'],
             'customfields-open', callback);
     });
 
     gulp.task('customfields-build-reload', function (callback) {
-        return runSequence(['customfields-clean', 'customfields-build-js'], 'customfields-files-copy'
+        return runSequence(['customfields-clean', 'customfields-build-js', 'customfields-files-copy']
             , 'customfields-reload', callback);
     });
 

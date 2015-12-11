@@ -3,22 +3,23 @@ var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
 var TemplatePanelBody = require('./templatePanelBody');
 
-var _subscriptionToken = null;
 
 var TemplatePanel = React.createClass({
     propTypes: {
-        template: React.PropTypes.object.isRequired
+        template: React.PropTypes.object.isRequired,
+        onRemove: React.PropTypes.func.isRequired
     },
 
     getInitialState: function () {
         return {
-            isEditing: false
+            isEditing: false,
+            fieldName: this.props.template.get('field_name')
         };
     },
 
     componentDidMount: function () {
         var component = this;
-        _subscriptionToken = PubSub.subscribe('turn_off_editing', function (topic, triggeringComponent) {
+        this.subscriptionToken = PubSub.subscribe('turn_off_editing', function (topic, triggeringComponent) {
             if (triggeringComponent == component) {
                 return;
             }
@@ -27,10 +28,16 @@ var TemplatePanel = React.createClass({
                 isEditing: false
             });
         });
+        this.props.template.on('change', this.fieldLabelChanged, this);
     },
 
-    componentWillUnmount() {
-        PubSub.unsubscribe(_subscriptionToken);
+    componentWillUnmount: function () {
+        PubSub.unsubscribe(this.subscriptionToken);
+        this.props.template.off('change', this.fieldLabelChanged, this);
+    },
+
+    fieldLabelChanged: function () {
+        this.setState({fieldName: this.props.template.get('field_name')});
     },
 
     switchToEdit: function () {
@@ -46,12 +53,16 @@ var TemplatePanel = React.createClass({
         });
     },
 
+    invokeRemove: function() {
+      this.props.onRemove(this.props.template);
+    },
+
     render: function () {
         var templateClass = "template-header";
 
         var header = (
             <span>
-                {this.props.template.get('field_label')}
+                {this.props.template.get('field_name')}
             </span>
         );
 
@@ -66,7 +77,7 @@ var TemplatePanel = React.createClass({
 
             header = (
                 <span>
-                    {this.props.template.get('field_label')} - Editing
+                    {this.state.fieldName} - Editing
                 </span>
             );
 
@@ -95,7 +106,7 @@ var TemplatePanel = React.createClass({
                     <div className="pull-right">
                         <div className="btn-group">
                             {editCloseLink}
-                            <button href="#" className="btn btn-xs btn-default">
+                            <button onClick={this.invokeRemove} href="#" className="btn btn-xs btn-default">
                                 <i className="fa fa-trash fa-fw"></i>
                             </button>
                         </div>

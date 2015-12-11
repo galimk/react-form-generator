@@ -20,7 +20,7 @@ var InputText = React.createClass({
 
         return (
             <div className={wrapperClass}>
-                <label htmlFor={this.props.name}>{this.props.label}</label>
+                <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
                 <div className="field">
                     <input type="text"
                            name={this.props.name}
@@ -31,7 +31,12 @@ var InputText = React.createClass({
                            onChange={this.props.onChange}
                         />
 
-                    <div className="input">{this.props.error}</div>
+                    <div className="help-block">
+                        <ul className="list-unstyled">
+                            <li>{this.props.error}</li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
         );
