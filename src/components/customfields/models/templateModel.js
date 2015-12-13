@@ -6,15 +6,15 @@ _.extend(Backbone.Model.prototype, Validation.mixin);
 var TemplateModel = Backbone.Model.extend({
     defaults: {
         id: 0,
-        field_label: '',
-        field_name: '',
-        type: 'text',
+        name: '',
+        type: 1,
         placeholder: '',
-        is_required: false
+        is_required: false,
+        options: []
     },
 
     validation: {
-        field_name: [
+        name: [
             {
                 required: true,
                 msg: 'Field Name is required'

@@ -1,6 +1,8 @@
 var React = require('react');
-var Input = require('../../common/inputText');
-
+var InputText = require('../../common/inputText');
+var DropDown = require('../../common/dropDown');
+var InputTypes = require('../models/inputTypes');
+var Options = require('./options');
 
 var TemplatePanelBody = React.createClass({
     propTypes: {
@@ -14,9 +16,21 @@ var TemplatePanelBody = React.createClass({
     composeTemplateState: function () {
         return {
             template: {
-                field_name: {
-                    value: this.props.template.get('field_name'),
-                    error: this.props.template.get('field_name_error')
+                name: {
+                    value: this.props.template.get('name'),
+                    error: this.props.template.get('name_error')
+                },
+                type: {
+                    value: this.props.template.get('type'),
+                    error: this.props.template.get('type_error')
+                },
+                placeholder: {
+                    value: this.props.template.get('placeholder'),
+                    error: this.props.template.get('placeholder_error')
+                },
+                options: {
+                    value: this.props.template.get('options'),
+                    error: this.props.template.get('options_error')
                 }
             }
         };
@@ -42,15 +56,53 @@ var TemplatePanelBody = React.createClass({
         this.props.template.set(setter);
     },
 
+    onOptionAdded: function () {
+
+    },
+
+    onOptionRemoved: function () {
+
+    },
+
     render: function () {
         return (
             <div>
-                <Input name="field_name"
-                       label="Field Name"
-                       placeholder="Field Name"
-                       value={this.state.template.field_name.value}
-                       error={this.state.template.field_name.error}
-                       onChange={this.onChange}/>
+
+                <InputText name="name"
+                           label="Input Name"
+                           placeholder="Input Name"
+                           value={this.state.template.name.value}
+                           error={this.state.template.name.error}
+                           onChange={this.onChange}/>
+
+                <DropDown name="type"
+                          label="Input Type"
+                          placeholder="Select Input Type"
+                          value={this.state.template.type.value}
+                          error={this.state.template.type.error}
+                          onChange={this.onChange}
+                          list={InputTypes.getInputTypes()}
+                          itemKey="key"
+                          itemText="text"
+                    />
+
+                <InputText name="placeholder"
+                           label="Placeholder"
+                           value={this.state.template.placeholder.value}
+                           error={this.state.template.placeholder.error}
+                           onChange={this.onChange}
+                    />
+
+                <div>
+                    {(() => {
+                        if (this.state.template.type.value === 2) {
+                            return <Options onAdded={this.onOptionAdded}
+                                            onRemoved={this.onOptionRemoved}
+                                            options={this.state.template.options.value}/>;
+                        }
+                        return null;
+                    })()}
+                </div>
             </div>
         );
     }

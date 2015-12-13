@@ -44,3 +44,10 @@
 .custom-fields-component .header-input {
   margin-right: 50px;
 }
+.custom-fields-component .select-item {
+  font-size: 14px !important;
+  margin-right: 5px;
+}
+.custom-fields-component .select-item-add {
+  margin-top: 10px;
+}

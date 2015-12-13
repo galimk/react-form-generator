@@ -13,7 +13,8 @@ var TemplatePanel = React.createClass({
     getInitialState: function () {
         return {
             isEditing: false,
-            fieldName: this.props.template.get('field_name')
+            name: this.props.template.get('name'),
+            isValid: true
         };
     },
 
@@ -28,16 +29,27 @@ var TemplatePanel = React.createClass({
                 isEditing: false
             });
         });
-        this.props.template.on('change', this.fieldLabelChanged, this);
+        this.props.template.on('change', this.modelChanged, this);
+        this.props.template.on('validated', this.validationTriggered, this);
     },
 
     componentWillUnmount: function () {
         PubSub.unsubscribe(this.subscriptionToken);
-        this.props.template.off('change', this.fieldLabelChanged, this);
+        this.props.template.off('change', this.modelChanged, this);
+        this.props.template.off('validated', this.validationTriggered, this);
     },
 
-    fieldLabelChanged: function () {
-        this.setState({fieldName: this.props.template.get('field_name')});
+    modelChanged: function () {
+        this.props.template.validate();
+        this.setState({
+            name: this.props.template.get('name')
+        });
+    },
+
+    validationTriggered: function (isValid) {
+        this.setState({
+            isValid: isValid
+        });
     },
 
     switchToEdit: function () {
@@ -53,8 +65,8 @@ var TemplatePanel = React.createClass({
         });
     },
 
-    invokeRemove: function() {
-      this.props.onRemove(this.props.template);
+    invokeRemove: function () {
+        this.props.onRemove(this.props.template);
     },
 
     render: function () {
@@ -62,7 +74,7 @@ var TemplatePanel = React.createClass({
 
         var header = (
             <span>
-                {this.props.template.get('field_name')}
+               {this.state.name}
             </span>
         );
 
@@ -77,7 +89,7 @@ var TemplatePanel = React.createClass({
 
             header = (
                 <span>
-                    {this.state.fieldName} - Editing
+                    {this.state.name} - Editing
                 </span>
             );
 
@@ -89,8 +101,9 @@ var TemplatePanel = React.createClass({
         }
 
         var panelClasses = classNames({
-            'panel-success': this.state.isEditing,
-            'panel-primary': !this.state.isEditing,
+            'panel-success': this.state.isEditing && this.state.isValid,
+            'panel-danger': !this.state.isValid,
+            'panel-primary': !this.state.isEditing && this.state.isValid,
             'panel': true
         });
 

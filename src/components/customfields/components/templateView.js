@@ -18,7 +18,8 @@ var TemplateView = React.createClass({
         }
 
         templates.add(new TemplateModel({
-            id: latestId
+            id: latestId,
+            name: 'New Input'
         }));
     },
 
@@ -53,11 +54,11 @@ var TemplateView = React.createClass({
         return (
             <div>
                 <div>
-                    {this.state.templates.models.map(showItem, this)}
+                    {this.state.templates.map(showItem, this)}
                 </div>
                 <div className="action-button-panel">
                     <button className="btn btn-default action-button" onClick={this.addNewField}>
-                        add new field
+                        add new input
                     </button>
                 </div>
             </div>
