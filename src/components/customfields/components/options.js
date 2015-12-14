@@ -1,5 +1,5 @@
 var React = require('react');
-
+var ReactDOM = require('react-dom');
 
 var Options = React.createClass({
     propTypes: {
@@ -20,15 +20,32 @@ var Options = React.createClass({
         });
     },
 
-    removeOption: function (option) {
+    removeOption: function (option, event) {
+        event.preventDefault();
         this.props.onRemoved(option);
     },
 
-    addOption: function () {
+    addBtnHandler: function () {
+        this.addOptionInternal(true);
+    },
+
+    inputKeyDownHandler: function (e) {
+        if (e.keyCode === 13) {
+            this.addOptionInternal();
+        }
+    },
+
+    addOptionInternal: function (setFocus) {
         this.props.onAdded(this.state.value);
         this.setState({
             value: ''
         });
+        if (setFocus) {
+            var that = this;
+            setTimeout(function () {
+                ReactDOM.findDOMNode(that.refs.listItem).focus();
+            }, 200);
+        }
     },
 
     render: function () {
@@ -40,7 +57,8 @@ var Options = React.createClass({
         function renderOption(option) {
             return (
                 <span key={option} className="select-item label label-large label-primary">
-                    {option} <a href="#" onClick={this.removeItem}> <i className="fa fa-close fa-fw"></i> </a>
+                    {option}<a href="#" onClick={this.removeOption.bind(this, option)}><i
+                    className="fa fa-close fa-inverse fa-fw"></i></a>
                 </span>
             );
         }
@@ -58,13 +76,15 @@ var Options = React.createClass({
                     <div className="input-group">
                         <input type="text"
                                name="listItem"
+                               ref="listItem"
                                className="form-control"
                                placeholder="New List Option"
+                               onKeyDown={this.inputKeyDownHandler}
                                value={this.state.value}
                                onChange={this.onChange}
                             />
                         <span className="input-group-btn">
-                            <button className="btn btn-default" type="button">Add</button>
+                            <button className="btn btn-default" onClick={this.addBtnHandler} type="button">Add</button>
                         </span>
                     </div>
                 </div>

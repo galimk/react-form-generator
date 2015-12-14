@@ -95,7 +95,7 @@ var TemplatePanel = React.createClass({
 
             editCloseLink = (
                 <button href="#" className="btn btn-xs btn-default" onClick={this.switchFromEdit}>
-                    <i className="fa fa-close fa-fw"></i>
+                    <i className="fa fa-minus fa-fw"></i>
                 </button>
             );
         }

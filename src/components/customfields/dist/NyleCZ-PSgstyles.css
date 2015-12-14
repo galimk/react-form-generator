@@ -47,6 +47,8 @@
 .custom-fields-component .select-item {
   font-size: 14px !important;
   margin-right: 5px;
+  margin-top: 5px;
+  display: inline-block;
 }
 .custom-fields-component .select-item-add {
   margin-top: 10px;

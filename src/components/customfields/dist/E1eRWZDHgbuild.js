@@ -32972,7 +32972,7 @@ module.exports = MainControllerView;
 
 },{"../models/templateCollectionModel":330,"../models/templateModel":331,"./templateView":328,"React":156,"underscore":320}],325:[function(require,module,exports){
 var React = require('react');
-
+var ReactDOM = require('react-dom');
 
 var Options = React.createClass({displayName: "Options",
     propTypes: {
@@ -32993,15 +32993,32 @@ var Options = React.createClass({displayName: "Options",
         });
     },
 
-    removeOption: function (option) {
+    removeOption: function (option, event) {
+        event.preventDefault();
         this.props.onRemoved(option);
     },
 
-    addOption: function () {
+    addBtnHandler: function () {
+        this.addOptionInternal(true);
+    },
+
+    inputKeyDownHandler: function (e) {
+        if (e.keyCode === 13) {
+            this.addOptionInternal();
+        }
+    },
+
+    addOptionInternal: function (setFocus) {
         this.props.onAdded(this.state.value);
         this.setState({
             value: ''
         });
+        if (setFocus) {
+            var that = this;
+            setTimeout(function () {
+                ReactDOM.findDOMNode(that.refs.listItem).focus();
+            }, 200);
+        }
     },
 
     render: function () {
@@ -33013,7 +33030,8 @@ var Options = React.createClass({displayName: "Options",
         function renderOption(option) {
             return (
                 React.createElement("span", {key: option, className: "select-item label label-large label-primary"}, 
-                    option, " ", React.createElement("a", {href: "#", onClick: this.removeItem}, " ", React.createElement("i", {className: "fa fa-close fa-fw"}), " ")
+                    option, React.createElement("a", {href: "#", onClick: this.removeOption.bind(this, option)}, React.createElement("i", {
+                    className: "fa fa-close fa-inverse fa-fw"}))
                 )
             );
         }
@@ -33031,13 +33049,15 @@ var Options = React.createClass({displayName: "Options",
                     React.createElement("div", {className: "input-group"}, 
                         React.createElement("input", {type: "text", 
                                name: "listItem", 
+                               ref: "listItem", 
                                className: "form-control", 
                                placeholder: "New List Option", 
+                               onKeyDown: this.inputKeyDownHandler, 
                                value: this.state.value, 
                                onChange: this.onChange}
                             ), 
                         React.createElement("span", {className: "input-group-btn"}, 
-                            React.createElement("button", {className: "btn btn-default", type: "button"}, "Add")
+                            React.createElement("button", {className: "btn btn-default", onClick: this.addBtnHandler, type: "button"}, "Add")
                         )
                     )
                 )
@@ -33049,7 +33069,7 @@ var Options = React.createClass({displayName: "Options",
 
 module.exports = Options;
 
-},{"react":319}],326:[function(require,module,exports){
+},{"react":319,"react-dom":163}],326:[function(require,module,exports){
 var React = require('react');
 var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
@@ -33147,7 +33167,7 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
 
             editCloseLink = (
                 React.createElement("button", {href: "#", className: "btn btn-xs btn-default", onClick: this.switchFromEdit}, 
-                    React.createElement("i", {className: "fa fa-close fa-fw"})
+                    React.createElement("i", {className: "fa fa-minus fa-fw"})
                 )
             );
         }
@@ -33206,6 +33226,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
     },
 
     composeTemplateState: function () {
+        console.log('composing state...', this.props.template.get('options'));
         return {
             template: {
                 name: {
@@ -33248,12 +33269,16 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
         this.props.template.set(setter);
     },
 
-    onOptionAdded: function () {
-
+    onOptionAdded: function (newOption) {
+        var options = this.props.template.get('options');
+        options.push(newOption);
+        this.props.template.trigger('change', this.props.template, {});
     },
 
-    onOptionRemoved: function () {
-
+    onOptionRemoved: function (toRemove) {
+        var options = this.props.template.get('options');
+        options.splice(options.indexOf(toRemove), 1);
+        this.props.template.trigger('change', this.props.template, {});
     },
 
     render: function () {

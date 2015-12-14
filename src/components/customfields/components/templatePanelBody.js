@@ -14,6 +14,7 @@ var TemplatePanelBody = React.createClass({
     },
 
     composeTemplateState: function () {
+        console.log('composing state...', this.props.template.get('options'));
         return {
             template: {
                 name: {
@@ -56,12 +57,16 @@ var TemplatePanelBody = React.createClass({
         this.props.template.set(setter);
     },
 
-    onOptionAdded: function () {
-
+    onOptionAdded: function (newOption) {
+        var options = this.props.template.get('options');
+        options.push(newOption);
+        this.props.template.trigger('change', this.props.template, {});
     },
 
-    onOptionRemoved: function () {
-
+    onOptionRemoved: function (toRemove) {
+        var options = this.props.template.get('options');
+        options.splice(options.indexOf(toRemove), 1);
+        this.props.template.trigger('change', this.props.template, {});
     },
 
     render: function () {
