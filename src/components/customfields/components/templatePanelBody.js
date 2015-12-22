@@ -2,7 +2,7 @@ var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
 var InputTypes = require('../models/inputTypes');
-var Options = require('./options');
+var Options = require('./optionsList');
 
 var TemplatePanelBody = React.createClass({
     propTypes: {
@@ -14,7 +14,6 @@ var TemplatePanelBody = React.createClass({
     },
 
     composeTemplateState: function () {
-        console.log('composing state...', this.props.template.get('options'));
         return {
             template: {
                 name: {
@@ -59,6 +58,7 @@ var TemplatePanelBody = React.createClass({
 
     onOptionAdded: function (newOption) {
         var options = this.props.template.get('options');
+        this.props.template.set({'options_error': null});
         options.push(newOption);
         this.props.template.trigger('change', this.props.template, {});
     },
@@ -66,10 +66,21 @@ var TemplatePanelBody = React.createClass({
     onOptionRemoved: function (toRemove) {
         var options = this.props.template.get('options');
         options.splice(options.indexOf(toRemove), 1);
-        this.props.template.trigger('change', this.props.template, {});
+        var error = this.props.template.preValidate('options', options);
+        this.props.template.set({'options_error': error});
+        this.props.template.trigger('change', this.props.template);
     },
 
     render: function () {
+
+        var options = null;
+        if (this.state.template.type.value === 2) {
+            options = <Options onAdded={this.onOptionAdded}
+                               onRemoved={this.onOptionRemoved}
+                               error={this.state.template.options.error}
+                               options={this.state.template.options.value}/>;
+        }
+
         return (
             <div>
 
@@ -99,14 +110,7 @@ var TemplatePanelBody = React.createClass({
                     />
 
                 <div>
-                    {(() => {
-                        if (this.state.template.type.value === 2) {
-                            return <Options onAdded={this.onOptionAdded}
-                                            onRemoved={this.onOptionRemoved}
-                                            options={this.state.template.options.value}/>;
-                        }
-                        return null;
-                    })()}
+                    {options}
                 </div>
             </div>
         );

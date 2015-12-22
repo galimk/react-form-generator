@@ -32970,81 +32970,104 @@ var MainControllerView = React.createClass({displayName: "MainControllerView",
 
 module.exports = MainControllerView;
 
-},{"../models/templateCollectionModel":330,"../models/templateModel":331,"./templateView":328,"React":156,"underscore":320}],325:[function(require,module,exports){
+},{"../models/templateCollectionModel":331,"../models/templateModel":332,"./templateView":329,"React":156,"underscore":320}],325:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
+var _ = require('underscore');
+var classNames = require('classnames');
+var OptionListItem = require('./optionsListItem');
 
-var Options = React.createClass({displayName: "Options",
+var OptionsList = React.createClass({displayName: "OptionsList",
     propTypes: {
         options: React.PropTypes.array.isRequired,
         onAdded: React.PropTypes.func.isRequired,
-        onRemoved: React.PropTypes.func.isRequired
+        onRemoved: React.PropTypes.func.isRequired,
+        error: React.PropTypes.string
     },
 
     getInitialState: function () {
         return {
-            value: ''
+            value: '',
+            addValidationError: null
         }
+    },
+
+    onRemove: function (index) {
+
     },
 
     onChange: function (e) {
+        var validationError = null;
+
+        if (e.target.value.length > 255) {
+            validationError = 'Option List Item cannot exceed 255 characters';
+        }
+
+        var matchedElements = _.filter(this.props.options, function (term) {
+            return term.toLowerCase() === e.target.value.toLowerCase();
+        });
+
+        if (matchedElements.length > 0) {
+            validationError = 'Cannot add duplicate option list item';
+        }
+
         this.setState({
-            value: e.target.value
+            value: e.target.value,
+            addValidationError: validationError
         });
     },
 
-    removeOption: function (option, event) {
-        event.preventDefault();
-        this.props.onRemoved(option);
-    },
-
-    addBtnHandler: function () {
-        this.addOptionInternal(true);
+    addBtnHandler: function(e) {
+        e.preventDefault();
+        this.internalOnAdd();
     },
 
     inputKeyDownHandler: function (e) {
-        if (e.keyCode === 13) {
-            this.addOptionInternal();
+        if (this.state.addValidationError !== null) {
+            return;
+        }
+        if (e.keyCode == 13) {
+            this.internalOnAdd();
         }
     },
 
-    addOptionInternal: function (setFocus) {
+    internalOnAdd: function() {
         this.props.onAdded(this.state.value);
         this.setState({
             value: ''
         });
-        if (setFocus) {
-            var that = this;
-            setTimeout(function () {
-                ReactDOM.findDOMNode(that.refs.listItem).focus();
-            }, 200);
-        }
+    },
+
+    onRemove: function (index) {
+
     },
 
     render: function () {
-        var wrapperClass = 'form-group';
-        if (this.props.error && this.props.error.length > 0) {
-            wrapperClass += ' ' + 'has-error';
-        }
-
-        function renderOption(option) {
+        function renderOption(option, index) {
             return (
-                React.createElement("span", {key: option, className: "select-item label label-large label-primary"}, 
-                    option, React.createElement("a", {href: "#", onClick: this.removeOption.bind(this, option)}, React.createElement("i", {
-                    className: "fa fa-close fa-inverse fa-fw"}))
+                React.createElement("div", {key: option, className: "form-group"}, 
+                    React.createElement(OptionListItem, {index: index, options: this.props.options, onRemove: this.onRemove})
                 )
             );
         }
 
+        var wrapperClass = classNames({
+            'form-group': true,
+            'has-error': this.props.error && this.props.error.length > 0 || this.state.addValidationError !== null
+        });
+
+        var disabled = this.state.addValidationError !== null;
+
         return (
-            React.createElement("div", {className: "{wrapperClass}"}, 
-                React.createElement("label", null, 
+            React.createElement("div", {className: wrapperClass}, 
+                React.createElement("label", {className: "control-label"}, 
                     "Select List Options"
                 ), 
 
                 React.createElement("div", null, 
                     this.props.options.map(renderOption, this)
                 ), 
+
                 React.createElement("div", {className: "select-item-add"}, 
                     React.createElement("div", {className: "input-group"}, 
                         React.createElement("input", {type: "text", 
@@ -33057,7 +33080,13 @@ var Options = React.createClass({displayName: "Options",
                                onChange: this.onChange}
                             ), 
                         React.createElement("span", {className: "input-group-btn"}, 
-                            React.createElement("button", {className: "btn btn-default", onClick: this.addBtnHandler, type: "button"}, "Add")
+                            React.createElement("button", {className: "btn btn-default", disabled: disabled, onClick: this.addBtnHandler, type: "button"}, "Add")
+                        )
+                    ), 
+                    React.createElement("div", {className: "help-block"}, 
+                        React.createElement("ul", {className: "list-unstyled"}, 
+                            React.createElement("li", null, this.props.error), 
+                            React.createElement("li", null, this.state.addValidationError)
                         )
                     )
                 )
@@ -33067,14 +33096,57 @@ var Options = React.createClass({displayName: "Options",
 });
 
 
-module.exports = Options;
+module.exports = OptionsList;
 
-},{"react":319,"react-dom":163}],326:[function(require,module,exports){
+},{"./optionsListItem":326,"classnames":161,"react":319,"react-dom":163,"underscore":320}],326:[function(require,module,exports){
+var React = require('react');
+var classNames = require('classnames');
+var _ = require('underscore');
+
+var OptionsListItem = React.createClass({displayName: "OptionsListItem",
+    propTypes: {
+        index: React.PropTypes.number.isRequired,
+        options: React.PropTypes.array.isRequired,
+        onRemove: React.PropTypes.func.isRequired
+    },
+
+    populateState: function () {
+        return {
+            value: this.props.options[this.props.index]
+        }
+    },
+
+    getInitialState: function () {
+        return this.populateState();
+    },
+
+    onRemove: function () {
+        this.props.onRemove(this.props.index);
+    },
+
+    render: function () {
+        var wrapperClasses = classNames({
+            'has-error': [null, undefined].indexOf(this.props.error) === -1,
+            'form-group': true
+        });
+
+        return (
+            React.createElement("div", {className: wrapperClasses}, 
+                React.createElement("div", null, 
+                    React.createElement("span", null, this.state.value)
+                )
+            )
+        );
+    }
+});
+
+module.exports = OptionsListItem;
+
+},{"classnames":161,"react":319,"underscore":320}],327:[function(require,module,exports){
 var React = require('react');
 var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
 var TemplatePanelBody = require('./templatePanelBody');
-
 
 var TemplatePanel = React.createClass({displayName: "TemplatePanel",
     propTypes: {
@@ -33209,12 +33281,12 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
 
 module.exports = TemplatePanel;
 
-},{"../../../pubsub-simple":332,"./templatePanelBody":327,"classnames":161,"react":319}],327:[function(require,module,exports){
+},{"../../../pubsub-simple":333,"./templatePanelBody":328,"classnames":161,"react":319}],328:[function(require,module,exports){
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
 var InputTypes = require('../models/inputTypes');
-var Options = require('./options');
+var Options = require('./optionsList');
 
 var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
     propTypes: {
@@ -33226,7 +33298,6 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
     },
 
     composeTemplateState: function () {
-        console.log('composing state...', this.props.template.get('options'));
         return {
             template: {
                 name: {
@@ -33271,6 +33342,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
 
     onOptionAdded: function (newOption) {
         var options = this.props.template.get('options');
+        this.props.template.set({'options_error': null});
         options.push(newOption);
         this.props.template.trigger('change', this.props.template, {});
     },
@@ -33278,10 +33350,21 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
     onOptionRemoved: function (toRemove) {
         var options = this.props.template.get('options');
         options.splice(options.indexOf(toRemove), 1);
-        this.props.template.trigger('change', this.props.template, {});
+        var error = this.props.template.preValidate('options', options);
+        this.props.template.set({'options_error': error});
+        this.props.template.trigger('change', this.props.template);
     },
 
     render: function () {
+
+        var options = null;
+        if (this.state.template.type.value === 2) {
+            options = React.createElement(Options, {onAdded: this.onOptionAdded, 
+                               onRemoved: this.onOptionRemoved, 
+                               error: this.state.template.options.error, 
+                               options: this.state.template.options.value});
+        }
+
         return (
             React.createElement("div", null, 
 
@@ -33311,14 +33394,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
                     ), 
 
                 React.createElement("div", null, 
-                    (() => {
-                        if (this.state.template.type.value === 2) {
-                            return React.createElement(Options, {onAdded: this.onOptionAdded, 
-                                            onRemoved: this.onOptionRemoved, 
-                                            options: this.state.template.options.value});
-                        }
-                        return null;
-                    })()
+                    options
                 )
             )
         );
@@ -33328,7 +33404,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
 
 module.exports = TemplatePanelBody;
 
-},{"../../common/dropDown":321,"../../common/inputText":322,"../models/inputTypes":329,"./options":325,"react":319}],328:[function(require,module,exports){
+},{"../../common/dropDown":321,"../../common/inputText":322,"../models/inputTypes":330,"./optionsList":325,"react":319}],329:[function(require,module,exports){
 var React = require('react');
 var TemplatePanel = require('./templatePanel');
 var TemplateModel = require('../models/templateModel');
@@ -33399,7 +33475,7 @@ var TemplateView = React.createClass({displayName: "TemplateView",
 
 module.exports = TemplateView;
 
-},{"../models/templateModel":331,"./templatePanel":326,"react":319}],329:[function(require,module,exports){
+},{"../models/templateModel":332,"./templatePanel":327,"react":319}],330:[function(require,module,exports){
 module.exports = {
     getInputTypes: function () {
         return [
@@ -33412,7 +33488,7 @@ module.exports = {
     }
 };
 
-},{}],330:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 var TemplateModel = require('./templateModel');
 var Backbone = require('backbone');
 
@@ -33422,7 +33498,7 @@ var TemplatesCollectionModel = Backbone.Collection.extend({
 
 module.exports = TemplatesCollectionModel;
 
-},{"./templateModel":331,"backbone":158}],331:[function(require,module,exports){
+},{"./templateModel":332,"backbone":158}],332:[function(require,module,exports){
 var Backbone = require('backbone');
 var Validation = require('backbone-validation');
 var _ = require('underscore');
@@ -33448,13 +33524,19 @@ var TemplateModel = Backbone.Model.extend({
                 maxLength: 255,
                 msg: 'Field Name cannot exceed 255 characters'
             }
-        ]
+        ],
+
+        options: function (value, attr, computedState) {
+            if (value.length === 0) {
+                return 'Must have at least one select list option';
+            }
+        }
     }
 });
 
 module.exports = TemplateModel;
 
-},{"backbone":158,"backbone-validation":157,"underscore":320}],332:[function(require,module,exports){
+},{"backbone":158,"backbone-validation":157,"underscore":320}],333:[function(require,module,exports){
 var pubsub = {};
 
 (function(q) {

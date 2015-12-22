@@ -3,7 +3,6 @@ var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
 var TemplatePanelBody = require('./templatePanelBody');
 
-
 var TemplatePanel = React.createClass({
     propTypes: {
         template: React.PropTypes.object.isRequired,
