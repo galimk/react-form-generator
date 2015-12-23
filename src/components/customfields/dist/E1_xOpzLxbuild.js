@@ -38943,7 +38943,7 @@ var panelSource = {
         return {
             targetId: props.template.get('id'),
             id: props.template.get('id'),
-            index: props.index
+            index: props.index,
         };
     }
 };
@@ -38978,6 +38978,7 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
     propTypes: {
         connectDragSource: React.PropTypes.func.isRequired,
         connectDropTarget: React.PropTypes.func.isRequired,
+        connectDragPreview: React.PropTypes.func.isRequired,
         isDragging: React.PropTypes.bool.isRequired,
         template: React.PropTypes.object.isRequired,
         onRemove: React.PropTypes.func.isRequired,
@@ -39090,21 +39091,25 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
 
         var connectDragSource = this.props.connectDragSource;
         var connectDropTarget = this.props.connectDropTarget;
+        var connectDragPreview = this.props.connectDragPreview;
 
-        return connectDragSource(connectDropTarget((
+        return connectDragPreview(connectDropTarget((
             React.createElement("div", {className: panelClasses}, 
-                React.createElement("div", {className: "panel-heading"}, 
-                    React.createElement("div", {className: "pull-left"}, header), 
-                    React.createElement("div", {className: "pull-right"}, 
-                        React.createElement("div", {className: "btn-group"}, 
-                            editCloseLink, 
-                            React.createElement("button", {onClick: this.invokeRemove, href: "#", className: "btn btn-xs btn-default"}, 
-                                React.createElement("i", {className: "fa fa-trash fa-fw"})
+                connectDragSource(
+                    React.createElement("div", {className: "panel-heading"}, 
+                        React.createElement("div", {className: "pull-left"}, header), 
+                        React.createElement("div", {className: "pull-right"}, 
+                            React.createElement("div", {className: "btn-group"}, 
+                                editCloseLink, 
+                                React.createElement("button", {onClick: this.invokeRemove, href: "#", className: "btn btn-xs btn-default"}, 
+                                    React.createElement("i", {className: "fa fa-trash fa-fw"})
+                                )
                             )
-                        )
-                    ), 
-                    React.createElement("div", {className: "clearfix"})
+                        ), 
+                        React.createElement("div", {className: "clearfix"})
+                    )
                 ), 
+
                 React.createElement("div", {className: panelBodyClasses}, 
                     React.createElement(TemplatePanelBody, {template: this.props.template})
                 )
@@ -39120,6 +39125,7 @@ TemplatePanel = DropTarget('TemplatePanel', panelTarget, function (connect) {
 TemplatePanel = DragSource('TemplatePanel', panelSource, function (connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
+        connectDragPreview: connect.dragPreview(),
         isDragging: monitor.isDragging()
     };
 })(TemplatePanel);

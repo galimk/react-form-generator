@@ -11,7 +11,7 @@ var panelSource = {
         return {
             targetId: props.template.get('id'),
             id: props.template.get('id'),
-            index: props.index
+            index: props.index,
         };
     }
 };
@@ -46,6 +46,7 @@ var TemplatePanel = React.createClass({
     propTypes: {
         connectDragSource: React.PropTypes.func.isRequired,
         connectDropTarget: React.PropTypes.func.isRequired,
+        connectDragPreview: React.PropTypes.func.isRequired,
         isDragging: React.PropTypes.bool.isRequired,
         template: React.PropTypes.object.isRequired,
         onRemove: React.PropTypes.func.isRequired,
@@ -158,21 +159,25 @@ var TemplatePanel = React.createClass({
 
         var connectDragSource = this.props.connectDragSource;
         var connectDropTarget = this.props.connectDropTarget;
+        var connectDragPreview = this.props.connectDragPreview;
 
-        return connectDragSource(connectDropTarget((
+        return connectDragPreview(connectDropTarget((
             <div className={panelClasses}>
-                <div className="panel-heading">
-                    <div className="pull-left">{header}</div>
-                    <div className="pull-right">
-                        <div className="btn-group">
-                            {editCloseLink}
-                            <button onClick={this.invokeRemove} href="#" className="btn btn-xs btn-default">
-                                <i className="fa fa-trash fa-fw"></i>
-                            </button>
+                {connectDragSource(
+                    <div className="panel-heading">
+                        <div className="pull-left">{header}</div>
+                        <div className="pull-right">
+                            <div className="btn-group">
+                                {editCloseLink}
+                                <button onClick={this.invokeRemove} href="#" className="btn btn-xs btn-default">
+                                    <i className="fa fa-trash fa-fw"></i>
+                                </button>
+                            </div>
                         </div>
+                        <div className="clearfix"/>
                     </div>
-                    <div className="clearfix"/>
-                </div>
+                )}
+
                 <div className={panelBodyClasses}>
                     <TemplatePanelBody template={this.props.template}/>
                 </div>
@@ -188,6 +193,7 @@ TemplatePanel = DropTarget('TemplatePanel', panelTarget, function (connect) {
 TemplatePanel = DragSource('TemplatePanel', panelSource, function (connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
+        connectDragPreview: connect.dragPreview(),
         isDragging: monitor.isDragging()
     };
 })(TemplatePanel);
