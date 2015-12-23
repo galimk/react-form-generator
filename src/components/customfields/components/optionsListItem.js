@@ -24,16 +24,17 @@ var OptionsListItem = React.createClass({
     },
 
     render: function () {
-        var wrapperClasses = classNames({
-            'has-error': [null, undefined].indexOf(this.props.error) === -1,
-            'form-group': true
-        });
-
         return (
-            <div className={wrapperClasses}>
-                <div>
-                    <span>{this.state.value}</span>
+            <div className="select-item-option">
+                <div className="pull-left">
+                    <span className="dont-break-out">{this.state.value}</span>
                 </div>
+
+                <div className="pull-right">
+                    <button className="btn btn-default btn-xs" onClick={this.onRemove}><i className="fa fa-close fa-fw"></i> </button>
+                </div>
+
+                <div className="clearfix"></div>
             </div>
         );
     }

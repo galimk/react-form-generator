@@ -1,6 +1,8 @@
 var React = require('react');
 var TemplatePanel = require('./templatePanel');
 var TemplateModel = require('../models/templateModel');
+var HTML5Backend = require('react-dnd-html5-backend');
+var DragDropContext = require('react-dnd').DragDropContext;
 
 var TemplateView = React.createClass({
     propTypes: {
@@ -44,10 +46,18 @@ var TemplateView = React.createClass({
         this.templatesCollectionChanged();
     },
 
+    onMovePanel: function (dragIndex, hoverIndex) {
+        var templatesCollection = this.props.templates;
+        var dragCard = templatesCollection.models[hoverIndex];
+        templatesCollection.remove(dragCard, {silent: true});
+        templatesCollection.add(dragCard, {at: dragIndex});
+    },
+
     render: function () {
-        var showItem = function (template) {
+        var showItem = function (template, index) {
             return (
-                <TemplatePanel onRemove={this.onRemove} key={template.get('id')} template={template}/>
+                <TemplatePanel index={index} onRemove={this.onRemove} movePanel={this.onMovePanel}
+                               key={template.get('id')} template={template}/>
             );
         };
 
@@ -66,4 +76,4 @@ var TemplateView = React.createClass({
     }
 });
 
-module.exports = TemplateView;
+module.exports = DragDropContext(HTML5Backend)(TemplateView);

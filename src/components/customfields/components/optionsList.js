@@ -66,15 +66,15 @@ var OptionsList = React.createClass({
     },
 
     onRemove: function (index) {
-
+        this.props.onRemoved(index);
     },
 
     render: function () {
         function renderOption(option, index) {
             return (
-                <div key={option} className="form-group">
+                <li key={option} className="list-group-item list-group-item-default">
                     <OptionListItem index={index} options={this.props.options} onRemove={this.onRemove}/>
-                </div>
+                </li>
             );
         }
 
@@ -92,7 +92,9 @@ var OptionsList = React.createClass({
                 </label>
 
                 <div>
-                    {this.props.options.map(renderOption, this)}
+                    <ul className="list-group">
+                        {this.props.options.map(renderOption, this)}
+                    </ul>
                 </div>
 
                 <div className="select-item-add">

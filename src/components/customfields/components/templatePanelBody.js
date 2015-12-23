@@ -14,7 +14,7 @@ var TemplatePanelBody = React.createClass({
     },
 
     composeTemplateState: function () {
-        return {
+        var panelBodyState = {
             template: {
                 name: {
                     value: this.props.template.get('name'),
@@ -27,13 +27,19 @@ var TemplatePanelBody = React.createClass({
                 placeholder: {
                     value: this.props.template.get('placeholder'),
                     error: this.props.template.get('placeholder_error')
-                },
-                options: {
-                    value: this.props.template.get('options'),
-                    error: this.props.template.get('options_error')
                 }
             }
         };
+
+        var type = this.props.template.get('type');
+        if (type === 2 || type === 5) {
+            panelBodyState.template.options = {
+                value: this.props.template.get('options'),
+                error: this.props.template.get('options_error')
+            }
+        }
+
+        return panelBodyState;
     },
 
     componentDidMount: function () {
@@ -63,18 +69,19 @@ var TemplatePanelBody = React.createClass({
         this.props.template.trigger('change', this.props.template, {});
     },
 
-    onOptionRemoved: function (toRemove) {
+    onOptionRemoved: function (index) {
         var options = this.props.template.get('options');
-        options.splice(options.indexOf(toRemove), 1);
+        options.splice(index, 1);
         var error = this.props.template.preValidate('options', options);
         this.props.template.set({'options_error': error});
         this.props.template.trigger('change', this.props.template);
     },
 
     render: function () {
-
         var options = null;
-        if (this.state.template.type.value === 2) {
+        var type = this.state.template.type.value;
+
+        if (type === 2 || type === 5) {
             options = <Options onAdded={this.onOptionAdded}
                                onRemoved={this.onOptionRemoved}
                                error={this.state.template.options.error}

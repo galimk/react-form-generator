@@ -19637,7 +19637,7 @@ module.exports = require('./lib/React');
   }(_));
   return Backbone.Validation;
 }));
-},{"backbone":158,"underscore":320}],158:[function(require,module,exports){
+},{"backbone":158,"underscore":452}],158:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.2.3
 
@@ -32444,323 +32444,6107 @@ return jQuery;
 },{}],163:[function(require,module,exports){
 'use strict';
 
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _lodashFunctionMemoize = require('lodash/function/memoize');
+
+var _lodashFunctionMemoize2 = _interopRequireDefault(_lodashFunctionMemoize);
+
+var isFirefox = _lodashFunctionMemoize2['default'](function () {
+  return (/firefox/i.test(navigator.userAgent)
+  );
+});
+
+exports.isFirefox = isFirefox;
+var isSafari = _lodashFunctionMemoize2['default'](function () {
+  return Boolean(window.safari);
+});
+exports.isSafari = isSafari;
+},{"lodash/function/memoize":175}],164:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _lodashArrayUnion = require('lodash/array/union');
+
+var _lodashArrayUnion2 = _interopRequireDefault(_lodashArrayUnion);
+
+var _lodashArrayWithout = require('lodash/array/without');
+
+var _lodashArrayWithout2 = _interopRequireDefault(_lodashArrayWithout);
+
+var EnterLeaveCounter = (function () {
+  function EnterLeaveCounter() {
+    _classCallCheck(this, EnterLeaveCounter);
+
+    this.entered = [];
+  }
+
+  EnterLeaveCounter.prototype.enter = function enter(enteringNode) {
+    var previousLength = this.entered.length;
+
+    this.entered = _lodashArrayUnion2['default'](this.entered.filter(function (node) {
+      return document.documentElement.contains(node) && (!node.contains || node.contains(enteringNode));
+    }), [enteringNode]);
+
+    return previousLength === 0 && this.entered.length > 0;
+  };
+
+  EnterLeaveCounter.prototype.leave = function leave(leavingNode) {
+    var previousLength = this.entered.length;
+
+    this.entered = _lodashArrayWithout2['default'](this.entered.filter(function (node) {
+      return document.documentElement.contains(node);
+    }), leavingNode);
+
+    return previousLength > 0 && this.entered.length === 0;
+  };
+
+  EnterLeaveCounter.prototype.reset = function reset() {
+    this.entered = [];
+  };
+
+  return EnterLeaveCounter;
+})();
+
+exports['default'] = EnterLeaveCounter;
+module.exports = exports['default'];
+},{"lodash/array/union":173,"lodash/array/without":174}],165:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _lodashObjectDefaults = require('lodash/object/defaults');
+
+var _lodashObjectDefaults2 = _interopRequireDefault(_lodashObjectDefaults);
+
+var _shallowEqual = require('./shallowEqual');
+
+var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
+
+var _EnterLeaveCounter = require('./EnterLeaveCounter');
+
+var _EnterLeaveCounter2 = _interopRequireDefault(_EnterLeaveCounter);
+
+var _BrowserDetector = require('./BrowserDetector');
+
+var _OffsetUtils = require('./OffsetUtils');
+
+var _NativeDragSources = require('./NativeDragSources');
+
+var _NativeTypes = require('./NativeTypes');
+
+var NativeTypes = _interopRequireWildcard(_NativeTypes);
+
+var HTML5Backend = (function () {
+  function HTML5Backend(manager) {
+    _classCallCheck(this, HTML5Backend);
+
+    this.actions = manager.getActions();
+    this.monitor = manager.getMonitor();
+    this.registry = manager.getRegistry();
+
+    this.sourcePreviewNodes = {};
+    this.sourcePreviewNodeOptions = {};
+    this.sourceNodes = {};
+    this.sourceNodeOptions = {};
+    this.enterLeaveCounter = new _EnterLeaveCounter2['default']();
+
+    this.getSourceClientOffset = this.getSourceClientOffset.bind(this);
+    this.handleTopDragStart = this.handleTopDragStart.bind(this);
+    this.handleTopDragStartCapture = this.handleTopDragStartCapture.bind(this);
+    this.handleTopDragEndCapture = this.handleTopDragEndCapture.bind(this);
+    this.handleTopDragEnter = this.handleTopDragEnter.bind(this);
+    this.handleTopDragEnterCapture = this.handleTopDragEnterCapture.bind(this);
+    this.handleTopDragLeaveCapture = this.handleTopDragLeaveCapture.bind(this);
+    this.handleTopDragOver = this.handleTopDragOver.bind(this);
+    this.handleTopDragOverCapture = this.handleTopDragOverCapture.bind(this);
+    this.handleTopDrop = this.handleTopDrop.bind(this);
+    this.handleTopDropCapture = this.handleTopDropCapture.bind(this);
+    this.handleSelectStart = this.handleSelectStart.bind(this);
+    this.endDragIfSourceWasRemovedFromDOM = this.endDragIfSourceWasRemovedFromDOM.bind(this);
+  }
+
+  HTML5Backend.prototype.setup = function setup() {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (this.constructor.isSetUp) {
+      throw new Error('Cannot have two HTML5 backends at the same time.');
+    }
+    this.constructor.isSetUp = true;
+
+    window.addEventListener('dragstart', this.handleTopDragStart);
+    window.addEventListener('dragstart', this.handleTopDragStartCapture, true);
+    window.addEventListener('dragend', this.handleTopDragEndCapture, true);
+    window.addEventListener('dragenter', this.handleTopDragEnter);
+    window.addEventListener('dragenter', this.handleTopDragEnterCapture, true);
+    window.addEventListener('dragleave', this.handleTopDragLeaveCapture, true);
+    window.addEventListener('dragover', this.handleTopDragOver);
+    window.addEventListener('dragover', this.handleTopDragOverCapture, true);
+    window.addEventListener('drop', this.handleTopDrop);
+    window.addEventListener('drop', this.handleTopDropCapture, true);
+  };
+
+  HTML5Backend.prototype.teardown = function teardown() {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.constructor.isSetUp = false;
+
+    window.removeEventListener('dragstart', this.handleTopDragStart);
+    window.removeEventListener('dragstart', this.handleTopDragStartCapture, true);
+    window.removeEventListener('dragend', this.handleTopDragEndCapture, true);
+    window.removeEventListener('dragenter', this.handleTopDragEnter);
+    window.removeEventListener('dragenter', this.handleTopDragEnterCapture, true);
+    window.removeEventListener('dragleave', this.handleTopDragLeaveCapture, true);
+    window.removeEventListener('dragover', this.handleTopDragOver);
+    window.removeEventListener('dragover', this.handleTopDragOverCapture, true);
+    window.removeEventListener('drop', this.handleTopDrop);
+    window.removeEventListener('drop', this.handleTopDropCapture, true);
+
+    this.clearCurrentDragSourceNode();
+  };
+
+  HTML5Backend.prototype.connectDragPreview = function connectDragPreview(sourceId, node, options) {
+    var _this = this;
+
+    this.sourcePreviewNodeOptions[sourceId] = options;
+    this.sourcePreviewNodes[sourceId] = node;
+
+    return function () {
+      delete _this.sourcePreviewNodes[sourceId];
+      delete _this.sourcePreviewNodeOptions[sourceId];
+    };
+  };
+
+  HTML5Backend.prototype.connectDragSource = function connectDragSource(sourceId, node, options) {
+    var _this2 = this;
+
+    this.sourceNodes[sourceId] = node;
+    this.sourceNodeOptions[sourceId] = options;
+
+    var handleDragStart = function handleDragStart(e) {
+      return _this2.handleDragStart(e, sourceId);
+    };
+    var handleSelectStart = function handleSelectStart(e) {
+      return _this2.handleSelectStart(e, sourceId);
+    };
+
+    node.setAttribute('draggable', true);
+    node.addEventListener('dragstart', handleDragStart);
+    node.addEventListener('selectstart', handleSelectStart);
+
+    return function () {
+      delete _this2.sourceNodes[sourceId];
+      delete _this2.sourceNodeOptions[sourceId];
+
+      node.removeEventListener('dragstart', handleDragStart);
+      node.removeEventListener('selectstart', handleSelectStart);
+      node.setAttribute('draggable', false);
+    };
+  };
+
+  HTML5Backend.prototype.connectDropTarget = function connectDropTarget(targetId, node) {
+    var _this3 = this;
+
+    var handleDragEnter = function handleDragEnter(e) {
+      return _this3.handleDragEnter(e, targetId);
+    };
+    var handleDragOver = function handleDragOver(e) {
+      return _this3.handleDragOver(e, targetId);
+    };
+    var handleDrop = function handleDrop(e) {
+      return _this3.handleDrop(e, targetId);
+    };
+
+    node.addEventListener('dragenter', handleDragEnter);
+    node.addEventListener('dragover', handleDragOver);
+    node.addEventListener('drop', handleDrop);
+
+    return function () {
+      node.removeEventListener('dragenter', handleDragEnter);
+      node.removeEventListener('dragover', handleDragOver);
+      node.removeEventListener('drop', handleDrop);
+    };
+  };
+
+  HTML5Backend.prototype.getCurrentSourceNodeOptions = function getCurrentSourceNodeOptions() {
+    var sourceId = this.monitor.getSourceId();
+    var sourceNodeOptions = this.sourceNodeOptions[sourceId];
+
+    return _lodashObjectDefaults2['default'](sourceNodeOptions || {}, {
+      dropEffect: 'move'
+    });
+  };
+
+  HTML5Backend.prototype.getCurrentDropEffect = function getCurrentDropEffect() {
+    if (this.isDraggingNativeItem()) {
+      // It makes more sense to default to 'copy' for native resources
+      return 'copy';
+    }
+
+    return this.getCurrentSourceNodeOptions().dropEffect;
+  };
+
+  HTML5Backend.prototype.getCurrentSourcePreviewNodeOptions = function getCurrentSourcePreviewNodeOptions() {
+    var sourceId = this.monitor.getSourceId();
+    var sourcePreviewNodeOptions = this.sourcePreviewNodeOptions[sourceId];
+
+    return _lodashObjectDefaults2['default'](sourcePreviewNodeOptions || {}, {
+      anchorX: 0.5,
+      anchorY: 0.5,
+      captureDraggingState: false
+    });
+  };
+
+  HTML5Backend.prototype.getSourceClientOffset = function getSourceClientOffset(sourceId) {
+    return _OffsetUtils.getNodeClientOffset(this.sourceNodes[sourceId]);
+  };
+
+  HTML5Backend.prototype.isDraggingNativeItem = function isDraggingNativeItem() {
+    var itemType = this.monitor.getItemType();
+    return Object.keys(NativeTypes).some(function (key) {
+      return NativeTypes[key] === itemType;
+    });
+  };
+
+  HTML5Backend.prototype.beginDragNativeItem = function beginDragNativeItem(type) {
+    this.clearCurrentDragSourceNode();
+
+    var SourceType = _NativeDragSources.createNativeDragSource(type);
+    this.currentNativeSource = new SourceType();
+    this.currentNativeHandle = this.registry.addSource(type, this.currentNativeSource);
+    this.actions.beginDrag([this.currentNativeHandle]);
+  };
+
+  HTML5Backend.prototype.endDragNativeItem = function endDragNativeItem() {
+    this.actions.endDrag();
+    this.registry.removeSource(this.currentNativeHandle);
+    this.currentNativeHandle = null;
+    this.currentNativeSource = null;
+  };
+
+  HTML5Backend.prototype.endDragIfSourceWasRemovedFromDOM = function endDragIfSourceWasRemovedFromDOM() {
+    var node = this.currentDragSourceNode;
+    if (document.body.contains(node)) {
+      return;
+    }
+
+    this.actions.endDrag();
+    this.clearCurrentDragSourceNode();
+  };
+
+  HTML5Backend.prototype.setCurrentDragSourceNode = function setCurrentDragSourceNode(node) {
+    this.clearCurrentDragSourceNode();
+    this.currentDragSourceNode = node;
+    this.currentDragSourceNodeOffset = _OffsetUtils.getNodeClientOffset(node);
+    this.currentDragSourceNodeOffsetChanged = false;
+
+    // Receiving a mouse event in the middle of a dragging operation
+    // means it has ended and the drag source node disappeared from DOM,
+    // so the browser didn't dispatch the dragend event.
+    window.addEventListener('mousemove', this.endDragIfSourceWasRemovedFromDOM, true);
+  };
+
+  HTML5Backend.prototype.clearCurrentDragSourceNode = function clearCurrentDragSourceNode() {
+    if (this.currentDragSourceNode) {
+      this.currentDragSourceNode = null;
+      this.currentDragSourceNodeOffset = null;
+      this.currentDragSourceNodeOffsetChanged = false;
+      window.removeEventListener('mousemove', this.endDragIfSourceWasRemovedFromDOM, true);
+      return true;
+    }
+
+    return false;
+  };
+
+  HTML5Backend.prototype.checkIfCurrentDragSourceRectChanged = function checkIfCurrentDragSourceRectChanged() {
+    var node = this.currentDragSourceNode;
+    if (!node) {
+      return false;
+    }
+
+    if (this.currentDragSourceNodeOffsetChanged) {
+      return true;
+    }
+
+    this.currentDragSourceNodeOffsetChanged = !_shallowEqual2['default'](_OffsetUtils.getNodeClientOffset(node), this.currentDragSourceNodeOffset);
+
+    return this.currentDragSourceNodeOffsetChanged;
+  };
+
+  HTML5Backend.prototype.handleTopDragStartCapture = function handleTopDragStartCapture() {
+    this.clearCurrentDragSourceNode();
+    this.dragStartSourceIds = [];
+  };
+
+  HTML5Backend.prototype.handleDragStart = function handleDragStart(e, sourceId) {
+    this.dragStartSourceIds.unshift(sourceId);
+  };
+
+  HTML5Backend.prototype.handleTopDragStart = function handleTopDragStart(e) {
+    var _this4 = this;
+
+    var dragStartSourceIds = this.dragStartSourceIds;
+
+    this.dragStartSourceIds = null;
+
+    var clientOffset = _OffsetUtils.getEventClientOffset(e);
+
+    // Don't publish the source just yet (see why below)
+    this.actions.beginDrag(dragStartSourceIds, {
+      publishSource: false,
+      getSourceClientOffset: this.getSourceClientOffset,
+      clientOffset: clientOffset
+    });
+
+    var dataTransfer = e.dataTransfer;
+
+    var nativeType = _NativeDragSources.matchNativeItemType(dataTransfer);
+
+    if (this.monitor.isDragging()) {
+      if (typeof dataTransfer.setDragImage === 'function') {
+        // Use custom drag image if user specifies it.
+        // If child drag source refuses drag but parent agrees,
+        // use parent's node as drag image. Neither works in IE though.
+        var sourceId = this.monitor.getSourceId();
+        var sourceNode = this.sourceNodes[sourceId];
+        var dragPreview = this.sourcePreviewNodes[sourceId] || sourceNode;
+
+        var _getCurrentSourcePreviewNodeOptions = this.getCurrentSourcePreviewNodeOptions();
+
+        var anchorX = _getCurrentSourcePreviewNodeOptions.anchorX;
+        var anchorY = _getCurrentSourcePreviewNodeOptions.anchorY;
+
+        var anchorPoint = { anchorX: anchorX, anchorY: anchorY };
+        var dragPreviewOffset = _OffsetUtils.getDragPreviewOffset(sourceNode, dragPreview, clientOffset, anchorPoint);
+        dataTransfer.setDragImage(dragPreview, dragPreviewOffset.x, dragPreviewOffset.y);
+      }
+
+      try {
+        // Firefox won't drag without setting data
+        dataTransfer.setData('application/json', {});
+      } catch (err) {}
+      // IE doesn't support MIME types in setData
+
+      // Store drag source node so we can check whether
+      // it is removed from DOM and trigger endDrag manually.
+      this.setCurrentDragSourceNode(e.target);
+
+      // Now we are ready to publish the drag source.. or are we not?
+
+      var _getCurrentSourcePreviewNodeOptions2 = this.getCurrentSourcePreviewNodeOptions();
+
+      var captureDraggingState = _getCurrentSourcePreviewNodeOptions2.captureDraggingState;
+
+      if (!captureDraggingState) {
+        // Usually we want to publish it in the next tick so that browser
+        // is able to screenshot the current (not yet dragging) state.
+        //
+        // It also neatly avoids a situation where render() returns null
+        // in the same tick for the source element, and browser freaks out.
+        setTimeout(function () {
+          return _this4.actions.publishDragSource();
+        });
+      } else {
+        // In some cases the user may want to override this behavior, e.g.
+        // to work around IE not supporting custom drag previews.
+        //
+        // When using a custom drag layer, the only way to prevent
+        // the default drag preview from drawing in IE is to screenshot
+        // the dragging state in which the node itself has zero opacity
+        // and height. In this case, though, returning null from render()
+        // will abruptly end the dragging, which is not obvious.
+        //
+        // This is the reason such behavior is strictly opt-in.
+        this.actions.publishDragSource();
+      }
+    } else if (nativeType) {
+      // A native item (such as URL) dragged from inside the document
+      this.beginDragNativeItem(nativeType);
+    } else if (!dataTransfer.types && (!e.target.hasAttribute || !e.target.hasAttribute('draggable'))) {
+      // Looks like a Safari bug: dataTransfer.types is null, but there was no draggable.
+      // Just let it drag. It's a native type (URL or text) and will be picked up in dragenter handler.
+      return;
+    } else {
+      // If by this time no drag source reacted, tell browser not to drag.
+      e.preventDefault();
+    }
+  };
+
+  HTML5Backend.prototype.handleTopDragEndCapture = function handleTopDragEndCapture() {
+    if (this.clearCurrentDragSourceNode()) {
+      // Firefox can dispatch this event in an infinite loop
+      // if dragend handler does something like showing an alert.
+      // Only proceed if we have not handled it already.
+      this.actions.endDrag();
+    }
+  };
+
+  HTML5Backend.prototype.handleTopDragEnterCapture = function handleTopDragEnterCapture(e) {
+    this.dragEnterTargetIds = [];
+
+    var isFirstEnter = this.enterLeaveCounter.enter(e.target);
+    if (!isFirstEnter || this.monitor.isDragging()) {
+      return;
+    }
+
+    var dataTransfer = e.dataTransfer;
+
+    var nativeType = _NativeDragSources.matchNativeItemType(dataTransfer);
+
+    if (nativeType) {
+      // A native item (such as file or URL) dragged from outside the document
+      this.beginDragNativeItem(nativeType);
+    }
+  };
+
+  HTML5Backend.prototype.handleDragEnter = function handleDragEnter(e, targetId) {
+    this.dragEnterTargetIds.unshift(targetId);
+  };
+
+  HTML5Backend.prototype.handleTopDragEnter = function handleTopDragEnter(e) {
+    var _this5 = this;
+
+    var dragEnterTargetIds = this.dragEnterTargetIds;
+
+    this.dragEnterTargetIds = [];
+
+    if (!this.monitor.isDragging()) {
+      // This is probably a native item type we don't understand.
+      return;
+    }
+
+    if (!_BrowserDetector.isFirefox()) {
+      // Don't emit hover in `dragenter` on Firefox due to an edge case.
+      // If the target changes position as the result of `dragenter`, Firefox
+      // will still happily dispatch `dragover` despite target being no longer
+      // there. The easy solution is to only fire `hover` in `dragover` on FF.
+      this.actions.hover(dragEnterTargetIds, {
+        clientOffset: _OffsetUtils.getEventClientOffset(e)
+      });
+    }
+
+    var canDrop = dragEnterTargetIds.some(function (targetId) {
+      return _this5.monitor.canDropOnTarget(targetId);
+    });
+
+    if (canDrop) {
+      // IE requires this to fire dragover events
+      e.preventDefault();
+      e.dataTransfer.dropEffect = this.getCurrentDropEffect();
+    }
+  };
+
+  HTML5Backend.prototype.handleTopDragOverCapture = function handleTopDragOverCapture() {
+    this.dragOverTargetIds = [];
+  };
+
+  HTML5Backend.prototype.handleDragOver = function handleDragOver(e, targetId) {
+    this.dragOverTargetIds.unshift(targetId);
+  };
+
+  HTML5Backend.prototype.handleTopDragOver = function handleTopDragOver(e) {
+    var _this6 = this;
+
+    var dragOverTargetIds = this.dragOverTargetIds;
+
+    this.dragOverTargetIds = [];
+
+    if (!this.monitor.isDragging()) {
+      // This is probably a native item type we don't understand.
+      // Prevent default "drop and blow away the whole document" action.
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'none';
+      return;
+    }
+
+    this.actions.hover(dragOverTargetIds, {
+      clientOffset: _OffsetUtils.getEventClientOffset(e)
+    });
+
+    var canDrop = dragOverTargetIds.some(function (targetId) {
+      return _this6.monitor.canDropOnTarget(targetId);
+    });
+
+    if (canDrop) {
+      // Show user-specified drop effect.
+      e.preventDefault();
+      e.dataTransfer.dropEffect = this.getCurrentDropEffect();
+    } else if (this.isDraggingNativeItem()) {
+      // Don't show a nice cursor but still prevent default
+      // "drop and blow away the whole document" action.
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'none';
+    } else if (this.checkIfCurrentDragSourceRectChanged()) {
+      // Prevent animating to incorrect position.
+      // Drop effect must be other than 'none' to prevent animation.
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+  };
+
+  HTML5Backend.prototype.handleTopDragLeaveCapture = function handleTopDragLeaveCapture(e) {
+    if (this.isDraggingNativeItem()) {
+      e.preventDefault();
+    }
+
+    var isLastLeave = this.enterLeaveCounter.leave(e.target);
+    if (!isLastLeave) {
+      return;
+    }
+
+    if (this.isDraggingNativeItem()) {
+      this.endDragNativeItem();
+    }
+  };
+
+  HTML5Backend.prototype.handleTopDropCapture = function handleTopDropCapture(e) {
+    this.dropTargetIds = [];
+    e.preventDefault();
+
+    if (this.isDraggingNativeItem()) {
+      this.currentNativeSource.mutateItemByReadingDataTransfer(e.dataTransfer);
+    }
+
+    this.enterLeaveCounter.reset();
+  };
+
+  HTML5Backend.prototype.handleDrop = function handleDrop(e, targetId) {
+    this.dropTargetIds.unshift(targetId);
+  };
+
+  HTML5Backend.prototype.handleTopDrop = function handleTopDrop(e) {
+    var dropTargetIds = this.dropTargetIds;
+
+    this.dropTargetIds = [];
+
+    this.actions.hover(dropTargetIds, {
+      clientOffset: _OffsetUtils.getEventClientOffset(e)
+    });
+    this.actions.drop();
+
+    if (this.isDraggingNativeItem()) {
+      this.endDragNativeItem();
+    } else {
+      this.endDragIfSourceWasRemovedFromDOM();
+    }
+  };
+
+  HTML5Backend.prototype.handleSelectStart = function handleSelectStart(e) {
+    // Prevent selection on IE
+    // and instead ask it to consider dragging.
+    if (typeof e.target.dragDrop === 'function') {
+      e.preventDefault();
+      e.target.dragDrop();
+    }
+  };
+
+  return HTML5Backend;
+})();
+
+exports['default'] = HTML5Backend;
+module.exports = exports['default'];
+},{"./BrowserDetector":163,"./EnterLeaveCounter":164,"./NativeDragSources":167,"./NativeTypes":168,"./OffsetUtils":169,"./shallowEqual":172,"lodash/object/defaults":214}],166:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MonotonicInterpolant = (function () {
+  function MonotonicInterpolant(xs, ys) {
+    _classCallCheck(this, MonotonicInterpolant);
+
+    var length = xs.length;
+
+    // Rearrange xs and ys so that xs is sorted
+    var indexes = [];
+    for (var i = 0; i < length; i++) {
+      indexes.push(i);
+    }
+    indexes.sort(function (a, b) {
+      return xs[a] < xs[b] ? -1 : 1;
+    });
+
+    // Get consecutive differences and slopes
+    var dys = [];
+    var dxs = [];
+    var ms = [];
+    var dx = undefined;
+    var dy = undefined;
+    for (var i = 0; i < length - 1; i++) {
+      dx = xs[i + 1] - xs[i];
+      dy = ys[i + 1] - ys[i];
+      dxs.push(dx);
+      dys.push(dy);
+      ms.push(dy / dx);
+    }
+
+    // Get degree-1 coefficients
+    var c1s = [ms[0]];
+    for (var i = 0; i < dxs.length - 1; i++) {
+      var _m = ms[i];
+      var mNext = ms[i + 1];
+      if (_m * mNext <= 0) {
+        c1s.push(0);
+      } else {
+        dx = dxs[i];
+        var dxNext = dxs[i + 1];
+        var common = dx + dxNext;
+        c1s.push(3 * common / ((common + dxNext) / _m + (common + dx) / mNext));
+      }
+    }
+    c1s.push(ms[ms.length - 1]);
+
+    // Get degree-2 and degree-3 coefficients
+    var c2s = [];
+    var c3s = [];
+    var m = undefined;
+    for (var i = 0; i < c1s.length - 1; i++) {
+      m = ms[i];
+      var c1 = c1s[i];
+      var invDx = 1 / dxs[i];
+      var common = c1 + c1s[i + 1] - m - m;
+      c2s.push((m - c1 - common) * invDx);
+      c3s.push(common * invDx * invDx);
+    }
+
+    this.xs = xs;
+    this.ys = ys;
+    this.c1s = c1s;
+    this.c2s = c2s;
+    this.c3s = c3s;
+  }
+
+  MonotonicInterpolant.prototype.interpolate = function interpolate(x) {
+    var xs = this.xs;
+    var ys = this.ys;
+    var c1s = this.c1s;
+    var c2s = this.c2s;
+    var c3s = this.c3s;
+
+    // The rightmost point in the dataset should give an exact result
+    var i = xs.length - 1;
+    if (x === xs[i]) {
+      return ys[i];
+    }
+
+    // Search for the interval x is in, returning the corresponding y if x is one of the original xs
+    var low = 0;
+    var high = c3s.length - 1;
+    var mid = undefined;
+    while (low <= high) {
+      mid = Math.floor(0.5 * (low + high));
+      var xHere = xs[mid];
+      if (xHere < x) {
+        low = mid + 1;
+      } else if (xHere > x) {
+        high = mid - 1;
+      } else {
+        return ys[mid];
+      }
+    }
+    i = Math.max(0, high);
+
+    // Interpolate
+    var diff = x - xs[i];
+    var diffSq = diff * diff;
+    return ys[i] + c1s[i] * diff + c2s[i] * diffSq + c3s[i] * diff * diffSq;
+  };
+
+  return MonotonicInterpolant;
+})();
+
+exports["default"] = MonotonicInterpolant;
+module.exports = exports["default"];
+},{}],167:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+var _nativeTypesConfig;
+
+exports.createNativeDragSource = createNativeDragSource;
+exports.matchNativeItemType = matchNativeItemType;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var _NativeTypes = require('./NativeTypes');
+
+var NativeTypes = _interopRequireWildcard(_NativeTypes);
+
+function getDataFromDataTransfer(dataTransfer, typesToTry, defaultValue) {
+  var result = typesToTry.reduce(function (resultSoFar, typeToTry) {
+    return resultSoFar || dataTransfer.getData(typeToTry);
+  }, null);
+
+  return result != null ? // eslint-disable-line eqeqeq
+  result : defaultValue;
+}
+
+var nativeTypesConfig = (_nativeTypesConfig = {}, _defineProperty(_nativeTypesConfig, NativeTypes.FILE, {
+  exposeProperty: 'files',
+  matchesTypes: ['Files'],
+  getData: function getData(dataTransfer) {
+    return Array.prototype.slice.call(dataTransfer.files);
+  }
+}), _defineProperty(_nativeTypesConfig, NativeTypes.URL, {
+  exposeProperty: 'urls',
+  matchesTypes: ['Url', 'text/uri-list'],
+  getData: function getData(dataTransfer, matchesTypes) {
+    return getDataFromDataTransfer(dataTransfer, matchesTypes, '').split('\n');
+  }
+}), _defineProperty(_nativeTypesConfig, NativeTypes.TEXT, {
+  exposeProperty: 'text',
+  matchesTypes: ['Text', 'text/plain'],
+  getData: function getData(dataTransfer, matchesTypes) {
+    return getDataFromDataTransfer(dataTransfer, matchesTypes, '');
+  }
+}), _nativeTypesConfig);
+
+function createNativeDragSource(type) {
+  var _nativeTypesConfig$type = nativeTypesConfig[type];
+  var exposeProperty = _nativeTypesConfig$type.exposeProperty;
+  var matchesTypes = _nativeTypesConfig$type.matchesTypes;
+  var getData = _nativeTypesConfig$type.getData;
+
+  return (function () {
+    function NativeDragSource() {
+      _classCallCheck(this, NativeDragSource);
+
+      this.item = Object.defineProperties({}, _defineProperty({}, exposeProperty, {
+        get: function get() {
+          console.warn( // eslint-disable-line no-console
+          'Browser doesn\'t allow reading "' + exposeProperty + '" until the drop event.');
+          return null;
+        },
+        configurable: true,
+        enumerable: true
+      }));
+    }
+
+    NativeDragSource.prototype.mutateItemByReadingDataTransfer = function mutateItemByReadingDataTransfer(dataTransfer) {
+      delete this.item[exposeProperty];
+      this.item[exposeProperty] = getData(dataTransfer, matchesTypes);
+    };
+
+    NativeDragSource.prototype.canDrag = function canDrag() {
+      return true;
+    };
+
+    NativeDragSource.prototype.beginDrag = function beginDrag() {
+      return this.item;
+    };
+
+    NativeDragSource.prototype.isDragging = function isDragging(monitor, handle) {
+      return handle === monitor.getSourceId();
+    };
+
+    NativeDragSource.prototype.endDrag = function endDrag() {};
+
+    return NativeDragSource;
+  })();
+}
+
+function matchNativeItemType(dataTransfer) {
+  var dataTransferTypes = Array.prototype.slice.call(dataTransfer.types || []);
+
+  return Object.keys(nativeTypesConfig).filter(function (nativeItemType) {
+    var matchesTypes = nativeTypesConfig[nativeItemType].matchesTypes;
+
+    return matchesTypes.some(function (t) {
+      return dataTransferTypes.indexOf(t) > -1;
+    });
+  })[0] || null;
+}
+},{"./NativeTypes":168}],168:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+var FILE = '__NATIVE_FILE__';
+exports.FILE = FILE;
+var URL = '__NATIVE_URL__';
+exports.URL = URL;
+var TEXT = '__NATIVE_TEXT__';
+exports.TEXT = TEXT;
+},{}],169:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports.getNodeClientOffset = getNodeClientOffset;
+exports.getEventClientOffset = getEventClientOffset;
+exports.getDragPreviewOffset = getDragPreviewOffset;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _BrowserDetector = require('./BrowserDetector');
+
+var _MonotonicInterpolant = require('./MonotonicInterpolant');
+
+var _MonotonicInterpolant2 = _interopRequireDefault(_MonotonicInterpolant);
+
+var ELEMENT_NODE = 1;
+
+function getNodeClientOffset(node) {
+  var el = node.nodeType === ELEMENT_NODE ? node : node.parentElement;
+
+  if (!el) {
+    return null;
+  }
+
+  var _el$getBoundingClientRect = el.getBoundingClientRect();
+
+  var top = _el$getBoundingClientRect.top;
+  var left = _el$getBoundingClientRect.left;
+
+  return { x: left, y: top };
+}
+
+function getEventClientOffset(e) {
+  return {
+    x: e.clientX,
+    y: e.clientY
+  };
+}
+
+function getDragPreviewOffset(sourceNode, dragPreview, clientOffset, anchorPoint) {
+  // The browsers will use the image intrinsic size under different conditions.
+  // Firefox only cares if it's an image, but WebKit also wants it to be detached.
+  var isImage = dragPreview.nodeName === 'IMG' && (_BrowserDetector.isFirefox() || !document.documentElement.contains(dragPreview));
+  var dragPreviewNode = isImage ? sourceNode : dragPreview;
+
+  var dragPreviewNodeOffsetFromClient = getNodeClientOffset(dragPreviewNode);
+  var offsetFromDragPreview = {
+    x: clientOffset.x - dragPreviewNodeOffsetFromClient.x,
+    y: clientOffset.y - dragPreviewNodeOffsetFromClient.y
+  };
+
+  var sourceWidth = sourceNode.offsetWidth;
+  var sourceHeight = sourceNode.offsetHeight;
+  var anchorX = anchorPoint.anchorX;
+  var anchorY = anchorPoint.anchorY;
+
+  var dragPreviewWidth = isImage ? dragPreview.width : sourceWidth;
+  var dragPreviewHeight = isImage ? dragPreview.height : sourceHeight;
+
+  // Work around @2x coordinate discrepancies in browsers
+  if (_BrowserDetector.isSafari() && isImage) {
+    dragPreviewHeight /= window.devicePixelRatio;
+    dragPreviewWidth /= window.devicePixelRatio;
+  } else if (_BrowserDetector.isFirefox() && !isImage) {
+    dragPreviewHeight *= window.devicePixelRatio;
+    dragPreviewWidth *= window.devicePixelRatio;
+  }
+
+  // Interpolate coordinates depending on anchor point
+  // If you know a simpler way to do this, let me know
+  var interpolantX = new _MonotonicInterpolant2['default']([0, 0.5, 1], [
+  // Dock to the left
+  offsetFromDragPreview.x,
+  // Align at the center
+  offsetFromDragPreview.x / sourceWidth * dragPreviewWidth,
+  // Dock to the right
+  offsetFromDragPreview.x + dragPreviewWidth - sourceWidth]);
+  var interpolantY = new _MonotonicInterpolant2['default']([0, 0.5, 1], [
+  // Dock to the top
+  offsetFromDragPreview.y,
+  // Align at the center
+  offsetFromDragPreview.y / sourceHeight * dragPreviewHeight,
+  // Dock to the bottom
+  offsetFromDragPreview.y + dragPreviewHeight - sourceHeight]);
+  var x = interpolantX.interpolate(anchorX);
+  var y = interpolantY.interpolate(anchorY);
+
+  // Work around Safari 8 positioning bug
+  if (_BrowserDetector.isSafari() && isImage) {
+    // We'll have to wait for @3x to see if this is entirely correct
+    y += (window.devicePixelRatio - 1) * dragPreviewHeight;
+  }
+
+  return { x: x, y: y };
+}
+},{"./BrowserDetector":163,"./MonotonicInterpolant":166}],170:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = getEmptyImage;
+var emptyImage = undefined;
+
+function getEmptyImage() {
+  if (!emptyImage) {
+    emptyImage = new Image();
+    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  }
+
+  return emptyImage;
+}
+
+module.exports = exports['default'];
+},{}],171:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = createHTML5Backend;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _HTML5Backend = require('./HTML5Backend');
+
+var _HTML5Backend2 = _interopRequireDefault(_HTML5Backend);
+
+var _getEmptyImage = require('./getEmptyImage');
+
+var _getEmptyImage2 = _interopRequireDefault(_getEmptyImage);
+
+var _NativeTypes = require('./NativeTypes');
+
+var NativeTypes = _interopRequireWildcard(_NativeTypes);
+
+exports.NativeTypes = NativeTypes;
+exports.getEmptyImage = _getEmptyImage2['default'];
+
+function createHTML5Backend(manager) {
+  return new _HTML5Backend2['default'](manager);
+}
+},{"./HTML5Backend":165,"./NativeTypes":168,"./getEmptyImage":170}],172:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+exports["default"] = shallowEqual;
+
+function shallowEqual(objA, objB) {
+  if (objA === objB) {
+    return true;
+  }
+
+  var keysA = Object.keys(objA);
+  var keysB = Object.keys(objB);
+
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+
+  // Test for A's keys different from B.
+  var hasOwn = Object.prototype.hasOwnProperty;
+  for (var i = 0; i < keysA.length; i++) {
+    if (!hasOwn.call(objB, keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
+      return false;
+    }
+
+    var valA = objA[keysA[i]];
+    var valB = objB[keysA[i]];
+
+    if (valA !== valB) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+module.exports = exports["default"];
+},{}],173:[function(require,module,exports){
+var baseFlatten = require('../internal/baseFlatten'),
+    baseUniq = require('../internal/baseUniq'),
+    restParam = require('../function/restParam');
+
+/**
+ * Creates an array of unique values, in order, from all of the provided arrays
+ * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+ * for equality comparisons.
+ *
+ * @static
+ * @memberOf _
+ * @category Array
+ * @param {...Array} [arrays] The arrays to inspect.
+ * @returns {Array} Returns the new array of combined values.
+ * @example
+ *
+ * _.union([1, 2], [4, 2], [2, 1]);
+ * // => [1, 2, 4]
+ */
+var union = restParam(function(arrays) {
+  return baseUniq(baseFlatten(arrays, false, true));
+});
+
+module.exports = union;
+
+},{"../function/restParam":176,"../internal/baseFlatten":185,"../internal/baseUniq":188}],174:[function(require,module,exports){
+var baseDifference = require('../internal/baseDifference'),
+    isArrayLike = require('../internal/isArrayLike'),
+    restParam = require('../function/restParam');
+
+/**
+ * Creates an array excluding all provided values using
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+ * for equality comparisons.
+ *
+ * @static
+ * @memberOf _
+ * @category Array
+ * @param {Array} array The array to filter.
+ * @param {...*} [values] The values to exclude.
+ * @returns {Array} Returns the new array of filtered values.
+ * @example
+ *
+ * _.without([1, 2, 1, 3], 1, 2);
+ * // => [3]
+ */
+var without = restParam(function(array, values) {
+  return isArrayLike(array)
+    ? baseDifference(array, values)
+    : [];
+});
+
+module.exports = without;
+
+},{"../function/restParam":176,"../internal/baseDifference":184,"../internal/isArrayLike":198}],175:[function(require,module,exports){
+var MapCache = require('../internal/MapCache');
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/**
+ * Creates a function that memoizes the result of `func`. If `resolver` is
+ * provided it determines the cache key for storing the result based on the
+ * arguments provided to the memoized function. By default, the first argument
+ * provided to the memoized function is coerced to a string and used as the
+ * cache key. The `func` is invoked with the `this` binding of the memoized
+ * function.
+ *
+ * **Note:** The cache is exposed as the `cache` property on the memoized
+ * function. Its creation may be customized by replacing the `_.memoize.Cache`
+ * constructor with one whose instances implement the [`Map`](http://ecma-international.org/ecma-262/6.0/#sec-properties-of-the-map-prototype-object)
+ * method interface of `get`, `has`, and `set`.
+ *
+ * @static
+ * @memberOf _
+ * @category Function
+ * @param {Function} func The function to have its output memoized.
+ * @param {Function} [resolver] The function to resolve the cache key.
+ * @returns {Function} Returns the new memoizing function.
+ * @example
+ *
+ * var upperCase = _.memoize(function(string) {
+ *   return string.toUpperCase();
+ * });
+ *
+ * upperCase('fred');
+ * // => 'FRED'
+ *
+ * // modifying the result cache
+ * upperCase.cache.set('fred', 'BARNEY');
+ * upperCase('fred');
+ * // => 'BARNEY'
+ *
+ * // replacing `_.memoize.Cache`
+ * var object = { 'user': 'fred' };
+ * var other = { 'user': 'barney' };
+ * var identity = _.memoize(_.identity);
+ *
+ * identity(object);
+ * // => { 'user': 'fred' }
+ * identity(other);
+ * // => { 'user': 'fred' }
+ *
+ * _.memoize.Cache = WeakMap;
+ * var identity = _.memoize(_.identity);
+ *
+ * identity(object);
+ * // => { 'user': 'fred' }
+ * identity(other);
+ * // => { 'user': 'barney' }
+ */
+function memoize(func, resolver) {
+  if (typeof func != 'function' || (resolver && typeof resolver != 'function')) {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  var memoized = function() {
+    var args = arguments,
+        key = resolver ? resolver.apply(this, args) : args[0],
+        cache = memoized.cache;
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    var result = func.apply(this, args);
+    memoized.cache = cache.set(key, result);
+    return result;
+  };
+  memoized.cache = new memoize.Cache;
+  return memoized;
+}
+
+// Assign cache to `_.memoize`.
+memoize.Cache = MapCache;
+
+module.exports = memoize;
+
+},{"../internal/MapCache":177}],176:[function(require,module,exports){
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max;
+
+/**
+ * Creates a function that invokes `func` with the `this` binding of the
+ * created function and arguments from `start` and beyond provided as an array.
+ *
+ * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/Web/JavaScript/Reference/Functions/rest_parameters).
+ *
+ * @static
+ * @memberOf _
+ * @category Function
+ * @param {Function} func The function to apply a rest parameter to.
+ * @param {number} [start=func.length-1] The start position of the rest parameter.
+ * @returns {Function} Returns the new function.
+ * @example
+ *
+ * var say = _.restParam(function(what, names) {
+ *   return what + ' ' + _.initial(names).join(', ') +
+ *     (_.size(names) > 1 ? ', & ' : '') + _.last(names);
+ * });
+ *
+ * say('hello', 'fred', 'barney', 'pebbles');
+ * // => 'hello fred, barney, & pebbles'
+ */
+function restParam(func, start) {
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  start = nativeMax(start === undefined ? (func.length - 1) : (+start || 0), 0);
+  return function() {
+    var args = arguments,
+        index = -1,
+        length = nativeMax(args.length - start, 0),
+        rest = Array(length);
+
+    while (++index < length) {
+      rest[index] = args[start + index];
+    }
+    switch (start) {
+      case 0: return func.call(this, rest);
+      case 1: return func.call(this, args[0], rest);
+      case 2: return func.call(this, args[0], args[1], rest);
+    }
+    var otherArgs = Array(start + 1);
+    index = -1;
+    while (++index < start) {
+      otherArgs[index] = args[index];
+    }
+    otherArgs[start] = rest;
+    return func.apply(this, otherArgs);
+  };
+}
+
+module.exports = restParam;
+
+},{}],177:[function(require,module,exports){
+var mapDelete = require('./mapDelete'),
+    mapGet = require('./mapGet'),
+    mapHas = require('./mapHas'),
+    mapSet = require('./mapSet');
+
+/**
+ * Creates a cache object to store key/value pairs.
+ *
+ * @private
+ * @static
+ * @name Cache
+ * @memberOf _.memoize
+ */
+function MapCache() {
+  this.__data__ = {};
+}
+
+// Add functions to the `Map` cache.
+MapCache.prototype['delete'] = mapDelete;
+MapCache.prototype.get = mapGet;
+MapCache.prototype.has = mapHas;
+MapCache.prototype.set = mapSet;
+
+module.exports = MapCache;
+
+},{"./mapDelete":203,"./mapGet":204,"./mapHas":205,"./mapSet":206}],178:[function(require,module,exports){
+(function (global){
+var cachePush = require('./cachePush'),
+    getNative = require('./getNative');
+
+/** Native method references. */
+var Set = getNative(global, 'Set');
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeCreate = getNative(Object, 'create');
+
+/**
+ *
+ * Creates a cache object to store unique values.
+ *
+ * @private
+ * @param {Array} [values] The values to cache.
+ */
+function SetCache(values) {
+  var length = values ? values.length : 0;
+
+  this.data = { 'hash': nativeCreate(null), 'set': new Set };
+  while (length--) {
+    this.push(values[length]);
+  }
+}
+
+// Add functions to the `Set` cache.
+SetCache.prototype.push = cachePush;
+
+module.exports = SetCache;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./cachePush":191,"./getNative":196}],179:[function(require,module,exports){
+/**
+ * Appends the elements of `values` to `array`.
+ *
+ * @private
+ * @param {Array} array The array to modify.
+ * @param {Array} values The values to append.
+ * @returns {Array} Returns `array`.
+ */
+function arrayPush(array, values) {
+  var index = -1,
+      length = values.length,
+      offset = array.length;
+
+  while (++index < length) {
+    array[offset + index] = values[index];
+  }
+  return array;
+}
+
+module.exports = arrayPush;
+
+},{}],180:[function(require,module,exports){
+/**
+ * Used by `_.defaults` to customize its `_.assign` use.
+ *
+ * @private
+ * @param {*} objectValue The destination object property value.
+ * @param {*} sourceValue The source object property value.
+ * @returns {*} Returns the value to assign to the destination object.
+ */
+function assignDefaults(objectValue, sourceValue) {
+  return objectValue === undefined ? sourceValue : objectValue;
+}
+
+module.exports = assignDefaults;
+
+},{}],181:[function(require,module,exports){
+var keys = require('../object/keys');
+
+/**
+ * A specialized version of `_.assign` for customizing assigned values without
+ * support for argument juggling, multiple sources, and `this` binding `customizer`
+ * functions.
+ *
+ * @private
+ * @param {Object} object The destination object.
+ * @param {Object} source The source object.
+ * @param {Function} customizer The function to customize assigned values.
+ * @returns {Object} Returns `object`.
+ */
+function assignWith(object, source, customizer) {
+  var index = -1,
+      props = keys(source),
+      length = props.length;
+
+  while (++index < length) {
+    var key = props[index],
+        value = object[key],
+        result = customizer(value, source[key], key, object, source);
+
+    if ((result === result ? (result !== value) : (value === value)) ||
+        (value === undefined && !(key in object))) {
+      object[key] = result;
+    }
+  }
+  return object;
+}
+
+module.exports = assignWith;
+
+},{"../object/keys":215}],182:[function(require,module,exports){
+var baseCopy = require('./baseCopy'),
+    keys = require('../object/keys');
+
+/**
+ * The base implementation of `_.assign` without support for argument juggling,
+ * multiple sources, and `customizer` functions.
+ *
+ * @private
+ * @param {Object} object The destination object.
+ * @param {Object} source The source object.
+ * @returns {Object} Returns `object`.
+ */
+function baseAssign(object, source) {
+  return source == null
+    ? object
+    : baseCopy(source, keys(source), object);
+}
+
+module.exports = baseAssign;
+
+},{"../object/keys":215,"./baseCopy":183}],183:[function(require,module,exports){
+/**
+ * Copies properties of `source` to `object`.
+ *
+ * @private
+ * @param {Object} source The object to copy properties from.
+ * @param {Array} props The property names to copy.
+ * @param {Object} [object={}] The object to copy properties to.
+ * @returns {Object} Returns `object`.
+ */
+function baseCopy(source, props, object) {
+  object || (object = {});
+
+  var index = -1,
+      length = props.length;
+
+  while (++index < length) {
+    var key = props[index];
+    object[key] = source[key];
+  }
+  return object;
+}
+
+module.exports = baseCopy;
+
+},{}],184:[function(require,module,exports){
+var baseIndexOf = require('./baseIndexOf'),
+    cacheIndexOf = require('./cacheIndexOf'),
+    createCache = require('./createCache');
+
+/** Used as the size to enable large array optimizations. */
+var LARGE_ARRAY_SIZE = 200;
+
+/**
+ * The base implementation of `_.difference` which accepts a single array
+ * of values to exclude.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {Array} values The values to exclude.
+ * @returns {Array} Returns the new array of filtered values.
+ */
+function baseDifference(array, values) {
+  var length = array ? array.length : 0,
+      result = [];
+
+  if (!length) {
+    return result;
+  }
+  var index = -1,
+      indexOf = baseIndexOf,
+      isCommon = true,
+      cache = (isCommon && values.length >= LARGE_ARRAY_SIZE) ? createCache(values) : null,
+      valuesLength = values.length;
+
+  if (cache) {
+    indexOf = cacheIndexOf;
+    isCommon = false;
+    values = cache;
+  }
+  outer:
+  while (++index < length) {
+    var value = array[index];
+
+    if (isCommon && value === value) {
+      var valuesIndex = valuesLength;
+      while (valuesIndex--) {
+        if (values[valuesIndex] === value) {
+          continue outer;
+        }
+      }
+      result.push(value);
+    }
+    else if (indexOf(values, value, 0) < 0) {
+      result.push(value);
+    }
+  }
+  return result;
+}
+
+module.exports = baseDifference;
+
+},{"./baseIndexOf":186,"./cacheIndexOf":190,"./createCache":193}],185:[function(require,module,exports){
+var arrayPush = require('./arrayPush'),
+    isArguments = require('../lang/isArguments'),
+    isArray = require('../lang/isArray'),
+    isArrayLike = require('./isArrayLike'),
+    isObjectLike = require('./isObjectLike');
+
+/**
+ * The base implementation of `_.flatten` with added support for restricting
+ * flattening and specifying the start index.
+ *
+ * @private
+ * @param {Array} array The array to flatten.
+ * @param {boolean} [isDeep] Specify a deep flatten.
+ * @param {boolean} [isStrict] Restrict flattening to arrays-like objects.
+ * @param {Array} [result=[]] The initial result value.
+ * @returns {Array} Returns the new flattened array.
+ */
+function baseFlatten(array, isDeep, isStrict, result) {
+  result || (result = []);
+
+  var index = -1,
+      length = array.length;
+
+  while (++index < length) {
+    var value = array[index];
+    if (isObjectLike(value) && isArrayLike(value) &&
+        (isStrict || isArray(value) || isArguments(value))) {
+      if (isDeep) {
+        // Recursively flatten arrays (susceptible to call stack limits).
+        baseFlatten(value, isDeep, isStrict, result);
+      } else {
+        arrayPush(result, value);
+      }
+    } else if (!isStrict) {
+      result[result.length] = value;
+    }
+  }
+  return result;
+}
+
+module.exports = baseFlatten;
+
+},{"../lang/isArguments":208,"../lang/isArray":209,"./arrayPush":179,"./isArrayLike":198,"./isObjectLike":202}],186:[function(require,module,exports){
+var indexOfNaN = require('./indexOfNaN');
+
+/**
+ * The base implementation of `_.indexOf` without support for binary searches.
+ *
+ * @private
+ * @param {Array} array The array to search.
+ * @param {*} value The value to search for.
+ * @param {number} fromIndex The index to search from.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function baseIndexOf(array, value, fromIndex) {
+  if (value !== value) {
+    return indexOfNaN(array, fromIndex);
+  }
+  var index = fromIndex - 1,
+      length = array.length;
+
+  while (++index < length) {
+    if (array[index] === value) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+module.exports = baseIndexOf;
+
+},{"./indexOfNaN":197}],187:[function(require,module,exports){
+/**
+ * The base implementation of `_.property` without support for deep paths.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @returns {Function} Returns the new function.
+ */
+function baseProperty(key) {
+  return function(object) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = baseProperty;
+
+},{}],188:[function(require,module,exports){
+var baseIndexOf = require('./baseIndexOf'),
+    cacheIndexOf = require('./cacheIndexOf'),
+    createCache = require('./createCache');
+
+/** Used as the size to enable large array optimizations. */
+var LARGE_ARRAY_SIZE = 200;
+
+/**
+ * The base implementation of `_.uniq` without support for callback shorthands
+ * and `this` binding.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {Function} [iteratee] The function invoked per iteration.
+ * @returns {Array} Returns the new duplicate free array.
+ */
+function baseUniq(array, iteratee) {
+  var index = -1,
+      indexOf = baseIndexOf,
+      length = array.length,
+      isCommon = true,
+      isLarge = isCommon && length >= LARGE_ARRAY_SIZE,
+      seen = isLarge ? createCache() : null,
+      result = [];
+
+  if (seen) {
+    indexOf = cacheIndexOf;
+    isCommon = false;
+  } else {
+    isLarge = false;
+    seen = iteratee ? [] : result;
+  }
+  outer:
+  while (++index < length) {
+    var value = array[index],
+        computed = iteratee ? iteratee(value, index, array) : value;
+
+    if (isCommon && value === value) {
+      var seenIndex = seen.length;
+      while (seenIndex--) {
+        if (seen[seenIndex] === computed) {
+          continue outer;
+        }
+      }
+      if (iteratee) {
+        seen.push(computed);
+      }
+      result.push(value);
+    }
+    else if (indexOf(seen, computed, 0) < 0) {
+      if (iteratee || isLarge) {
+        seen.push(computed);
+      }
+      result.push(value);
+    }
+  }
+  return result;
+}
+
+module.exports = baseUniq;
+
+},{"./baseIndexOf":186,"./cacheIndexOf":190,"./createCache":193}],189:[function(require,module,exports){
+var identity = require('../utility/identity');
+
+/**
+ * A specialized version of `baseCallback` which only supports `this` binding
+ * and specifying the number of arguments to provide to `func`.
+ *
+ * @private
+ * @param {Function} func The function to bind.
+ * @param {*} thisArg The `this` binding of `func`.
+ * @param {number} [argCount] The number of arguments to provide to `func`.
+ * @returns {Function} Returns the callback.
+ */
+function bindCallback(func, thisArg, argCount) {
+  if (typeof func != 'function') {
+    return identity;
+  }
+  if (thisArg === undefined) {
+    return func;
+  }
+  switch (argCount) {
+    case 1: return function(value) {
+      return func.call(thisArg, value);
+    };
+    case 3: return function(value, index, collection) {
+      return func.call(thisArg, value, index, collection);
+    };
+    case 4: return function(accumulator, value, index, collection) {
+      return func.call(thisArg, accumulator, value, index, collection);
+    };
+    case 5: return function(value, other, key, object, source) {
+      return func.call(thisArg, value, other, key, object, source);
+    };
+  }
+  return function() {
+    return func.apply(thisArg, arguments);
+  };
+}
+
+module.exports = bindCallback;
+
+},{"../utility/identity":217}],190:[function(require,module,exports){
+var isObject = require('../lang/isObject');
+
+/**
+ * Checks if `value` is in `cache` mimicking the return signature of
+ * `_.indexOf` by returning `0` if the value is found, else `-1`.
+ *
+ * @private
+ * @param {Object} cache The cache to search.
+ * @param {*} value The value to search for.
+ * @returns {number} Returns `0` if `value` is found, else `-1`.
+ */
+function cacheIndexOf(cache, value) {
+  var data = cache.data,
+      result = (typeof value == 'string' || isObject(value)) ? data.set.has(value) : data.hash[value];
+
+  return result ? 0 : -1;
+}
+
+module.exports = cacheIndexOf;
+
+},{"../lang/isObject":212}],191:[function(require,module,exports){
+var isObject = require('../lang/isObject');
+
+/**
+ * Adds `value` to the cache.
+ *
+ * @private
+ * @name push
+ * @memberOf SetCache
+ * @param {*} value The value to cache.
+ */
+function cachePush(value) {
+  var data = this.data;
+  if (typeof value == 'string' || isObject(value)) {
+    data.set.add(value);
+  } else {
+    data.hash[value] = true;
+  }
+}
+
+module.exports = cachePush;
+
+},{"../lang/isObject":212}],192:[function(require,module,exports){
+var bindCallback = require('./bindCallback'),
+    isIterateeCall = require('./isIterateeCall'),
+    restParam = require('../function/restParam');
+
+/**
+ * Creates a `_.assign`, `_.defaults`, or `_.merge` function.
+ *
+ * @private
+ * @param {Function} assigner The function to assign values.
+ * @returns {Function} Returns the new assigner function.
+ */
+function createAssigner(assigner) {
+  return restParam(function(object, sources) {
+    var index = -1,
+        length = object == null ? 0 : sources.length,
+        customizer = length > 2 ? sources[length - 2] : undefined,
+        guard = length > 2 ? sources[2] : undefined,
+        thisArg = length > 1 ? sources[length - 1] : undefined;
+
+    if (typeof customizer == 'function') {
+      customizer = bindCallback(customizer, thisArg, 5);
+      length -= 2;
+    } else {
+      customizer = typeof thisArg == 'function' ? thisArg : undefined;
+      length -= (customizer ? 1 : 0);
+    }
+    if (guard && isIterateeCall(sources[0], sources[1], guard)) {
+      customizer = length < 3 ? undefined : customizer;
+      length = 1;
+    }
+    while (++index < length) {
+      var source = sources[index];
+      if (source) {
+        assigner(object, source, customizer);
+      }
+    }
+    return object;
+  });
+}
+
+module.exports = createAssigner;
+
+},{"../function/restParam":176,"./bindCallback":189,"./isIterateeCall":200}],193:[function(require,module,exports){
+(function (global){
+var SetCache = require('./SetCache'),
+    getNative = require('./getNative');
+
+/** Native method references. */
+var Set = getNative(global, 'Set');
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeCreate = getNative(Object, 'create');
+
+/**
+ * Creates a `Set` cache object to optimize linear searches of large arrays.
+ *
+ * @private
+ * @param {Array} [values] The values to cache.
+ * @returns {null|Object} Returns the new cache object if `Set` is supported, else `null`.
+ */
+function createCache(values) {
+  return (nativeCreate && Set) ? new SetCache(values) : null;
+}
+
+module.exports = createCache;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./SetCache":178,"./getNative":196}],194:[function(require,module,exports){
+var restParam = require('../function/restParam');
+
+/**
+ * Creates a `_.defaults` or `_.defaultsDeep` function.
+ *
+ * @private
+ * @param {Function} assigner The function to assign values.
+ * @param {Function} customizer The function to customize assigned values.
+ * @returns {Function} Returns the new defaults function.
+ */
+function createDefaults(assigner, customizer) {
+  return restParam(function(args) {
+    var object = args[0];
+    if (object == null) {
+      return object;
+    }
+    args.push(customizer);
+    return assigner.apply(undefined, args);
+  });
+}
+
+module.exports = createDefaults;
+
+},{"../function/restParam":176}],195:[function(require,module,exports){
+var baseProperty = require('./baseProperty');
+
+/**
+ * Gets the "length" property value of `object`.
+ *
+ * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
+ * that affects Safari on at least iOS 8.1-8.3 ARM64.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {*} Returns the "length" value.
+ */
+var getLength = baseProperty('length');
+
+module.exports = getLength;
+
+},{"./baseProperty":187}],196:[function(require,module,exports){
+var isNative = require('../lang/isNative');
+
+/**
+ * Gets the native function at `key` of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
+ */
+function getNative(object, key) {
+  var value = object == null ? undefined : object[key];
+  return isNative(value) ? value : undefined;
+}
+
+module.exports = getNative;
+
+},{"../lang/isNative":211}],197:[function(require,module,exports){
+/**
+ * Gets the index at which the first occurrence of `NaN` is found in `array`.
+ *
+ * @private
+ * @param {Array} array The array to search.
+ * @param {number} fromIndex The index to search from.
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {number} Returns the index of the matched `NaN`, else `-1`.
+ */
+function indexOfNaN(array, fromIndex, fromRight) {
+  var length = array.length,
+      index = fromIndex + (fromRight ? 0 : -1);
+
+  while ((fromRight ? index-- : ++index < length)) {
+    var other = array[index];
+    if (other !== other) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+module.exports = indexOfNaN;
+
+},{}],198:[function(require,module,exports){
+var getLength = require('./getLength'),
+    isLength = require('./isLength');
+
+/**
+ * Checks if `value` is array-like.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ */
+function isArrayLike(value) {
+  return value != null && isLength(getLength(value));
+}
+
+module.exports = isArrayLike;
+
+},{"./getLength":195,"./isLength":201}],199:[function(require,module,exports){
+/** Used to detect unsigned integer values. */
+var reIsUint = /^\d+$/;
+
+/**
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+ * of an array-like value.
+ */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+function isIndex(value, length) {
+  value = (typeof value == 'number' || reIsUint.test(value)) ? +value : -1;
+  length = length == null ? MAX_SAFE_INTEGER : length;
+  return value > -1 && value % 1 == 0 && value < length;
+}
+
+module.exports = isIndex;
+
+},{}],200:[function(require,module,exports){
+var isArrayLike = require('./isArrayLike'),
+    isIndex = require('./isIndex'),
+    isObject = require('../lang/isObject');
+
+/**
+ * Checks if the provided arguments are from an iteratee call.
+ *
+ * @private
+ * @param {*} value The potential iteratee value argument.
+ * @param {*} index The potential iteratee index or key argument.
+ * @param {*} object The potential iteratee object argument.
+ * @returns {boolean} Returns `true` if the arguments are from an iteratee call, else `false`.
+ */
+function isIterateeCall(value, index, object) {
+  if (!isObject(object)) {
+    return false;
+  }
+  var type = typeof index;
+  if (type == 'number'
+      ? (isArrayLike(object) && isIndex(index, object.length))
+      : (type == 'string' && index in object)) {
+    var other = object[index];
+    return value === value ? (value === other) : (other !== other);
+  }
+  return false;
+}
+
+module.exports = isIterateeCall;
+
+},{"../lang/isObject":212,"./isArrayLike":198,"./isIndex":199}],201:[function(require,module,exports){
+/**
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+ * of an array-like value.
+ */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/**
+ * Checks if `value` is a valid array-like length.
+ *
+ * **Note:** This function is based on [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+ */
+function isLength(value) {
+  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+module.exports = isLength;
+
+},{}],202:[function(require,module,exports){
+/**
+ * Checks if `value` is object-like.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+module.exports = isObjectLike;
+
+},{}],203:[function(require,module,exports){
+/**
+ * Removes `key` and its value from the cache.
+ *
+ * @private
+ * @name delete
+ * @memberOf _.memoize.Cache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed successfully, else `false`.
+ */
+function mapDelete(key) {
+  return this.has(key) && delete this.__data__[key];
+}
+
+module.exports = mapDelete;
+
+},{}],204:[function(require,module,exports){
+/**
+ * Gets the cached value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf _.memoize.Cache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the cached value.
+ */
+function mapGet(key) {
+  return key == '__proto__' ? undefined : this.__data__[key];
+}
+
+module.exports = mapGet;
+
+},{}],205:[function(require,module,exports){
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Checks if a cached value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf _.memoize.Cache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function mapHas(key) {
+  return key != '__proto__' && hasOwnProperty.call(this.__data__, key);
+}
+
+module.exports = mapHas;
+
+},{}],206:[function(require,module,exports){
+/**
+ * Sets `value` to `key` of the cache.
+ *
+ * @private
+ * @name set
+ * @memberOf _.memoize.Cache
+ * @param {string} key The key of the value to cache.
+ * @param {*} value The value to cache.
+ * @returns {Object} Returns the cache object.
+ */
+function mapSet(key, value) {
+  if (key != '__proto__') {
+    this.__data__[key] = value;
+  }
+  return this;
+}
+
+module.exports = mapSet;
+
+},{}],207:[function(require,module,exports){
+var isArguments = require('../lang/isArguments'),
+    isArray = require('../lang/isArray'),
+    isIndex = require('./isIndex'),
+    isLength = require('./isLength'),
+    keysIn = require('../object/keysIn');
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A fallback implementation of `Object.keys` which creates an array of the
+ * own enumerable property names of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ */
+function shimKeys(object) {
+  var props = keysIn(object),
+      propsLength = props.length,
+      length = propsLength && object.length;
+
+  var allowIndexes = !!length && isLength(length) &&
+    (isArray(object) || isArguments(object));
+
+  var index = -1,
+      result = [];
+
+  while (++index < propsLength) {
+    var key = props[index];
+    if ((allowIndexes && isIndex(key, length)) || hasOwnProperty.call(object, key)) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+module.exports = shimKeys;
+
+},{"../lang/isArguments":208,"../lang/isArray":209,"../object/keysIn":216,"./isIndex":199,"./isLength":201}],208:[function(require,module,exports){
+var isArrayLike = require('../internal/isArrayLike'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Native method references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/**
+ * Checks if `value` is classified as an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+function isArguments(value) {
+  return isObjectLike(value) && isArrayLike(value) &&
+    hasOwnProperty.call(value, 'callee') && !propertyIsEnumerable.call(value, 'callee');
+}
+
+module.exports = isArguments;
+
+},{"../internal/isArrayLike":198,"../internal/isObjectLike":202}],209:[function(require,module,exports){
+var getNative = require('../internal/getNative'),
+    isLength = require('../internal/isLength'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** `Object#toString` result references. */
+var arrayTag = '[object Array]';
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objToString = objectProto.toString;
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeIsArray = getNative(Array, 'isArray');
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(function() { return arguments; }());
+ * // => false
+ */
+var isArray = nativeIsArray || function(value) {
+  return isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag;
+};
+
+module.exports = isArray;
+
+},{"../internal/getNative":196,"../internal/isLength":201,"../internal/isObjectLike":202}],210:[function(require,module,exports){
+var isObject = require('./isObject');
+
+/** `Object#toString` result references. */
+var funcTag = '[object Function]';
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objToString = objectProto.toString;
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in older versions of Chrome and Safari which return 'function' for regexes
+  // and Safari 8 which returns 'object' for typed array constructors.
+  return isObject(value) && objToString.call(value) == funcTag;
+}
+
+module.exports = isFunction;
+
+},{"./isObject":212}],211:[function(require,module,exports){
+var isFunction = require('./isFunction'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** Used to detect host constructors (Safari > 5). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var fnToString = Function.prototype.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  fnToString.call(hasOwnProperty).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
+  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
+/**
+ * Checks if `value` is a native function.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function, else `false`.
+ * @example
+ *
+ * _.isNative(Array.prototype.push);
+ * // => true
+ *
+ * _.isNative(_);
+ * // => false
+ */
+function isNative(value) {
+  if (value == null) {
+    return false;
+  }
+  if (isFunction(value)) {
+    return reIsNative.test(fnToString.call(value));
+  }
+  return isObjectLike(value) && reIsHostCtor.test(value);
+}
+
+module.exports = isNative;
+
+},{"../internal/isObjectLike":202,"./isFunction":210}],212:[function(require,module,exports){
+/**
+ * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+ * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(1);
+ * // => false
+ */
+function isObject(value) {
+  // Avoid a V8 JIT bug in Chrome 19-20.
+  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+module.exports = isObject;
+
+},{}],213:[function(require,module,exports){
+var assignWith = require('../internal/assignWith'),
+    baseAssign = require('../internal/baseAssign'),
+    createAssigner = require('../internal/createAssigner');
+
+/**
+ * Assigns own enumerable properties of source object(s) to the destination
+ * object. Subsequent sources overwrite property assignments of previous sources.
+ * If `customizer` is provided it's invoked to produce the assigned values.
+ * The `customizer` is bound to `thisArg` and invoked with five arguments:
+ * (objectValue, sourceValue, key, object, source).
+ *
+ * **Note:** This method mutates `object` and is based on
+ * [`Object.assign`](http://ecma-international.org/ecma-262/6.0/#sec-object.assign).
+ *
+ * @static
+ * @memberOf _
+ * @alias extend
+ * @category Object
+ * @param {Object} object The destination object.
+ * @param {...Object} [sources] The source objects.
+ * @param {Function} [customizer] The function to customize assigned values.
+ * @param {*} [thisArg] The `this` binding of `customizer`.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * _.assign({ 'user': 'barney' }, { 'age': 40 }, { 'user': 'fred' });
+ * // => { 'user': 'fred', 'age': 40 }
+ *
+ * // using a customizer callback
+ * var defaults = _.partialRight(_.assign, function(value, other) {
+ *   return _.isUndefined(value) ? other : value;
+ * });
+ *
+ * defaults({ 'user': 'barney' }, { 'age': 36 }, { 'user': 'fred' });
+ * // => { 'user': 'barney', 'age': 36 }
+ */
+var assign = createAssigner(function(object, source, customizer) {
+  return customizer
+    ? assignWith(object, source, customizer)
+    : baseAssign(object, source);
+});
+
+module.exports = assign;
+
+},{"../internal/assignWith":181,"../internal/baseAssign":182,"../internal/createAssigner":192}],214:[function(require,module,exports){
+var assign = require('./assign'),
+    assignDefaults = require('../internal/assignDefaults'),
+    createDefaults = require('../internal/createDefaults');
+
+/**
+ * Assigns own enumerable properties of source object(s) to the destination
+ * object for all destination properties that resolve to `undefined`. Once a
+ * property is set, additional values of the same property are ignored.
+ *
+ * **Note:** This method mutates `object`.
+ *
+ * @static
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The destination object.
+ * @param {...Object} [sources] The source objects.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * _.defaults({ 'user': 'barney' }, { 'age': 36 }, { 'user': 'fred' });
+ * // => { 'user': 'barney', 'age': 36 }
+ */
+var defaults = createDefaults(assign, assignDefaults);
+
+module.exports = defaults;
+
+},{"../internal/assignDefaults":180,"../internal/createDefaults":194,"./assign":213}],215:[function(require,module,exports){
+var getNative = require('../internal/getNative'),
+    isArrayLike = require('../internal/isArrayLike'),
+    isObject = require('../lang/isObject'),
+    shimKeys = require('../internal/shimKeys');
+
+/* Native method references for those with the same name as other `lodash` methods. */
+var nativeKeys = getNative(Object, 'keys');
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+var keys = !nativeKeys ? shimKeys : function(object) {
+  var Ctor = object == null ? undefined : object.constructor;
+  if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
+      (typeof object != 'function' && isArrayLike(object))) {
+    return shimKeys(object);
+  }
+  return isObject(object) ? nativeKeys(object) : [];
+};
+
+module.exports = keys;
+
+},{"../internal/getNative":196,"../internal/isArrayLike":198,"../internal/shimKeys":207,"../lang/isObject":212}],216:[function(require,module,exports){
+var isArguments = require('../lang/isArguments'),
+    isArray = require('../lang/isArray'),
+    isIndex = require('../internal/isIndex'),
+    isLength = require('../internal/isLength'),
+    isObject = require('../lang/isObject');
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Creates an array of the own and inherited enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects.
+ *
+ * @static
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keysIn(new Foo);
+ * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
+ */
+function keysIn(object) {
+  if (object == null) {
+    return [];
+  }
+  if (!isObject(object)) {
+    object = Object(object);
+  }
+  var length = object.length;
+  length = (length && isLength(length) &&
+    (isArray(object) || isArguments(object)) && length) || 0;
+
+  var Ctor = object.constructor,
+      index = -1,
+      isProto = typeof Ctor == 'function' && Ctor.prototype === object,
+      result = Array(length),
+      skipIndexes = length > 0;
+
+  while (++index < length) {
+    result[index] = (index + '');
+  }
+  for (var key in object) {
+    if (!(skipIndexes && isIndex(key, length)) &&
+        !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+module.exports = keysIn;
+
+},{"../internal/isIndex":199,"../internal/isLength":201,"../lang/isArguments":208,"../lang/isArray":209,"../lang/isObject":212}],217:[function(require,module,exports){
+/**
+ * This method returns the first argument provided to it.
+ *
+ * @static
+ * @memberOf _
+ * @category Utility
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'user': 'fred' };
+ *
+ * _.identity(object) === object;
+ * // => true
+ */
+function identity(value) {
+  return value;
+}
+
+module.exports = identity;
+
+},{}],218:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _slice = Array.prototype.slice;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+exports['default'] = DragDropContext;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _dndCore = require('dnd-core');
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _utilsCheckDecoratorArguments = require('./utils/checkDecoratorArguments');
+
+var _utilsCheckDecoratorArguments2 = _interopRequireDefault(_utilsCheckDecoratorArguments);
+
+function DragDropContext(backendOrModule) {
+  _utilsCheckDecoratorArguments2['default'].apply(undefined, ['DragDropContext', 'backend'].concat(_slice.call(arguments)));
+
+  // Auto-detect ES6 default export for people still using ES5
+  var backend = undefined;
+  if (typeof backendOrModule === 'object' && typeof backendOrModule['default'] === 'function') {
+    backend = backendOrModule['default'];
+  } else {
+    backend = backendOrModule;
+  }
+
+  _invariant2['default'](typeof backend === 'function', 'Expected the backend to be a function or an ES6 module exporting a default function. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-drop-context.html');
+
+  var childContext = {
+    dragDropManager: new _dndCore.DragDropManager(backend)
+  };
+
+  return function decorateContext(DecoratedComponent) {
+    var displayName = DecoratedComponent.displayName || DecoratedComponent.name || 'Component';
+
+    return (function (_Component) {
+      _inherits(DragDropContextContainer, _Component);
+
+      function DragDropContextContainer() {
+        _classCallCheck(this, DragDropContextContainer);
+
+        _Component.apply(this, arguments);
+      }
+
+      DragDropContextContainer.prototype.getDecoratedComponentInstance = function getDecoratedComponentInstance() {
+        return this.refs.child;
+      };
+
+      DragDropContextContainer.prototype.getManager = function getManager() {
+        return childContext.dragDropManager;
+      };
+
+      DragDropContextContainer.prototype.getChildContext = function getChildContext() {
+        return childContext;
+      };
+
+      DragDropContextContainer.prototype.render = function render() {
+        return _react2['default'].createElement(DecoratedComponent, _extends({}, this.props, {
+          ref: 'child' }));
+      };
+
+      _createClass(DragDropContextContainer, null, [{
+        key: 'DecoratedComponent',
+        value: DecoratedComponent,
+        enumerable: true
+      }, {
+        key: 'displayName',
+        value: 'DragDropContext(' + displayName + ')',
+        enumerable: true
+      }, {
+        key: 'childContextTypes',
+        value: {
+          dragDropManager: _react.PropTypes.object.isRequired
+        },
+        enumerable: true
+      }]);
+
+      return DragDropContextContainer;
+    })(_react.Component);
+  };
+}
+
+module.exports = exports['default'];
+},{"./utils/checkDecoratorArguments":234,"dnd-core":252,"invariant":262,"react":451}],219:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _slice = Array.prototype.slice;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+exports['default'] = DragLayer;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _utilsShallowEqual = require('./utils/shallowEqual');
+
+var _utilsShallowEqual2 = _interopRequireDefault(_utilsShallowEqual);
+
+var _utilsShallowEqualScalar = require('./utils/shallowEqualScalar');
+
+var _utilsShallowEqualScalar2 = _interopRequireDefault(_utilsShallowEqualScalar);
+
+var _lodashLangIsPlainObject = require('lodash/lang/isPlainObject');
+
+var _lodashLangIsPlainObject2 = _interopRequireDefault(_lodashLangIsPlainObject);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _utilsCheckDecoratorArguments = require('./utils/checkDecoratorArguments');
+
+var _utilsCheckDecoratorArguments2 = _interopRequireDefault(_utilsCheckDecoratorArguments);
+
+function DragLayer(collect) {
+  var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+  _utilsCheckDecoratorArguments2['default'].apply(undefined, ['DragLayer', 'collect[, options]'].concat(_slice.call(arguments)));
+  _invariant2['default'](typeof collect === 'function', 'Expected "collect" provided as the first argument to DragLayer ' + 'to be a function that collects props to inject into the component. ', 'Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-layer.html', collect);
+  _invariant2['default'](_lodashLangIsPlainObject2['default'](options), 'Expected "options" provided as the second argument to DragLayer to be ' + 'a plain object when specified. ' + 'Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-layer.html', options);
+
+  return function decorateLayer(DecoratedComponent) {
+    var _options$arePropsEqual = options.arePropsEqual;
+    var arePropsEqual = _options$arePropsEqual === undefined ? _utilsShallowEqualScalar2['default'] : _options$arePropsEqual;
+
+    var displayName = DecoratedComponent.displayName || DecoratedComponent.name || 'Component';
+
+    return (function (_Component) {
+      _inherits(DragLayerContainer, _Component);
+
+      DragLayerContainer.prototype.getDecoratedComponentInstance = function getDecoratedComponentInstance() {
+        return this.refs.child;
+      };
+
+      DragLayerContainer.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps, nextState) {
+        return !arePropsEqual(nextProps, this.props) || !_utilsShallowEqual2['default'](nextState, this.state);
+      };
+
+      _createClass(DragLayerContainer, null, [{
+        key: 'DecoratedComponent',
+        value: DecoratedComponent,
+        enumerable: true
+      }, {
+        key: 'displayName',
+        value: 'DragLayer(' + displayName + ')',
+        enumerable: true
+      }, {
+        key: 'contextTypes',
+        value: {
+          dragDropManager: _react.PropTypes.object.isRequired
+        },
+        enumerable: true
+      }]);
+
+      function DragLayerContainer(props, context) {
+        _classCallCheck(this, DragLayerContainer);
+
+        _Component.call(this, props);
+        this.handleChange = this.handleChange.bind(this);
+
+        this.manager = context.dragDropManager;
+        _invariant2['default'](typeof this.manager === 'object', 'Could not find the drag and drop manager in the context of %s. ' + 'Make sure to wrap the top-level component of your app with DragDropContext. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-troubleshooting.html#could-not-find-the-drag-and-drop-manager-in-the-context', displayName, displayName);
+
+        this.state = this.getCurrentState();
+      }
+
+      DragLayerContainer.prototype.componentDidMount = function componentDidMount() {
+        var monitor = this.manager.getMonitor();
+        this.unsubscribe = monitor.subscribeToOffsetChange(this.handleChange);
+      };
+
+      DragLayerContainer.prototype.componentWillUnmount = function componentWillUnmount() {
+        this.unsubscribe();
+      };
+
+      DragLayerContainer.prototype.handleChange = function handleChange() {
+        var nextState = this.getCurrentState();
+        if (!_utilsShallowEqual2['default'](nextState, this.state)) {
+          this.setState(nextState);
+        }
+      };
+
+      DragLayerContainer.prototype.getCurrentState = function getCurrentState() {
+        var monitor = this.manager.getMonitor();
+        return collect(monitor);
+      };
+
+      DragLayerContainer.prototype.render = function render() {
+        return _react2['default'].createElement(DecoratedComponent, _extends({}, this.props, this.state, {
+          ref: 'child' }));
+      };
+
+      return DragLayerContainer;
+    })(_react.Component);
+  };
+}
+
+module.exports = exports['default'];
+},{"./utils/checkDecoratorArguments":234,"./utils/shallowEqual":237,"./utils/shallowEqualScalar":238,"invariant":262,"lodash/lang/isPlainObject":292,"react":451}],220:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+var _slice = Array.prototype.slice;
+exports['default'] = DragSource;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _lodashLangIsPlainObject = require('lodash/lang/isPlainObject');
+
+var _lodashLangIsPlainObject2 = _interopRequireDefault(_lodashLangIsPlainObject);
+
+var _utilsCheckDecoratorArguments = require('./utils/checkDecoratorArguments');
+
+var _utilsCheckDecoratorArguments2 = _interopRequireDefault(_utilsCheckDecoratorArguments);
+
+var _decorateHandler = require('./decorateHandler');
+
+var _decorateHandler2 = _interopRequireDefault(_decorateHandler);
+
+var _registerSource = require('./registerSource');
+
+var _registerSource2 = _interopRequireDefault(_registerSource);
+
+var _createSourceFactory = require('./createSourceFactory');
+
+var _createSourceFactory2 = _interopRequireDefault(_createSourceFactory);
+
+var _createSourceMonitor = require('./createSourceMonitor');
+
+var _createSourceMonitor2 = _interopRequireDefault(_createSourceMonitor);
+
+var _createSourceConnector = require('./createSourceConnector');
+
+var _createSourceConnector2 = _interopRequireDefault(_createSourceConnector);
+
+var _utilsIsValidType = require('./utils/isValidType');
+
+var _utilsIsValidType2 = _interopRequireDefault(_utilsIsValidType);
+
+function DragSource(type, spec, collect) {
+  var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+  _utilsCheckDecoratorArguments2['default'].apply(undefined, ['DragSource', 'type, spec, collect[, options]'].concat(_slice.call(arguments)));
+  var getType = type;
+  if (typeof type !== 'function') {
+    _invariant2['default'](_utilsIsValidType2['default'](type), 'Expected "type" provided as the first argument to DragSource to be ' + 'a string, or a function that returns a string given the current props. ' + 'Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', type);
+    getType = function () {
+      return type;
+    };
+  }
+  _invariant2['default'](_lodashLangIsPlainObject2['default'](spec), 'Expected "spec" provided as the second argument to DragSource to be ' + 'a plain object. Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', spec);
+  var createSource = _createSourceFactory2['default'](spec);
+  _invariant2['default'](typeof collect === 'function', 'Expected "collect" provided as the third argument to DragSource to be ' + 'a function that returns a plain object of props to inject. ' + 'Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', collect);
+  _invariant2['default'](_lodashLangIsPlainObject2['default'](options), 'Expected "options" provided as the fourth argument to DragSource to be ' + 'a plain object when specified. ' + 'Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', collect);
+
+  return function decorateSource(DecoratedComponent) {
+    return _decorateHandler2['default']({
+      connectBackend: function connectBackend(backend, sourceId) {
+        return backend.connectDragSource(sourceId);
+      },
+      containerDisplayName: 'DragSource',
+      createHandler: createSource,
+      registerHandler: _registerSource2['default'],
+      createMonitor: _createSourceMonitor2['default'],
+      createConnector: _createSourceConnector2['default'],
+      DecoratedComponent: DecoratedComponent,
+      getType: getType,
+      collect: collect,
+      options: options
+    });
+  };
+}
+
+module.exports = exports['default'];
+},{"./createSourceConnector":224,"./createSourceFactory":225,"./createSourceMonitor":226,"./decorateHandler":230,"./registerSource":232,"./utils/checkDecoratorArguments":234,"./utils/isValidType":236,"invariant":262,"lodash/lang/isPlainObject":292}],221:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+var _slice = Array.prototype.slice;
+exports['default'] = DropTarget;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _lodashLangIsPlainObject = require('lodash/lang/isPlainObject');
+
+var _lodashLangIsPlainObject2 = _interopRequireDefault(_lodashLangIsPlainObject);
+
+var _utilsCheckDecoratorArguments = require('./utils/checkDecoratorArguments');
+
+var _utilsCheckDecoratorArguments2 = _interopRequireDefault(_utilsCheckDecoratorArguments);
+
+var _decorateHandler = require('./decorateHandler');
+
+var _decorateHandler2 = _interopRequireDefault(_decorateHandler);
+
+var _registerTarget = require('./registerTarget');
+
+var _registerTarget2 = _interopRequireDefault(_registerTarget);
+
+var _createTargetFactory = require('./createTargetFactory');
+
+var _createTargetFactory2 = _interopRequireDefault(_createTargetFactory);
+
+var _createTargetMonitor = require('./createTargetMonitor');
+
+var _createTargetMonitor2 = _interopRequireDefault(_createTargetMonitor);
+
+var _createTargetConnector = require('./createTargetConnector');
+
+var _createTargetConnector2 = _interopRequireDefault(_createTargetConnector);
+
+var _utilsIsValidType = require('./utils/isValidType');
+
+var _utilsIsValidType2 = _interopRequireDefault(_utilsIsValidType);
+
+function DropTarget(type, spec, collect) {
+  var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+  _utilsCheckDecoratorArguments2['default'].apply(undefined, ['DropTarget', 'type, spec, collect[, options]'].concat(_slice.call(arguments)));
+  var getType = type;
+  if (typeof type !== 'function') {
+    _invariant2['default'](_utilsIsValidType2['default'](type, true), 'Expected "type" provided as the first argument to DropTarget to be ' + 'a string, an array of strings, or a function that returns either given ' + 'the current props. Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target.html', type);
+    getType = function () {
+      return type;
+    };
+  }
+  _invariant2['default'](_lodashLangIsPlainObject2['default'](spec), 'Expected "spec" provided as the second argument to DropTarget to be ' + 'a plain object. Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target.html', spec);
+  var createTarget = _createTargetFactory2['default'](spec);
+  _invariant2['default'](typeof collect === 'function', 'Expected "collect" provided as the third argument to DropTarget to be ' + 'a function that returns a plain object of props to inject. ' + 'Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target.html', collect);
+  _invariant2['default'](_lodashLangIsPlainObject2['default'](options), 'Expected "options" provided as the fourth argument to DropTarget to be ' + 'a plain object when specified. ' + 'Instead, received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target.html', collect);
+
+  return function decorateTarget(DecoratedComponent) {
+    return _decorateHandler2['default']({
+      connectBackend: function connectBackend(backend, targetId) {
+        return backend.connectDropTarget(targetId);
+      },
+      containerDisplayName: 'DropTarget',
+      createHandler: createTarget,
+      registerHandler: _registerTarget2['default'],
+      createMonitor: _createTargetMonitor2['default'],
+      createConnector: _createTargetConnector2['default'],
+      DecoratedComponent: DecoratedComponent,
+      getType: getType,
+      collect: collect,
+      options: options
+    });
+  };
+}
+
+module.exports = exports['default'];
+},{"./createTargetConnector":227,"./createTargetFactory":228,"./createTargetMonitor":229,"./decorateHandler":230,"./registerTarget":233,"./utils/checkDecoratorArguments":234,"./utils/isValidType":236,"invariant":262,"lodash/lang/isPlainObject":292}],222:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = bindConnector;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _bindConnectorMethod2 = require('./bindConnectorMethod');
+
+var _bindConnectorMethod3 = _interopRequireDefault(_bindConnectorMethod2);
+
+var _disposables = require('disposables');
+
+function bindConnector(connector, handlerId) {
+  var compositeDisposable = new _disposables.CompositeDisposable();
+  var handlerConnector = {};
+
+  Object.keys(connector).forEach(function (key) {
+    var _bindConnectorMethod = _bindConnectorMethod3['default'](handlerId, connector[key]);
+
+    var disposable = _bindConnectorMethod.disposable;
+    var ref = _bindConnectorMethod.ref;
+
+    compositeDisposable.add(disposable);
+    handlerConnector[key] = function () {
+      return ref;
+    };
+  });
+
+  return {
+    disposable: compositeDisposable,
+    handlerConnector: handlerConnector
+  };
+}
+
+module.exports = exports['default'];
+},{"./bindConnectorMethod":223,"disposables":242}],223:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = bindConnectorMethod;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _utilsShallowEqual = require('./utils/shallowEqual');
+
+var _utilsShallowEqual2 = _interopRequireDefault(_utilsShallowEqual);
+
+var _utilsCloneWithRef = require('./utils/cloneWithRef');
+
+var _utilsCloneWithRef2 = _interopRequireDefault(_utilsCloneWithRef);
+
+var _disposables = require('disposables');
+
+var _react = require('react');
+
+function areOptionsEqual(currentOptions, nextOptions) {
+  if (currentOptions === nextOptions) {
+    return true;
+  }
+
+  return currentOptions !== null && nextOptions !== null && _utilsShallowEqual2['default'](currentOptions, nextOptions);
+}
+
+function bindConnectorMethod(handlerId, connect) {
+  var disposable = new _disposables.SerialDisposable();
+
+  var currentNode = null;
+  var currentOptions = null;
+
+  function ref() {
+    var nextWhatever = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+    var nextOptions = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+    // If passed a ReactElement, clone it and attach this function as a ref.
+    // This helps us achieve a neat API where user doesn't even know that refs
+    // are being used under the hood.
+    if (_react.isValidElement(nextWhatever)) {
+      // Custom components can no longer be wrapped directly in React DnD 2.0
+      // so that we don't need to depend on findDOMNode() from react-dom.
+      if (typeof nextWhatever.type !== 'string') {
+        var displayName = nextWhatever.type.displayName || nextWhatever.type.name || 'the component';
+        throw new Error('Only native element nodes can now be passed to ' + connect.name + '(). ' + ('You can either wrap ' + displayName + ' into a <div>, or turn it into a ') + 'drag source or a drop target itself.');
+      }
+
+      var nextElement = nextWhatever;
+      return _utilsCloneWithRef2['default'](nextElement, function (inst) {
+        return ref(inst, nextOptions);
+      });
+    }
+
+    // At this point we can only receive DOM nodes.
+    var nextNode = nextWhatever;
+
+    // If nothing changed, bail out of re-connecting the node to the backend.
+    if (nextNode === currentNode && areOptionsEqual(currentOptions, nextOptions)) {
+      return;
+    }
+
+    currentNode = nextNode;
+    currentOptions = nextOptions;
+
+    if (!nextNode) {
+      disposable.setDisposable(null);
+      return;
+    }
+
+    // Re-connect the node to the backend.
+    var currentDispose = connect(handlerId, nextNode, nextOptions);
+    disposable.setDisposable(new _disposables.Disposable(currentDispose));
+  }
+
+  return {
+    ref: ref,
+    disposable: disposable
+  };
+}
+
+module.exports = exports['default'];
+},{"./utils/cloneWithRef":235,"./utils/shallowEqual":237,"disposables":242,"react":451}],224:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+exports["default"] = createSourceConnector;
+
+function createSourceConnector(backend) {
+  return {
+    dragSource: function connectDragSource() {
+      return backend.connectDragSource.apply(backend, arguments);
+    },
+    dragPreview: function connectDragPreview() {
+      return backend.connectDragPreview.apply(backend, arguments);
+    }
+  };
+}
+
+module.exports = exports["default"];
+},{}],225:[function(require,module,exports){
+(function (process){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = createSourceFactory;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _lodashLangIsPlainObject = require('lodash/lang/isPlainObject');
+
+var _lodashLangIsPlainObject2 = _interopRequireDefault(_lodashLangIsPlainObject);
+
+var ALLOWED_SPEC_METHODS = ['canDrag', 'beginDrag', 'canDrag', 'isDragging', 'endDrag'];
+var REQUIRED_SPEC_METHODS = ['beginDrag'];
+
+function createSourceFactory(spec) {
+  Object.keys(spec).forEach(function (key) {
+    _invariant2['default'](ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drag source specification to only have ' + 'some of the following keys: %s. ' + 'Instead received a specification with an unexpected "%s" key. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', ALLOWED_SPEC_METHODS.join(', '), key);
+    _invariant2['default'](typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' + 'Instead received a specification with %s: %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', key, key, spec[key]);
+  });
+  REQUIRED_SPEC_METHODS.forEach(function (key) {
+    _invariant2['default'](typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' + 'Instead received a specification with %s: %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', key, key, spec[key]);
+  });
+
+  var Source = (function () {
+    function Source(monitor) {
+      _classCallCheck(this, Source);
+
+      this.monitor = monitor;
+      this.props = null;
+      this.component = null;
+    }
+
+    Source.prototype.receiveProps = function receiveProps(props) {
+      this.props = props;
+    };
+
+    Source.prototype.receiveComponent = function receiveComponent(component) {
+      this.component = component;
+    };
+
+    Source.prototype.canDrag = function canDrag() {
+      if (!spec.canDrag) {
+        return true;
+      }
+
+      return spec.canDrag(this.props, this.monitor);
+    };
+
+    Source.prototype.isDragging = function isDragging(globalMonitor, sourceId) {
+      if (!spec.isDragging) {
+        return sourceId === globalMonitor.getSourceId();
+      }
+
+      return spec.isDragging(this.props, this.monitor);
+    };
+
+    Source.prototype.beginDrag = function beginDrag() {
+      var item = spec.beginDrag(this.props, this.monitor, this.component);
+      if (process.env.NODE_ENV !== 'production') {
+        _invariant2['default'](_lodashLangIsPlainObject2['default'](item), 'beginDrag() must return a plain object that represents the dragged item. ' + 'Instead received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source.html', item);
+      }
+      return item;
+    };
+
+    Source.prototype.endDrag = function endDrag() {
+      if (!spec.endDrag) {
+        return;
+      }
+
+      spec.endDrag(this.props, this.monitor, this.component);
+    };
+
+    return Source;
+  })();
+
+  return function createSource(monitor) {
+    return new Source(monitor);
+  };
+}
+
+module.exports = exports['default'];
+}).call(this,require('_process'))
+},{"_process":160,"invariant":262,"lodash/lang/isPlainObject":292}],226:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = createSourceMonitor;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var isCallingCanDrag = false;
+var isCallingIsDragging = false;
+
+var SourceMonitor = (function () {
+  function SourceMonitor(manager) {
+    _classCallCheck(this, SourceMonitor);
+
+    this.internalMonitor = manager.getMonitor();
+  }
+
+  SourceMonitor.prototype.receiveHandlerId = function receiveHandlerId(sourceId) {
+    this.sourceId = sourceId;
+  };
+
+  SourceMonitor.prototype.canDrag = function canDrag() {
+    _invariant2['default'](!isCallingCanDrag, 'You may not call monitor.canDrag() inside your canDrag() implementation. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source-monitor.html');
+
+    try {
+      isCallingCanDrag = true;
+      return this.internalMonitor.canDragSource(this.sourceId);
+    } finally {
+      isCallingCanDrag = false;
+    }
+  };
+
+  SourceMonitor.prototype.isDragging = function isDragging() {
+    _invariant2['default'](!isCallingIsDragging, 'You may not call monitor.isDragging() inside your isDragging() implementation. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drag-source-monitor.html');
+
+    try {
+      isCallingIsDragging = true;
+      return this.internalMonitor.isDraggingSource(this.sourceId);
+    } finally {
+      isCallingIsDragging = false;
+    }
+  };
+
+  SourceMonitor.prototype.getItemType = function getItemType() {
+    return this.internalMonitor.getItemType();
+  };
+
+  SourceMonitor.prototype.getItem = function getItem() {
+    return this.internalMonitor.getItem();
+  };
+
+  SourceMonitor.prototype.getDropResult = function getDropResult() {
+    return this.internalMonitor.getDropResult();
+  };
+
+  SourceMonitor.prototype.didDrop = function didDrop() {
+    return this.internalMonitor.didDrop();
+  };
+
+  SourceMonitor.prototype.getInitialClientOffset = function getInitialClientOffset() {
+    return this.internalMonitor.getInitialClientOffset();
+  };
+
+  SourceMonitor.prototype.getInitialSourceClientOffset = function getInitialSourceClientOffset() {
+    return this.internalMonitor.getInitialSourceClientOffset();
+  };
+
+  SourceMonitor.prototype.getSourceClientOffset = function getSourceClientOffset() {
+    return this.internalMonitor.getSourceClientOffset();
+  };
+
+  SourceMonitor.prototype.getClientOffset = function getClientOffset() {
+    return this.internalMonitor.getClientOffset();
+  };
+
+  SourceMonitor.prototype.getDifferenceFromInitialOffset = function getDifferenceFromInitialOffset() {
+    return this.internalMonitor.getDifferenceFromInitialOffset();
+  };
+
+  return SourceMonitor;
+})();
+
+function createSourceMonitor(manager) {
+  return new SourceMonitor(manager);
+}
+
+module.exports = exports['default'];
+},{"invariant":262}],227:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+exports["default"] = createTargetConnector;
+
+function createTargetConnector(backend) {
+  return {
+    dropTarget: function connectDropTarget() {
+      return backend.connectDropTarget.apply(backend, arguments);
+    }
+  };
+}
+
+module.exports = exports["default"];
+},{}],228:[function(require,module,exports){
+(function (process){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = createTargetFactory;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _lodashLangIsPlainObject = require('lodash/lang/isPlainObject');
+
+var _lodashLangIsPlainObject2 = _interopRequireDefault(_lodashLangIsPlainObject);
+
+var ALLOWED_SPEC_METHODS = ['canDrop', 'hover', 'drop'];
+
+function createTargetFactory(spec) {
+  Object.keys(spec).forEach(function (key) {
+    _invariant2['default'](ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drop target specification to only have ' + 'some of the following keys: %s. ' + 'Instead received a specification with an unexpected "%s" key. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target.html', ALLOWED_SPEC_METHODS.join(', '), key);
+    _invariant2['default'](typeof spec[key] === 'function', 'Expected %s in the drop target specification to be a function. ' + 'Instead received a specification with %s: %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target.html', key, key, spec[key]);
+  });
+
+  var Target = (function () {
+    function Target(monitor) {
+      _classCallCheck(this, Target);
+
+      this.monitor = monitor;
+      this.props = null;
+      this.component = null;
+    }
+
+    Target.prototype.receiveProps = function receiveProps(props) {
+      this.props = props;
+    };
+
+    Target.prototype.receiveMonitor = function receiveMonitor(monitor) {
+      this.monitor = monitor;
+    };
+
+    Target.prototype.receiveComponent = function receiveComponent(component) {
+      this.component = component;
+    };
+
+    Target.prototype.canDrop = function canDrop() {
+      if (!spec.canDrop) {
+        return true;
+      }
+
+      return spec.canDrop(this.props, this.monitor);
+    };
+
+    Target.prototype.hover = function hover() {
+      if (!spec.hover) {
+        return;
+      }
+
+      spec.hover(this.props, this.monitor, this.component);
+    };
+
+    Target.prototype.drop = function drop() {
+      if (!spec.drop) {
+        return;
+      }
+
+      var dropResult = spec.drop(this.props, this.monitor, this.component);
+      if (process.env.NODE_ENV !== 'production') {
+        _invariant2['default'](typeof dropResult === 'undefined' || _lodashLangIsPlainObject2['default'](dropResult), 'drop() must either return undefined, or an object that represents the drop result. ' + 'Instead received %s. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target.html', dropResult);
+      }
+      return dropResult;
+    };
+
+    return Target;
+  })();
+
+  return function createTarget(monitor) {
+    return new Target(monitor);
+  };
+}
+
+module.exports = exports['default'];
+}).call(this,require('_process'))
+},{"_process":160,"invariant":262,"lodash/lang/isPlainObject":292}],229:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = createTargetMonitor;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var isCallingCanDrop = false;
+
+var TargetMonitor = (function () {
+  function TargetMonitor(manager) {
+    _classCallCheck(this, TargetMonitor);
+
+    this.internalMonitor = manager.getMonitor();
+  }
+
+  TargetMonitor.prototype.receiveHandlerId = function receiveHandlerId(targetId) {
+    this.targetId = targetId;
+  };
+
+  TargetMonitor.prototype.canDrop = function canDrop() {
+    _invariant2['default'](!isCallingCanDrop, 'You may not call monitor.canDrop() inside your canDrop() implementation. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-drop-target-monitor.html');
+
+    try {
+      isCallingCanDrop = true;
+      return this.internalMonitor.canDropOnTarget(this.targetId);
+    } finally {
+      isCallingCanDrop = false;
+    }
+  };
+
+  TargetMonitor.prototype.isOver = function isOver(options) {
+    return this.internalMonitor.isOverTarget(this.targetId, options);
+  };
+
+  TargetMonitor.prototype.getItemType = function getItemType() {
+    return this.internalMonitor.getItemType();
+  };
+
+  TargetMonitor.prototype.getItem = function getItem() {
+    return this.internalMonitor.getItem();
+  };
+
+  TargetMonitor.prototype.getDropResult = function getDropResult() {
+    return this.internalMonitor.getDropResult();
+  };
+
+  TargetMonitor.prototype.didDrop = function didDrop() {
+    return this.internalMonitor.didDrop();
+  };
+
+  TargetMonitor.prototype.getInitialClientOffset = function getInitialClientOffset() {
+    return this.internalMonitor.getInitialClientOffset();
+  };
+
+  TargetMonitor.prototype.getInitialSourceClientOffset = function getInitialSourceClientOffset() {
+    return this.internalMonitor.getInitialSourceClientOffset();
+  };
+
+  TargetMonitor.prototype.getSourceClientOffset = function getSourceClientOffset() {
+    return this.internalMonitor.getSourceClientOffset();
+  };
+
+  TargetMonitor.prototype.getClientOffset = function getClientOffset() {
+    return this.internalMonitor.getClientOffset();
+  };
+
+  TargetMonitor.prototype.getDifferenceFromInitialOffset = function getDifferenceFromInitialOffset() {
+    return this.internalMonitor.getDifferenceFromInitialOffset();
+  };
+
+  return TargetMonitor;
+})();
+
+function createTargetMonitor(manager) {
+  return new TargetMonitor(manager);
+}
+
+module.exports = exports['default'];
+},{"invariant":262}],230:[function(require,module,exports){
+(function (process){
+'use strict';
+
+exports.__esModule = true;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+exports['default'] = decorateHandler;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _disposables = require('disposables');
+
+var _utilsShallowEqual = require('./utils/shallowEqual');
+
+var _utilsShallowEqual2 = _interopRequireDefault(_utilsShallowEqual);
+
+var _utilsShallowEqualScalar = require('./utils/shallowEqualScalar');
+
+var _utilsShallowEqualScalar2 = _interopRequireDefault(_utilsShallowEqualScalar);
+
+var _lodashLangIsPlainObject = require('lodash/lang/isPlainObject');
+
+var _lodashLangIsPlainObject2 = _interopRequireDefault(_lodashLangIsPlainObject);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _bindConnector2 = require('./bindConnector');
+
+var _bindConnector3 = _interopRequireDefault(_bindConnector2);
+
+function decorateHandler(_ref) {
+  var DecoratedComponent = _ref.DecoratedComponent;
+  var createHandler = _ref.createHandler;
+  var createMonitor = _ref.createMonitor;
+  var createConnector = _ref.createConnector;
+  var registerHandler = _ref.registerHandler;
+  var containerDisplayName = _ref.containerDisplayName;
+  var getType = _ref.getType;
+  var collect = _ref.collect;
+  var options = _ref.options;
+  var _options$arePropsEqual = options.arePropsEqual;
+  var arePropsEqual = _options$arePropsEqual === undefined ? _utilsShallowEqualScalar2['default'] : _options$arePropsEqual;
+
+  var displayName = DecoratedComponent.displayName || DecoratedComponent.name || 'Component';
+
+  return (function (_Component) {
+    _inherits(DragDropContainer, _Component);
+
+    DragDropContainer.prototype.getHandlerId = function getHandlerId() {
+      return this.handlerId;
+    };
+
+    DragDropContainer.prototype.getDecoratedComponentInstance = function getDecoratedComponentInstance() {
+      return this.decoratedComponentInstance;
+    };
+
+    DragDropContainer.prototype.shouldComponentUpdate = function shouldComponentUpdate(nextProps, nextState) {
+      return !arePropsEqual(nextProps, this.props) || !_utilsShallowEqual2['default'](nextState, this.state);
+    };
+
+    _createClass(DragDropContainer, null, [{
+      key: 'DecoratedComponent',
+      value: DecoratedComponent,
+      enumerable: true
+    }, {
+      key: 'displayName',
+      value: containerDisplayName + '(' + displayName + ')',
+      enumerable: true
+    }, {
+      key: 'contextTypes',
+      value: {
+        dragDropManager: _react.PropTypes.object.isRequired
+      },
+      enumerable: true
+    }]);
+
+    function DragDropContainer(props, context) {
+      _classCallCheck(this, DragDropContainer);
+
+      _Component.call(this, props, context);
+      this.handleChange = this.handleChange.bind(this);
+      this.handleChildRef = this.handleChildRef.bind(this);
+
+      _invariant2['default'](typeof this.context.dragDropManager === 'object', 'Could not find the drag and drop manager in the context of %s. ' + 'Make sure to wrap the top-level component of your app with DragDropContext. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-troubleshooting.html#could-not-find-the-drag-and-drop-manager-in-the-context', displayName, displayName);
+
+      this.manager = this.context.dragDropManager;
+      this.handlerMonitor = createMonitor(this.manager);
+      this.handler = createHandler(this.handlerMonitor);
+      this.disposable = new _disposables.SerialDisposable();
+
+      this.receiveProps(props);
+      this.state = this.getCurrentState();
+    }
+
+    DragDropContainer.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+      if (!arePropsEqual(nextProps, this.props)) {
+        this.receiveProps(nextProps);
+        this.handleChange();
+      }
+    };
+
+    DragDropContainer.prototype.componentWillUnmount = function componentWillUnmount() {
+      this.disposable.dispose();
+    };
+
+    DragDropContainer.prototype.receiveProps = function receiveProps(props) {
+      this.handler.receiveProps(props);
+      this.receiveType(getType(props));
+    };
+
+    DragDropContainer.prototype.receiveType = function receiveType(type) {
+      if (type === this.currentType) {
+        return;
+      }
+
+      this.currentType = type;
+
+      var _registerHandler = registerHandler(type, this.handler, this.manager);
+
+      var handlerId = _registerHandler.handlerId;
+      var unregister = _registerHandler.unregister;
+
+      var connector = createConnector(this.manager.getBackend());
+
+      var _bindConnector = _bindConnector3['default'](connector, handlerId);
+
+      var handlerConnector = _bindConnector.handlerConnector;
+      var connectorDisposable = _bindConnector.disposable;
+
+      this.handlerId = handlerId;
+      this.handlerConnector = handlerConnector;
+      this.handlerMonitor.receiveHandlerId(handlerId);
+
+      var globalMonitor = this.manager.getMonitor();
+      var unsubscribe = globalMonitor.subscribeToStateChange(this.handleChange, { handlerIds: [handlerId] });
+
+      this.disposable.setDisposable(new _disposables.CompositeDisposable(new _disposables.Disposable(unsubscribe), new _disposables.Disposable(unregister), connectorDisposable));
+    };
+
+    DragDropContainer.prototype.handleChange = function handleChange() {
+      var nextState = this.getCurrentState();
+      if (!_utilsShallowEqual2['default'](nextState, this.state)) {
+        this.setState(nextState);
+      }
+    };
+
+    DragDropContainer.prototype.handleChildRef = function handleChildRef(component) {
+      this.decoratedComponentInstance = component;
+      this.handler.receiveComponent(component);
+    };
+
+    DragDropContainer.prototype.getCurrentState = function getCurrentState() {
+      var nextState = collect(this.handlerConnector, this.handlerMonitor);
+      if (process.env.NODE_ENV !== 'production') {
+        _invariant2['default'](_lodashLangIsPlainObject2['default'](nextState), 'Expected `collect` specified as the second argument to ' + '%s for %s to return a plain object of props to inject. ' + 'Instead, received %s.', containerDisplayName, displayName, nextState);
+      }
+      return nextState;
+    };
+
+    DragDropContainer.prototype.render = function render() {
+      return _react2['default'].createElement(DecoratedComponent, _extends({}, this.props, this.state, {
+        ref: this.handleChildRef }));
+    };
+
+    return DragDropContainer;
+  })(_react.Component);
+}
+
+module.exports = exports['default'];
+}).call(this,require('_process'))
+},{"./bindConnector":222,"./utils/shallowEqual":237,"./utils/shallowEqualScalar":238,"_process":160,"disposables":242,"invariant":262,"lodash/lang/isPlainObject":292,"react":451}],231:[function(require,module,exports){
+(function (process){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
+
+var _DragDropContext = require('./DragDropContext');
+
+exports.DragDropContext = _interopRequire(_DragDropContext);
+
+var _DragLayer = require('./DragLayer');
+
+exports.DragLayer = _interopRequire(_DragLayer);
+
+var _DragSource = require('./DragSource');
+
+exports.DragSource = _interopRequire(_DragSource);
+
+var _DropTarget = require('./DropTarget');
+
+exports.DropTarget = _interopRequire(_DropTarget);
+
+if (process.env.NODE_ENV !== 'production') {
+  Object.defineProperty(exports, 'default', {
+    get: function get() {
+      console.error( // eslint-disable-line no-console
+      'React DnD does not provide a default export. ' + 'You are probably missing the curly braces in the import statement. ' + 'Read more: http://gaearon.github.io/react-dnd/docs-troubleshooting.html#react-dnd-does-not-provide-a-default-export');
+    }
+  });
+}
+}).call(this,require('_process'))
+},{"./DragDropContext":218,"./DragLayer":219,"./DragSource":220,"./DropTarget":221,"_process":160}],232:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+exports["default"] = registerSource;
+
+function registerSource(type, source, manager) {
+  var registry = manager.getRegistry();
+  var sourceId = registry.addSource(type, source);
+
+  function unregisterSource() {
+    registry.removeSource(sourceId);
+  }
+
+  return {
+    handlerId: sourceId,
+    unregister: unregisterSource
+  };
+}
+
+module.exports = exports["default"];
+},{}],233:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+exports["default"] = registerTarget;
+
+function registerTarget(type, target, manager) {
+  var registry = manager.getRegistry();
+  var targetId = registry.addTarget(type, target);
+
+  function unregisterTarget() {
+    registry.removeTarget(targetId);
+  }
+
+  return {
+    handlerId: targetId,
+    unregister: unregisterTarget
+  };
+}
+
+module.exports = exports["default"];
+},{}],234:[function(require,module,exports){
+(function (process){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = checkDecoratorArguments;
+
+function checkDecoratorArguments(functionName, signature) {
+  if (process.env.NODE_ENV !== 'production') {
+    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+      args[_key - 2] = arguments[_key];
+    }
+
+    for (var i = 0; i < args.length; i++) {
+      var arg = args[i];
+      if (arg && arg.prototype && arg.prototype.render) {
+        console.error( // eslint-disable-line no-console
+        'You seem to be applying the arguments in the wrong order. ' + ('It should be ' + functionName + '(' + signature + ')(Component), not the other way around. ') + 'Read more: http://gaearon.github.io/react-dnd/docs-troubleshooting.html#you-seem-to-be-applying-the-arguments-in-the-wrong-order');
+        return;
+      }
+    }
+  }
+}
+
+module.exports = exports['default'];
+}).call(this,require('_process'))
+},{"_process":160}],235:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = cloneWithRef;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _react = require('react');
+
+function cloneWithRef(element, newRef) {
+  var previousRef = element.ref;
+  _invariant2['default'](typeof previousRef !== 'string', 'Cannot connect React DnD to an element with an existing string ref. ' + 'Please convert it to use a callback ref instead, or wrap it into a <span> or <div>. ' + 'Read more: https://facebook.github.io/react/docs/more-about-refs.html#the-ref-callback-attribute');
+
+  return _react.cloneElement(element, {
+    ref: function ref(instance) {
+      newRef(instance);
+
+      if (previousRef) {
+        previousRef(instance);
+      }
+    }
+  });
+}
+
+module.exports = exports['default'];
+},{"invariant":262,"react":451}],236:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = isValidType;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _lodashLangIsArray = require('lodash/lang/isArray');
+
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+
+function isValidType(type, allowArray) {
+       return typeof type === 'string' || typeof type === 'symbol' || allowArray && _lodashLangIsArray2['default'](type) && type.every(function (t) {
+              return isValidType(t, false);
+       });
+}
+
+module.exports = exports['default'];
+},{"lodash/lang/isArray":288}],237:[function(require,module,exports){
+arguments[4][172][0].apply(exports,arguments)
+},{"dup":172}],238:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = shallowEqualScalar;
+
+function shallowEqualScalar(objA, objB) {
+  if (objA === objB) {
+    return true;
+  }
+
+  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+    return false;
+  }
+
+  var keysA = Object.keys(objA);
+  var keysB = Object.keys(objB);
+
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+
+  // Test for A's keys different from B.
+  var hasOwn = Object.prototype.hasOwnProperty;
+  for (var i = 0; i < keysA.length; i++) {
+    if (!hasOwn.call(objB, keysA[i])) {
+      return false;
+    }
+
+    var valA = objA[keysA[i]];
+    var valB = objB[keysA[i]];
+
+    if (valA !== valB || typeof valA === 'object' || typeof valB === 'object') {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+module.exports = exports['default'];
+},{}],239:[function(require,module,exports){
+'use strict';
+
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+
+exports.__esModule = true;
+
+var _isDisposable = require('./isDisposable');
+
+var _isDisposable2 = _interopRequireWildcard(_isDisposable);
+
+/**
+ * Represents a group of disposable resources that are disposed together.
+ */
+
+var CompositeDisposable = (function () {
+  function CompositeDisposable() {
+    for (var _len = arguments.length, disposables = Array(_len), _key = 0; _key < _len; _key++) {
+      disposables[_key] = arguments[_key];
+    }
+
+    _classCallCheck(this, CompositeDisposable);
+
+    if (Array.isArray(disposables[0]) && disposables.length === 1) {
+      disposables = disposables[0];
+    }
+
+    for (var i = 0; i < disposables.length; i++) {
+      if (!_isDisposable2['default'](disposables[i])) {
+        throw new Error('Expected a disposable');
+      }
+    }
+
+    this.disposables = disposables;
+    this.isDisposed = false;
+  }
+
+  /**
+   * Adds a disposable to the CompositeDisposable or disposes the disposable if the CompositeDisposable is disposed.
+   * @param {Disposable} item Disposable to add.
+   */
+
+  CompositeDisposable.prototype.add = function add(item) {
+    if (this.isDisposed) {
+      item.dispose();
+    } else {
+      this.disposables.push(item);
+    }
+  };
+
+  /**
+   * Removes and disposes the first occurrence of a disposable from the CompositeDisposable.
+   * @param {Disposable} item Disposable to remove.
+   * @returns {Boolean} true if found; false otherwise.
+   */
+
+  CompositeDisposable.prototype.remove = function remove(item) {
+    if (this.isDisposed) {
+      return false;
+    }
+
+    var index = this.disposables.indexOf(item);
+    if (index === -1) {
+      return false;
+    }
+
+    this.disposables.splice(index, 1);
+    item.dispose();
+    return true;
+  };
+
+  /**
+   * Disposes all disposables in the group and removes them from the group.
+   */
+
+  CompositeDisposable.prototype.dispose = function dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+
+    var len = this.disposables.length;
+    var currentDisposables = new Array(len);
+    for (var i = 0; i < len; i++) {
+      currentDisposables[i] = this.disposables[i];
+    }
+
+    this.isDisposed = true;
+    this.disposables = [];
+    this.length = 0;
+
+    for (var i = 0; i < len; i++) {
+      currentDisposables[i].dispose();
+    }
+  };
+
+  return CompositeDisposable;
+})();
+
+exports['default'] = CompositeDisposable;
+module.exports = exports['default'];
+},{"./isDisposable":243}],240:[function(require,module,exports){
+"use strict";
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+exports.__esModule = true;
+var noop = function noop() {};
+
+/**
+ * The basic disposable.
+ */
+
+var Disposable = (function () {
+  function Disposable(action) {
+    _classCallCheck(this, Disposable);
+
+    this.isDisposed = false;
+    this.action = action || noop;
+  }
+
+  Disposable.prototype.dispose = function dispose() {
+    if (!this.isDisposed) {
+      this.action.call(null);
+      this.isDisposed = true;
+    }
+  };
+
+  _createClass(Disposable, null, [{
+    key: "empty",
+    enumerable: true,
+    value: { dispose: noop }
+  }]);
+
+  return Disposable;
+})();
+
+exports["default"] = Disposable;
+module.exports = exports["default"];
+},{}],241:[function(require,module,exports){
+'use strict';
+
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+
+exports.__esModule = true;
+
+var _isDisposable = require('./isDisposable');
+
+var _isDisposable2 = _interopRequireWildcard(_isDisposable);
+
+var SerialDisposable = (function () {
+  function SerialDisposable() {
+    _classCallCheck(this, SerialDisposable);
+
+    this.isDisposed = false;
+    this.current = null;
+  }
+
+  /**
+   * Gets the underlying disposable.
+   * @return The underlying disposable.
+   */
+
+  SerialDisposable.prototype.getDisposable = function getDisposable() {
+    return this.current;
+  };
+
+  /**
+   * Sets the underlying disposable.
+   * @param {Disposable} value The new underlying disposable.
+   */
+
+  SerialDisposable.prototype.setDisposable = function setDisposable() {
+    var value = arguments[0] === undefined ? null : arguments[0];
+
+    if (value != null && !_isDisposable2['default'](value)) {
+      throw new Error('Expected either an empty value or a valid disposable');
+    }
+
+    var isDisposed = this.isDisposed;
+    var previous = undefined;
+
+    if (!isDisposed) {
+      previous = this.current;
+      this.current = value;
+    }
+
+    if (previous) {
+      previous.dispose();
+    }
+
+    if (isDisposed && value) {
+      value.dispose();
+    }
+  };
+
+  /**
+   * Disposes the underlying disposable as well as all future replacements.
+   */
+
+  SerialDisposable.prototype.dispose = function dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+
+    this.isDisposed = true;
+    var previous = this.current;
+    this.current = null;
+
+    if (previous) {
+      previous.dispose();
+    }
+  };
+
+  return SerialDisposable;
+})();
+
+exports['default'] = SerialDisposable;
+module.exports = exports['default'];
+},{"./isDisposable":243}],242:[function(require,module,exports){
+'use strict';
+
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+exports.__esModule = true;
+
+var _isDisposable2 = require('./isDisposable');
+
+var _isDisposable3 = _interopRequireWildcard(_isDisposable2);
+
+exports.isDisposable = _isDisposable3['default'];
+
+var _Disposable2 = require('./Disposable');
+
+var _Disposable3 = _interopRequireWildcard(_Disposable2);
+
+exports.Disposable = _Disposable3['default'];
+
+var _CompositeDisposable2 = require('./CompositeDisposable');
+
+var _CompositeDisposable3 = _interopRequireWildcard(_CompositeDisposable2);
+
+exports.CompositeDisposable = _CompositeDisposable3['default'];
+
+var _SerialDisposable2 = require('./SerialDisposable');
+
+var _SerialDisposable3 = _interopRequireWildcard(_SerialDisposable2);
+
+exports.SerialDisposable = _SerialDisposable3['default'];
+},{"./CompositeDisposable":239,"./Disposable":240,"./SerialDisposable":241,"./isDisposable":243}],243:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = isDisposable;
+
+function isDisposable(obj) {
+  return Boolean(obj && typeof obj.dispose === 'function');
+}
+
+module.exports = exports['default'];
+},{}],244:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _reduxLibCreateStore = require('redux/lib/createStore');
+
+var _reduxLibCreateStore2 = _interopRequireDefault(_reduxLibCreateStore);
+
+var _reducers = require('./reducers');
+
+var _reducers2 = _interopRequireDefault(_reducers);
+
+var _actionsDragDrop = require('./actions/dragDrop');
+
+var dragDropActions = _interopRequireWildcard(_actionsDragDrop);
+
+var _DragDropMonitor = require('./DragDropMonitor');
+
+var _DragDropMonitor2 = _interopRequireDefault(_DragDropMonitor);
+
+var _HandlerRegistry = require('./HandlerRegistry');
+
+var _HandlerRegistry2 = _interopRequireDefault(_HandlerRegistry);
+
+var DragDropManager = (function () {
+  function DragDropManager(createBackend) {
+    _classCallCheck(this, DragDropManager);
+
+    var store = _reduxLibCreateStore2['default'](_reducers2['default']);
+
+    this.store = store;
+    this.monitor = new _DragDropMonitor2['default'](store);
+    this.registry = this.monitor.registry;
+    this.backend = createBackend(this);
+
+    store.subscribe(this.handleRefCountChange.bind(this));
+  }
+
+  DragDropManager.prototype.handleRefCountChange = function handleRefCountChange() {
+    var shouldSetUp = this.store.getState().refCount > 0;
+    if (shouldSetUp && !this.isSetUp) {
+      this.backend.setup();
+      this.isSetUp = true;
+    } else if (!shouldSetUp && this.isSetUp) {
+      this.backend.teardown();
+      this.isSetUp = false;
+    }
+  };
+
+  DragDropManager.prototype.getMonitor = function getMonitor() {
+    return this.monitor;
+  };
+
+  DragDropManager.prototype.getBackend = function getBackend() {
+    return this.backend;
+  };
+
+  DragDropManager.prototype.getRegistry = function getRegistry() {
+    return this.registry;
+  };
+
+  DragDropManager.prototype.getActions = function getActions() {
+    var manager = this;
+    var dispatch = this.store.dispatch;
+
+    function bindActionCreator(actionCreator) {
+      return function () {
+        var action = actionCreator.apply(manager, arguments);
+        if (typeof action !== 'undefined') {
+          dispatch(action);
+        }
+      };
+    }
+
+    return Object.keys(dragDropActions).filter(function (key) {
+      return typeof dragDropActions[key] === 'function';
+    }).reduce(function (boundActions, key) {
+      boundActions[key] = bindActionCreator(dragDropActions[key]);
+      return boundActions;
+    }, {});
+  };
+
+  return DragDropManager;
+})();
+
+exports['default'] = DragDropManager;
+module.exports = exports['default'];
+},{"./DragDropMonitor":245,"./HandlerRegistry":248,"./actions/dragDrop":249,"./reducers":256,"redux/lib/createStore":260}],245:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _utilsMatchesType = require('./utils/matchesType');
+
+var _utilsMatchesType2 = _interopRequireDefault(_utilsMatchesType);
+
+var _lodashLangIsArray = require('lodash/lang/isArray');
+
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+
+var _HandlerRegistry = require('./HandlerRegistry');
+
+var _HandlerRegistry2 = _interopRequireDefault(_HandlerRegistry);
+
+var _reducersDragOffset = require('./reducers/dragOffset');
+
+var _reducersDirtyHandlerIds = require('./reducers/dirtyHandlerIds');
+
+var DragDropMonitor = (function () {
+  function DragDropMonitor(store) {
+    _classCallCheck(this, DragDropMonitor);
+
+    this.store = store;
+    this.registry = new _HandlerRegistry2['default'](store);
+  }
+
+  DragDropMonitor.prototype.subscribeToStateChange = function subscribeToStateChange(listener) {
+    var _this = this;
+
+    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var handlerIds = _ref.handlerIds;
+
+    _invariant2['default'](typeof listener === 'function', 'listener must be a function.');
+    _invariant2['default'](typeof handlerIds === 'undefined' || _lodashLangIsArray2['default'](handlerIds), 'handlerIds, when specified, must be an array of strings.');
+
+    var handleChange = function handleChange() {
+      if (_reducersDirtyHandlerIds.areDirty(_this.store.getState().dirtyHandlerIds, handlerIds)) {
+        listener();
+      }
+    };
+
+    return this.store.subscribe(handleChange);
+  };
+
+  DragDropMonitor.prototype.subscribeToOffsetChange = function subscribeToOffsetChange(listener) {
+    var _this2 = this;
+
+    _invariant2['default'](typeof listener === 'function', 'listener must be a function.');
+
+    var previousState = this.store.getState().dragOffset;
+    var handleChange = function handleChange() {
+      var nextState = _this2.store.getState().dragOffset;
+      if (nextState === previousState) {
+        return;
+      }
+
+      previousState = nextState;
+      listener();
+    };
+
+    return this.store.subscribe(handleChange);
+  };
+
+  DragDropMonitor.prototype.canDragSource = function canDragSource(sourceId) {
+    var source = this.registry.getSource(sourceId);
+    _invariant2['default'](source, 'Expected to find a valid source.');
+
+    if (this.isDragging()) {
+      return false;
+    }
+
+    return source.canDrag(this, sourceId);
+  };
+
+  DragDropMonitor.prototype.canDropOnTarget = function canDropOnTarget(targetId) {
+    var target = this.registry.getTarget(targetId);
+    _invariant2['default'](target, 'Expected to find a valid target.');
+
+    if (!this.isDragging() || this.didDrop()) {
+      return false;
+    }
+
+    var targetType = this.registry.getTargetType(targetId);
+    var draggedItemType = this.getItemType();
+    return _utilsMatchesType2['default'](targetType, draggedItemType) && target.canDrop(this, targetId);
+  };
+
+  DragDropMonitor.prototype.isDragging = function isDragging() {
+    return Boolean(this.getItemType());
+  };
+
+  DragDropMonitor.prototype.isDraggingSource = function isDraggingSource(sourceId) {
+    var source = this.registry.getSource(sourceId, true);
+    _invariant2['default'](source, 'Expected to find a valid source.');
+
+    if (!this.isDragging() || !this.isSourcePublic()) {
+      return false;
+    }
+
+    var sourceType = this.registry.getSourceType(sourceId);
+    var draggedItemType = this.getItemType();
+    if (sourceType !== draggedItemType) {
+      return false;
+    }
+
+    return source.isDragging(this, sourceId);
+  };
+
+  DragDropMonitor.prototype.isOverTarget = function isOverTarget(targetId) {
+    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var _ref2$shallow = _ref2.shallow;
+    var shallow = _ref2$shallow === undefined ? false : _ref2$shallow;
+
+    if (!this.isDragging()) {
+      return false;
+    }
+
+    var targetType = this.registry.getTargetType(targetId);
+    var draggedItemType = this.getItemType();
+    if (!_utilsMatchesType2['default'](targetType, draggedItemType)) {
+      return false;
+    }
+
+    var targetIds = this.getTargetIds();
+    if (!targetIds.length) {
+      return false;
+    }
+
+    var index = targetIds.indexOf(targetId);
+    if (shallow) {
+      return index === targetIds.length - 1;
+    } else {
+      return index > -1;
+    }
+  };
+
+  DragDropMonitor.prototype.getItemType = function getItemType() {
+    return this.store.getState().dragOperation.itemType;
+  };
+
+  DragDropMonitor.prototype.getItem = function getItem() {
+    return this.store.getState().dragOperation.item;
+  };
+
+  DragDropMonitor.prototype.getSourceId = function getSourceId() {
+    return this.store.getState().dragOperation.sourceId;
+  };
+
+  DragDropMonitor.prototype.getTargetIds = function getTargetIds() {
+    return this.store.getState().dragOperation.targetIds;
+  };
+
+  DragDropMonitor.prototype.getDropResult = function getDropResult() {
+    return this.store.getState().dragOperation.dropResult;
+  };
+
+  DragDropMonitor.prototype.didDrop = function didDrop() {
+    return this.store.getState().dragOperation.didDrop;
+  };
+
+  DragDropMonitor.prototype.isSourcePublic = function isSourcePublic() {
+    return this.store.getState().dragOperation.isSourcePublic;
+  };
+
+  DragDropMonitor.prototype.getInitialClientOffset = function getInitialClientOffset() {
+    return this.store.getState().dragOffset.initialClientOffset;
+  };
+
+  DragDropMonitor.prototype.getInitialSourceClientOffset = function getInitialSourceClientOffset() {
+    return this.store.getState().dragOffset.initialSourceClientOffset;
+  };
+
+  DragDropMonitor.prototype.getClientOffset = function getClientOffset() {
+    return this.store.getState().dragOffset.clientOffset;
+  };
+
+  DragDropMonitor.prototype.getSourceClientOffset = function getSourceClientOffset() {
+    return _reducersDragOffset.getSourceClientOffset(this.store.getState().dragOffset);
+  };
+
+  DragDropMonitor.prototype.getDifferenceFromInitialOffset = function getDifferenceFromInitialOffset() {
+    return _reducersDragOffset.getDifferenceFromInitialOffset(this.store.getState().dragOffset);
+  };
+
+  return DragDropMonitor;
+})();
+
+exports['default'] = DragDropMonitor;
+module.exports = exports['default'];
+},{"./HandlerRegistry":248,"./reducers/dirtyHandlerIds":253,"./reducers/dragOffset":254,"./utils/matchesType":259,"invariant":262,"lodash/lang/isArray":288}],246:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DragSource = (function () {
+  function DragSource() {
+    _classCallCheck(this, DragSource);
+  }
+
+  DragSource.prototype.canDrag = function canDrag() {
+    return true;
+  };
+
+  DragSource.prototype.isDragging = function isDragging(monitor, handle) {
+    return handle === monitor.getSourceId();
+  };
+
+  DragSource.prototype.endDrag = function endDrag() {};
+
+  return DragSource;
+})();
+
+exports["default"] = DragSource;
+module.exports = exports["default"];
+},{}],247:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DropTarget = (function () {
+  function DropTarget() {
+    _classCallCheck(this, DropTarget);
+  }
+
+  DropTarget.prototype.canDrop = function canDrop() {
+    return true;
+  };
+
+  DropTarget.prototype.hover = function hover() {};
+
+  DropTarget.prototype.drop = function drop() {};
+
+  return DropTarget;
+})();
+
+exports["default"] = DropTarget;
+module.exports = exports["default"];
+},{}],248:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _typeof(obj) { return obj && obj.constructor === Symbol ? 'symbol' : typeof obj; }
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _lodashLangIsArray = require('lodash/lang/isArray');
+
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+
+var _utilsGetNextUniqueId = require('./utils/getNextUniqueId');
+
+var _utilsGetNextUniqueId2 = _interopRequireDefault(_utilsGetNextUniqueId);
+
+var _actionsRegistry = require('./actions/registry');
+
+var HandlerRoles = {
+  SOURCE: 'SOURCE',
+  TARGET: 'TARGET'
+};
+
+function validateSourceContract(source) {
+  _invariant2['default'](typeof source.canDrag === 'function', 'Expected canDrag to be a function.');
+  _invariant2['default'](typeof source.beginDrag === 'function', 'Expected beginDrag to be a function.');
+  _invariant2['default'](typeof source.endDrag === 'function', 'Expected endDrag to be a function.');
+}
+
+function validateTargetContract(target) {
+  _invariant2['default'](typeof target.canDrop === 'function', 'Expected canDrop to be a function.');
+  _invariant2['default'](typeof target.hover === 'function', 'Expected hover to be a function.');
+  _invariant2['default'](typeof target.drop === 'function', 'Expected beginDrag to be a function.');
+}
+
+function validateType(type, allowArray) {
+  if (allowArray && _lodashLangIsArray2['default'](type)) {
+    type.forEach(function (t) {
+      return validateType(t, false);
+    });
+    return;
+  }
+
+  _invariant2['default'](typeof type === 'string' || (typeof type === 'undefined' ? 'undefined' : _typeof(type)) === 'symbol', allowArray ? 'Type can only be a string, a symbol, or an array of either.' : 'Type can only be a string or a symbol.');
+}
+
+function getNextHandlerId(role) {
+  var id = _utilsGetNextUniqueId2['default']().toString();
+  switch (role) {
+    case HandlerRoles.SOURCE:
+      return 'S' + id;
+    case HandlerRoles.TARGET:
+      return 'T' + id;
+    default:
+      _invariant2['default'](false, 'Unknown role: ' + role);
+  }
+}
+
+function parseRoleFromHandlerId(handlerId) {
+  switch (handlerId[0]) {
+    case 'S':
+      return HandlerRoles.SOURCE;
+    case 'T':
+      return HandlerRoles.TARGET;
+    default:
+      _invariant2['default'](false, 'Cannot parse handler ID: ' + handlerId);
+  }
+}
+
+var HandlerRegistry = (function () {
+  function HandlerRegistry(store) {
+    _classCallCheck(this, HandlerRegistry);
+
+    this.store = store;
+
+    this.types = {};
+    this.handlers = {};
+
+    this.pinnedSourceId = null;
+    this.pinnedSource = null;
+  }
+
+  HandlerRegistry.prototype.addSource = function addSource(type, source) {
+    validateType(type);
+    validateSourceContract(source);
+
+    var sourceId = this.addHandler(HandlerRoles.SOURCE, type, source);
+    this.store.dispatch(_actionsRegistry.addSource(sourceId));
+    return sourceId;
+  };
+
+  HandlerRegistry.prototype.addTarget = function addTarget(type, target) {
+    validateType(type, true);
+    validateTargetContract(target);
+
+    var targetId = this.addHandler(HandlerRoles.TARGET, type, target);
+    this.store.dispatch(_actionsRegistry.addTarget(targetId));
+    return targetId;
+  };
+
+  HandlerRegistry.prototype.addHandler = function addHandler(role, type, handler) {
+    var id = getNextHandlerId(role);
+    this.types[id] = type;
+    this.handlers[id] = handler;
+
+    return id;
+  };
+
+  HandlerRegistry.prototype.containsHandler = function containsHandler(handler) {
+    var _this = this;
+
+    return Object.keys(this.handlers).some(function (key) {
+      return _this.handlers[key] === handler;
+    });
+  };
+
+  HandlerRegistry.prototype.getSource = function getSource(sourceId, includePinned) {
+    _invariant2['default'](this.isSourceId(sourceId), 'Expected a valid source ID.');
+
+    var isPinned = includePinned && sourceId === this.pinnedSourceId;
+    var source = isPinned ? this.pinnedSource : this.handlers[sourceId];
+
+    return source;
+  };
+
+  HandlerRegistry.prototype.getTarget = function getTarget(targetId) {
+    _invariant2['default'](this.isTargetId(targetId), 'Expected a valid target ID.');
+    return this.handlers[targetId];
+  };
+
+  HandlerRegistry.prototype.getSourceType = function getSourceType(sourceId) {
+    _invariant2['default'](this.isSourceId(sourceId), 'Expected a valid source ID.');
+    return this.types[sourceId];
+  };
+
+  HandlerRegistry.prototype.getTargetType = function getTargetType(targetId) {
+    _invariant2['default'](this.isTargetId(targetId), 'Expected a valid target ID.');
+    return this.types[targetId];
+  };
+
+  HandlerRegistry.prototype.isSourceId = function isSourceId(handlerId) {
+    var role = parseRoleFromHandlerId(handlerId);
+    return role === HandlerRoles.SOURCE;
+  };
+
+  HandlerRegistry.prototype.isTargetId = function isTargetId(handlerId) {
+    var role = parseRoleFromHandlerId(handlerId);
+    return role === HandlerRoles.TARGET;
+  };
+
+  HandlerRegistry.prototype.removeSource = function removeSource(sourceId) {
+    _invariant2['default'](this.getSource(sourceId), 'Expected an existing source.');
+    this.store.dispatch(_actionsRegistry.removeSource(sourceId));
+    delete this.handlers[sourceId];
+    delete this.types[sourceId];
+  };
+
+  HandlerRegistry.prototype.removeTarget = function removeTarget(targetId) {
+    _invariant2['default'](this.getTarget(targetId), 'Expected an existing target.');
+    this.store.dispatch(_actionsRegistry.removeTarget(targetId));
+    delete this.handlers[targetId];
+    delete this.types[targetId];
+  };
+
+  HandlerRegistry.prototype.pinSource = function pinSource(sourceId) {
+    var source = this.getSource(sourceId);
+    _invariant2['default'](source, 'Expected an existing source.');
+
+    this.pinnedSourceId = sourceId;
+    this.pinnedSource = source;
+  };
+
+  HandlerRegistry.prototype.unpinSource = function unpinSource() {
+    _invariant2['default'](this.pinnedSource, 'No source is pinned at the time.');
+
+    this.pinnedSourceId = null;
+    this.pinnedSource = null;
+  };
+
+  return HandlerRegistry;
+})();
+
+exports['default'] = HandlerRegistry;
+module.exports = exports['default'];
+},{"./actions/registry":250,"./utils/getNextUniqueId":258,"invariant":262,"lodash/lang/isArray":288}],249:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports.beginDrag = beginDrag;
+exports.publishDragSource = publishDragSource;
+exports.hover = hover;
+exports.drop = drop;
+exports.endDrag = endDrag;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _utilsMatchesType = require('../utils/matchesType');
+
+var _utilsMatchesType2 = _interopRequireDefault(_utilsMatchesType);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _lodashLangIsArray = require('lodash/lang/isArray');
+
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+
+var _lodashLangIsObject = require('lodash/lang/isObject');
+
+var _lodashLangIsObject2 = _interopRequireDefault(_lodashLangIsObject);
+
+var BEGIN_DRAG = 'dnd-core/BEGIN_DRAG';
+exports.BEGIN_DRAG = BEGIN_DRAG;
+var PUBLISH_DRAG_SOURCE = 'dnd-core/PUBLISH_DRAG_SOURCE';
+exports.PUBLISH_DRAG_SOURCE = PUBLISH_DRAG_SOURCE;
+var HOVER = 'dnd-core/HOVER';
+exports.HOVER = HOVER;
+var DROP = 'dnd-core/DROP';
+exports.DROP = DROP;
+var END_DRAG = 'dnd-core/END_DRAG';
+
+exports.END_DRAG = END_DRAG;
+
+function beginDrag(sourceIds) {
+  var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+  var _ref$publishSource = _ref.publishSource;
+  var publishSource = _ref$publishSource === undefined ? true : _ref$publishSource;
+  var _ref$clientOffset = _ref.clientOffset;
+  var clientOffset = _ref$clientOffset === undefined ? null : _ref$clientOffset;
+  var getSourceClientOffset = _ref.getSourceClientOffset;
+
+  _invariant2['default'](_lodashLangIsArray2['default'](sourceIds), 'Expected sourceIds to be an array.');
+
+  var monitor = this.getMonitor();
+  var registry = this.getRegistry();
+  _invariant2['default'](!monitor.isDragging(), 'Cannot call beginDrag while dragging.');
+
+  for (var i = 0; i < sourceIds.length; i++) {
+    _invariant2['default'](registry.getSource(sourceIds[i]), 'Expected sourceIds to be registered.');
+  }
+
+  var sourceId = null;
+  for (var i = sourceIds.length - 1; i >= 0; i--) {
+    if (monitor.canDragSource(sourceIds[i])) {
+      sourceId = sourceIds[i];
+      break;
+    }
+  }
+  if (sourceId === null) {
+    return;
+  }
+
+  var sourceClientOffset = null;
+  if (clientOffset) {
+    _invariant2['default'](typeof getSourceClientOffset === 'function', 'When clientOffset is provided, getSourceClientOffset must be a function.');
+    sourceClientOffset = getSourceClientOffset(sourceId);
+  }
+
+  var source = registry.getSource(sourceId);
+  var item = source.beginDrag(monitor, sourceId);
+  _invariant2['default'](_lodashLangIsObject2['default'](item), 'Item must be an object.');
+
+  registry.pinSource(sourceId);
+
+  var itemType = registry.getSourceType(sourceId);
+  return {
+    type: BEGIN_DRAG,
+    itemType: itemType,
+    item: item,
+    sourceId: sourceId,
+    clientOffset: clientOffset,
+    sourceClientOffset: sourceClientOffset,
+    isSourcePublic: publishSource
+  };
+}
+
+function publishDragSource(manager) {
+  var monitor = this.getMonitor();
+  if (!monitor.isDragging()) {
+    return;
+  }
+
+  return {
+    type: PUBLISH_DRAG_SOURCE
+  };
+}
+
+function hover(targetIds) {
+  var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+  var _ref2$clientOffset = _ref2.clientOffset;
+  var clientOffset = _ref2$clientOffset === undefined ? null : _ref2$clientOffset;
+
+  _invariant2['default'](_lodashLangIsArray2['default'](targetIds), 'Expected targetIds to be an array.');
+  targetIds = targetIds.slice(0);
+
+  var monitor = this.getMonitor();
+  var registry = this.getRegistry();
+  _invariant2['default'](monitor.isDragging(), 'Cannot call hover while not dragging.');
+  _invariant2['default'](!monitor.didDrop(), 'Cannot call hover after drop.');
+
+  var draggedItemType = monitor.getItemType();
+  for (var i = 0; i < targetIds.length; i++) {
+    var targetId = targetIds[i];
+    _invariant2['default'](targetIds.lastIndexOf(targetId) === i, 'Expected targetIds to be unique in the passed array.');
+
+    var target = registry.getTarget(targetId);
+    _invariant2['default'](target, 'Expected targetIds to be registered.');
+
+    var targetType = registry.getTargetType(targetId);
+    if (_utilsMatchesType2['default'](targetType, draggedItemType)) {
+      target.hover(monitor, targetId);
+    }
+  }
+
+  return {
+    type: HOVER,
+    targetIds: targetIds,
+    clientOffset: clientOffset
+  };
+}
+
+function drop() {
+  var _this = this;
+
+  var monitor = this.getMonitor();
+  var registry = this.getRegistry();
+  _invariant2['default'](monitor.isDragging(), 'Cannot call drop while not dragging.');
+  _invariant2['default'](!monitor.didDrop(), 'Cannot call drop twice during one drag operation.');
+
+  var targetIds = monitor.getTargetIds().filter(monitor.canDropOnTarget, monitor);
+
+  targetIds.reverse();
+  targetIds.forEach(function (targetId, index) {
+    var target = registry.getTarget(targetId);
+
+    var dropResult = target.drop(monitor, targetId);
+    _invariant2['default'](typeof dropResult === 'undefined' || _lodashLangIsObject2['default'](dropResult), 'Drop result must either be an object or undefined.');
+    if (typeof dropResult === 'undefined') {
+      dropResult = index === 0 ? {} : monitor.getDropResult();
+    }
+
+    _this.store.dispatch({
+      type: DROP,
+      dropResult: dropResult
+    });
+  });
+}
+
+function endDrag() {
+  var monitor = this.getMonitor();
+  var registry = this.getRegistry();
+  _invariant2['default'](monitor.isDragging(), 'Cannot call endDrag while not dragging.');
+
+  var sourceId = monitor.getSourceId();
+  var source = registry.getSource(sourceId, true);
+  source.endDrag(monitor, sourceId);
+
+  registry.unpinSource();
+
+  return {
+    type: END_DRAG
+  };
+}
+},{"../utils/matchesType":259,"invariant":262,"lodash/lang/isArray":288,"lodash/lang/isObject":291}],250:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports.addSource = addSource;
+exports.addTarget = addTarget;
+exports.removeSource = removeSource;
+exports.removeTarget = removeTarget;
+var ADD_SOURCE = 'dnd-core/ADD_SOURCE';
+exports.ADD_SOURCE = ADD_SOURCE;
+var ADD_TARGET = 'dnd-core/ADD_TARGET';
+exports.ADD_TARGET = ADD_TARGET;
+var REMOVE_SOURCE = 'dnd-core/REMOVE_SOURCE';
+exports.REMOVE_SOURCE = REMOVE_SOURCE;
+var REMOVE_TARGET = 'dnd-core/REMOVE_TARGET';
+
+exports.REMOVE_TARGET = REMOVE_TARGET;
+
+function addSource(sourceId) {
+  return {
+    type: ADD_SOURCE,
+    sourceId: sourceId
+  };
+}
+
+function addTarget(targetId) {
+  return {
+    type: ADD_TARGET,
+    targetId: targetId
+  };
+}
+
+function removeSource(sourceId) {
+  return {
+    type: REMOVE_SOURCE,
+    sourceId: sourceId
+  };
+}
+
+function removeTarget(targetId) {
+  return {
+    type: REMOVE_TARGET,
+    targetId: targetId
+  };
+}
+},{}],251:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = createBackend;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _lodashUtilityNoop = require('lodash/utility/noop');
+
+var _lodashUtilityNoop2 = _interopRequireDefault(_lodashUtilityNoop);
+
+var TestBackend = (function () {
+  function TestBackend(manager) {
+    _classCallCheck(this, TestBackend);
+
+    this.actions = manager.getActions();
+  }
+
+  TestBackend.prototype.setup = function setup() {
+    this.didCallSetup = true;
+  };
+
+  TestBackend.prototype.teardown = function teardown() {
+    this.didCallTeardown = true;
+  };
+
+  TestBackend.prototype.connectDragSource = function connectDragSource() {
+    return _lodashUtilityNoop2['default'];
+  };
+
+  TestBackend.prototype.connectDragPreview = function connectDragPreview() {
+    return _lodashUtilityNoop2['default'];
+  };
+
+  TestBackend.prototype.connectDropTarget = function connectDropTarget() {
+    return _lodashUtilityNoop2['default'];
+  };
+
+  TestBackend.prototype.simulateBeginDrag = function simulateBeginDrag(sourceIds, options) {
+    this.actions.beginDrag(sourceIds, options);
+  };
+
+  TestBackend.prototype.simulatePublishDragSource = function simulatePublishDragSource() {
+    this.actions.publishDragSource();
+  };
+
+  TestBackend.prototype.simulateHover = function simulateHover(targetIds, options) {
+    this.actions.hover(targetIds, options);
+  };
+
+  TestBackend.prototype.simulateDrop = function simulateDrop() {
+    this.actions.drop();
+  };
+
+  TestBackend.prototype.simulateEndDrag = function simulateEndDrag() {
+    this.actions.endDrag();
+  };
+
+  return TestBackend;
+})();
+
+function createBackend(manager) {
+  return new TestBackend(manager);
+}
+
+module.exports = exports['default'];
+},{"lodash/utility/noop":294}],252:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequire(obj) { return obj && obj.__esModule ? obj['default'] : obj; }
+
+var _DragDropManager = require('./DragDropManager');
+
+exports.DragDropManager = _interopRequire(_DragDropManager);
+
+var _DragSource = require('./DragSource');
+
+exports.DragSource = _interopRequire(_DragSource);
+
+var _DropTarget = require('./DropTarget');
+
+exports.DropTarget = _interopRequire(_DropTarget);
+
+var _backendsCreateTestBackend = require('./backends/createTestBackend');
+
+exports.createTestBackend = _interopRequire(_backendsCreateTestBackend);
+},{"./DragDropManager":244,"./DragSource":246,"./DropTarget":247,"./backends/createTestBackend":251}],253:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = dirtyHandlerIds;
+exports.areDirty = areDirty;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _lodashArrayXor = require('lodash/array/xor');
+
+var _lodashArrayXor2 = _interopRequireDefault(_lodashArrayXor);
+
+var _lodashArrayIntersection = require('lodash/array/intersection');
+
+var _lodashArrayIntersection2 = _interopRequireDefault(_lodashArrayIntersection);
+
+var _actionsDragDrop = require('../actions/dragDrop');
+
+var _actionsRegistry = require('../actions/registry');
+
+var NONE = [];
+var ALL = [];
+
+function dirtyHandlerIds(state, action, dragOperation) {
+  if (state === undefined) state = NONE;
+
+  switch (action.type) {
+    case _actionsDragDrop.HOVER:
+      break;
+    case _actionsRegistry.ADD_SOURCE:
+    case _actionsRegistry.ADD_TARGET:
+    case _actionsRegistry.REMOVE_TARGET:
+    case _actionsRegistry.REMOVE_SOURCE:
+      return NONE;
+    case _actionsDragDrop.BEGIN_DRAG:
+    case _actionsDragDrop.PUBLISH_DRAG_SOURCE:
+    case _actionsDragDrop.END_DRAG:
+    case _actionsDragDrop.DROP:
+    default:
+      return ALL;
+  }
+
+  var targetIds = action.targetIds;
+  var prevTargetIds = dragOperation.targetIds;
+
+  var dirtyHandlerIds = _lodashArrayXor2['default'](targetIds, prevTargetIds);
+
+  var didChange = false;
+  if (dirtyHandlerIds.length === 0) {
+    for (var i = 0; i < targetIds.length; i++) {
+      if (targetIds[i] !== prevTargetIds[i]) {
+        didChange = true;
+        break;
+      }
+    }
+  } else {
+    didChange = true;
+  }
+
+  if (!didChange) {
+    return NONE;
+  }
+
+  var prevInnermostTargetId = prevTargetIds[prevTargetIds.length - 1];
+  var innermostTargetId = targetIds[targetIds.length - 1];
+
+  if (prevInnermostTargetId !== innermostTargetId) {
+    if (prevInnermostTargetId) {
+      dirtyHandlerIds.push(prevInnermostTargetId);
+    }
+    if (innermostTargetId) {
+      dirtyHandlerIds.push(innermostTargetId);
+    }
+  }
+
+  return dirtyHandlerIds;
+}
+
+function areDirty(state, handlerIds) {
+  if (state === NONE) {
+    return false;
+  }
+
+  if (state === ALL || typeof handlerIds === 'undefined') {
+    return true;
+  }
+
+  return _lodashArrayIntersection2['default'](handlerIds, state).length > 0;
+}
+},{"../actions/dragDrop":249,"../actions/registry":250,"lodash/array/intersection":263,"lodash/array/xor":265}],254:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports['default'] = dragOffset;
+exports.getSourceClientOffset = getSourceClientOffset;
+exports.getDifferenceFromInitialOffset = getDifferenceFromInitialOffset;
+
+var _actionsDragDrop = require('../actions/dragDrop');
+
+var initialState = {
+  initialSourceClientOffset: null,
+  initialClientOffset: null,
+  clientOffset: null
+};
+
+function areOffsetsEqual(offsetA, offsetB) {
+  if (offsetA === offsetB) {
+    return true;
+  }
+  return offsetA && offsetB && offsetA.x === offsetB.x && offsetA.y === offsetB.y;
+}
+
+function dragOffset(state, action) {
+  if (state === undefined) state = initialState;
+
+  switch (action.type) {
+    case _actionsDragDrop.BEGIN_DRAG:
+      return {
+        initialSourceClientOffset: action.sourceClientOffset,
+        initialClientOffset: action.clientOffset,
+        clientOffset: action.clientOffset
+      };
+    case _actionsDragDrop.HOVER:
+      if (areOffsetsEqual(state.clientOffset, action.clientOffset)) {
+        return state;
+      }
+      return _extends({}, state, {
+        clientOffset: action.clientOffset
+      });
+    case _actionsDragDrop.END_DRAG:
+    case _actionsDragDrop.DROP:
+      return initialState;
+    default:
+      return state;
+  }
+}
+
+function getSourceClientOffset(state) {
+  var clientOffset = state.clientOffset;
+  var initialClientOffset = state.initialClientOffset;
+  var initialSourceClientOffset = state.initialSourceClientOffset;
+
+  if (!clientOffset || !initialClientOffset || !initialSourceClientOffset) {
+    return null;
+  }
+  return {
+    x: clientOffset.x + initialSourceClientOffset.x - initialClientOffset.x,
+    y: clientOffset.y + initialSourceClientOffset.y - initialClientOffset.y
+  };
+}
+
+function getDifferenceFromInitialOffset(state) {
+  var clientOffset = state.clientOffset;
+  var initialClientOffset = state.initialClientOffset;
+
+  if (!clientOffset || !initialClientOffset) {
+    return null;
+  }
+  return {
+    x: clientOffset.x - initialClientOffset.x,
+    y: clientOffset.y - initialClientOffset.y
+  };
+}
+},{"../actions/dragDrop":249}],255:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports['default'] = dragOperation;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _actionsDragDrop = require('../actions/dragDrop');
+
+var _actionsRegistry = require('../actions/registry');
+
+var _lodashArrayWithout = require('lodash/array/without');
+
+var _lodashArrayWithout2 = _interopRequireDefault(_lodashArrayWithout);
+
+var initialState = {
+  itemType: null,
+  item: null,
+  sourceId: null,
+  targetIds: [],
+  dropResult: null,
+  didDrop: false,
+  isSourcePublic: null
+};
+
+function dragOperation(state, action) {
+  if (state === undefined) state = initialState;
+
+  switch (action.type) {
+    case _actionsDragDrop.BEGIN_DRAG:
+      return _extends({}, state, {
+        itemType: action.itemType,
+        item: action.item,
+        sourceId: action.sourceId,
+        isSourcePublic: action.isSourcePublic,
+        dropResult: null,
+        didDrop: false
+      });
+    case _actionsDragDrop.PUBLISH_DRAG_SOURCE:
+      return _extends({}, state, {
+        isSourcePublic: true
+      });
+    case _actionsDragDrop.HOVER:
+      return _extends({}, state, {
+        targetIds: action.targetIds
+      });
+    case _actionsDragDrop.PUBLISH_DRAG_SOURCE:
+      return _extends({}, state, {
+        isSourcePublic: true
+      });
+    case _actionsRegistry.REMOVE_TARGET:
+      if (state.targetIds.indexOf(action.targetId) === -1) {
+        return state;
+      }
+      return _extends({}, state, {
+        targetIds: _lodashArrayWithout2['default'](state.targetIds, action.targetId)
+      });
+    case _actionsDragDrop.DROP:
+      return _extends({}, state, {
+        dropResult: action.dropResult,
+        didDrop: true,
+        targetIds: []
+      });
+    case _actionsDragDrop.END_DRAG:
+      return _extends({}, state, {
+        itemType: null,
+        item: null,
+        sourceId: null,
+        dropResult: null,
+        didDrop: false,
+        isSourcePublic: null,
+        targetIds: []
+      });
+    default:
+      return state;
+  }
+}
+
+module.exports = exports['default'];
+},{"../actions/dragDrop":249,"../actions/registry":250,"lodash/array/without":264}],256:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _dragOffset = require('./dragOffset');
+
+var _dragOffset2 = _interopRequireDefault(_dragOffset);
+
+var _dragOperation = require('./dragOperation');
+
+var _dragOperation2 = _interopRequireDefault(_dragOperation);
+
+var _refCount = require('./refCount');
+
+var _refCount2 = _interopRequireDefault(_refCount);
+
+var _dirtyHandlerIds = require('./dirtyHandlerIds');
+
+var _dirtyHandlerIds2 = _interopRequireDefault(_dirtyHandlerIds);
+
+exports['default'] = function (state, action) {
+  if (state === undefined) state = {};
+
+  return {
+    dirtyHandlerIds: _dirtyHandlerIds2['default'](state.dirtyHandlerIds, action, state.dragOperation),
+    dragOffset: _dragOffset2['default'](state.dragOffset, action),
+    refCount: _refCount2['default'](state.refCount, action),
+    dragOperation: _dragOperation2['default'](state.dragOperation, action)
+  };
+};
+
+module.exports = exports['default'];
+},{"./dirtyHandlerIds":253,"./dragOffset":254,"./dragOperation":255,"./refCount":257}],257:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = refCount;
+
+var _actionsRegistry = require('../actions/registry');
+
+function refCount(state, action) {
+  if (state === undefined) state = 0;
+
+  switch (action.type) {
+    case _actionsRegistry.ADD_SOURCE:
+    case _actionsRegistry.ADD_TARGET:
+      return state + 1;
+    case _actionsRegistry.REMOVE_SOURCE:
+    case _actionsRegistry.REMOVE_TARGET:
+      return state - 1;
+    default:
+      return state;
+  }
+}
+
+module.exports = exports['default'];
+},{"../actions/registry":250}],258:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+exports["default"] = getNextUniqueId;
+var nextUniqueId = 0;
+
+function getNextUniqueId() {
+  return nextUniqueId++;
+}
+
+module.exports = exports["default"];
+},{}],259:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = matchesType;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _lodashLangIsArray = require('lodash/lang/isArray');
+
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+
+function matchesType(targetType, draggedItemType) {
+  if (_lodashLangIsArray2['default'](targetType)) {
+    return targetType.some(function (t) {
+      return t === draggedItemType;
+    });
+  } else {
+    return targetType === draggedItemType;
+  }
+}
+
+module.exports = exports['default'];
+},{"lodash/lang/isArray":288}],260:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = createStore;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _utilsIsPlainObject = require('./utils/isPlainObject');
+
+var _utilsIsPlainObject2 = _interopRequireDefault(_utilsIsPlainObject);
+
+/**
+ * These are private action types reserved by Redux.
+ * For any unknown actions, you must return the current state.
+ * If the current state is undefined, you must return the initial state.
+ * Do not reference these action types directly in your code.
+ */
+var ActionTypes = {
+  INIT: '@@redux/INIT'
+};
+
+exports.ActionTypes = ActionTypes;
+/**
+ * Creates a Redux store that holds the state tree.
+ * The only way to change the data in the store is to call `dispatch()` on it.
+ *
+ * There should only be a single store in your app. To specify how different
+ * parts of the state tree respond to actions, you may combine several reducers
+ * into a single reducer function by using `combineReducers`.
+ *
+ * @param {Function} reducer A function that returns the next state tree, given
+ * the current state tree and the action to handle.
+ *
+ * @param {any} [initialState] The initial state. You may optionally specify it
+ * to hydrate the state from the server in universal apps, or to restore a
+ * previously serialized user session.
+ * If you use `combineReducers` to produce the root reducer function, this must be
+ * an object with the same shape as `combineReducers` keys.
+ *
+ * @returns {Store} A Redux store that lets you read the state, dispatch actions
+ * and subscribe to changes.
+ */
+
+function createStore(reducer, initialState) {
+  if (typeof reducer !== 'function') {
+    throw new Error('Expected the reducer to be a function.');
+  }
+
+  var currentReducer = reducer;
+  var currentState = initialState;
+  var listeners = [];
+  var isDispatching = false;
+
+  /**
+   * Reads the state tree managed by the store.
+   *
+   * @returns {any} The current state tree of your application.
+   */
+  function getState() {
+    return currentState;
+  }
+
+  /**
+   * Adds a change listener. It will be called any time an action is dispatched,
+   * and some part of the state tree may potentially have changed. You may then
+   * call `getState()` to read the current state tree inside the callback.
+   *
+   * @param {Function} listener A callback to be invoked on every dispatch.
+   * @returns {Function} A function to remove this change listener.
+   */
+  function subscribe(listener) {
+    listeners.push(listener);
+    var isSubscribed = true;
+
+    return function unsubscribe() {
+      if (!isSubscribed) {
+        return;
+      }
+
+      isSubscribed = false;
+      var index = listeners.indexOf(listener);
+      listeners.splice(index, 1);
+    };
+  }
+
+  /**
+   * Dispatches an action. It is the only way to trigger a state change.
+   *
+   * The `reducer` function, used to create the store, will be called with the
+   * current state tree and the given `action`. Its return value will
+   * be considered the **next** state of the tree, and the change listeners
+   * will be notified.
+   *
+   * The base implementation only supports plain object actions. If you want to
+   * dispatch a Promise, an Observable, a thunk, or something else, you need to
+   * wrap your store creating function into the corresponding middleware. For
+   * example, see the documentation for the `redux-thunk` package. Even the
+   * middleware will eventually dispatch plain object actions using this method.
+   *
+   * @param {Object} action A plain object representing “what changed”. It is
+   * a good idea to keep actions serializable so you can record and replay user
+   * sessions, or use the time travelling `redux-devtools`. An action must have
+   * a `type` property which may not be `undefined`. It is a good idea to use
+   * string constants for action types.
+   *
+   * @returns {Object} For convenience, the same action object you dispatched.
+   *
+   * Note that, if you use a custom middleware, it may wrap `dispatch()` to
+   * return something else (for example, a Promise you can await).
+   */
+  function dispatch(action) {
+    if (!_utilsIsPlainObject2['default'](action)) {
+      throw new Error('Actions must be plain objects. ' + 'Use custom middleware for async actions.');
+    }
+
+    if (typeof action.type === 'undefined') {
+      throw new Error('Actions may not have an undefined "type" property. ' + 'Have you misspelled a constant?');
+    }
+
+    if (isDispatching) {
+      throw new Error('Reducers may not dispatch actions.');
+    }
+
+    try {
+      isDispatching = true;
+      currentState = currentReducer(currentState, action);
+    } finally {
+      isDispatching = false;
+    }
+
+    listeners.slice().forEach(function (listener) {
+      return listener();
+    });
+    return action;
+  }
+
+  /**
+   * Replaces the reducer currently used by the store to calculate the state.
+   *
+   * You might need this if your app implements code splitting and you want to
+   * load some of the reducers dynamically. You might also need this if you
+   * implement a hot reloading mechanism for Redux.
+   *
+   * @param {Function} nextReducer The reducer for the store to use instead.
+   * @returns {void}
+   */
+  function replaceReducer(nextReducer) {
+    currentReducer = nextReducer;
+    dispatch({ type: ActionTypes.INIT });
+  }
+
+  // When a store is created, an "INIT" action is dispatched so that every
+  // reducer returns their initial state. This effectively populates
+  // the initial state tree.
+  dispatch({ type: ActionTypes.INIT });
+
+  return {
+    dispatch: dispatch,
+    subscribe: subscribe,
+    getState: getState,
+    replaceReducer: replaceReducer
+  };
+}
+},{"./utils/isPlainObject":261}],261:[function(require,module,exports){
+'use strict';
+
+exports.__esModule = true;
+exports['default'] = isPlainObject;
+var fnToString = function fnToString(fn) {
+  return Function.prototype.toString.call(fn);
+};
+var objStringValue = fnToString(Object);
+
+/**
+ * @param {any} obj The object to inspect.
+ * @returns {boolean} True if the argument appears to be a plain object.
+ */
+
+function isPlainObject(obj) {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  var proto = typeof obj.constructor === 'function' ? Object.getPrototypeOf(obj) : Object.prototype;
+
+  if (proto === null) {
+    return true;
+  }
+
+  var constructor = proto.constructor;
+
+  return typeof constructor === 'function' && constructor instanceof constructor && fnToString(constructor) === objStringValue;
+}
+
+module.exports = exports['default'];
+},{}],262:[function(require,module,exports){
+(function (process){
+/**
+ * Copyright 2013-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+'use strict';
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
+var invariant = function(condition, format, a, b, c, d, e, f) {
+  if (process.env.NODE_ENV !== 'production') {
+    if (format === undefined) {
+      throw new Error('invariant requires an error message argument');
+    }
+  }
+
+  if (!condition) {
+    var error;
+    if (format === undefined) {
+      error = new Error(
+        'Minified exception occurred; use the non-minified dev environment ' +
+        'for the full error message and additional helpful warnings.'
+      );
+    } else {
+      var args = [a, b, c, d, e, f];
+      var argIndex = 0;
+      error = new Error(
+        format.replace(/%s/g, function() { return args[argIndex++]; })
+      );
+      error.name = 'Invariant Violation';
+    }
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
+    throw error;
+  }
+};
+
+module.exports = invariant;
+
+}).call(this,require('_process'))
+},{"_process":160}],263:[function(require,module,exports){
+var baseIndexOf = require('../internal/baseIndexOf'),
+    cacheIndexOf = require('../internal/cacheIndexOf'),
+    createCache = require('../internal/createCache'),
+    isArrayLike = require('../internal/isArrayLike'),
+    restParam = require('../function/restParam');
+
+/**
+ * Creates an array of unique values that are included in all of the provided
+ * arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+ * for equality comparisons.
+ *
+ * @static
+ * @memberOf _
+ * @category Array
+ * @param {...Array} [arrays] The arrays to inspect.
+ * @returns {Array} Returns the new array of shared values.
+ * @example
+ * _.intersection([1, 2], [4, 2], [2, 1]);
+ * // => [2]
+ */
+var intersection = restParam(function(arrays) {
+  var othLength = arrays.length,
+      othIndex = othLength,
+      caches = Array(length),
+      indexOf = baseIndexOf,
+      isCommon = true,
+      result = [];
+
+  while (othIndex--) {
+    var value = arrays[othIndex] = isArrayLike(value = arrays[othIndex]) ? value : [];
+    caches[othIndex] = (isCommon && value.length >= 120) ? createCache(othIndex && value) : null;
+  }
+  var array = arrays[0],
+      index = -1,
+      length = array ? array.length : 0,
+      seen = caches[0];
+
+  outer:
+  while (++index < length) {
+    value = array[index];
+    if ((seen ? cacheIndexOf(seen, value) : indexOf(result, value, 0)) < 0) {
+      var othIndex = othLength;
+      while (--othIndex) {
+        var cache = caches[othIndex];
+        if ((cache ? cacheIndexOf(cache, value) : indexOf(arrays[othIndex], value, 0)) < 0) {
+          continue outer;
+        }
+      }
+      if (seen) {
+        seen.push(value);
+      }
+      result.push(value);
+    }
+  }
+  return result;
+});
+
+module.exports = intersection;
+
+},{"../function/restParam":266,"../internal/baseIndexOf":272,"../internal/cacheIndexOf":275,"../internal/createCache":278,"../internal/isArrayLike":282}],264:[function(require,module,exports){
+arguments[4][174][0].apply(exports,arguments)
+},{"../function/restParam":266,"../internal/baseDifference":269,"../internal/isArrayLike":282,"dup":174}],265:[function(require,module,exports){
+var arrayPush = require('../internal/arrayPush'),
+    baseDifference = require('../internal/baseDifference'),
+    baseUniq = require('../internal/baseUniq'),
+    isArrayLike = require('../internal/isArrayLike');
+
+/**
+ * Creates an array of unique values that is the [symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference)
+ * of the provided arrays.
+ *
+ * @static
+ * @memberOf _
+ * @category Array
+ * @param {...Array} [arrays] The arrays to inspect.
+ * @returns {Array} Returns the new array of values.
+ * @example
+ *
+ * _.xor([1, 2], [4, 2]);
+ * // => [1, 4]
+ */
+function xor() {
+  var index = -1,
+      length = arguments.length;
+
+  while (++index < length) {
+    var array = arguments[index];
+    if (isArrayLike(array)) {
+      var result = result
+        ? arrayPush(baseDifference(result, array), baseDifference(array, result))
+        : array;
+    }
+  }
+  return result ? baseUniq(result) : [];
+}
+
+module.exports = xor;
+
+},{"../internal/arrayPush":268,"../internal/baseDifference":269,"../internal/baseUniq":274,"../internal/isArrayLike":282}],266:[function(require,module,exports){
+arguments[4][176][0].apply(exports,arguments)
+},{"dup":176}],267:[function(require,module,exports){
+arguments[4][178][0].apply(exports,arguments)
+},{"./cachePush":276,"./getNative":280,"dup":178}],268:[function(require,module,exports){
+arguments[4][179][0].apply(exports,arguments)
+},{"dup":179}],269:[function(require,module,exports){
+arguments[4][184][0].apply(exports,arguments)
+},{"./baseIndexOf":272,"./cacheIndexOf":275,"./createCache":278,"dup":184}],270:[function(require,module,exports){
+var createBaseFor = require('./createBaseFor');
+
+/**
+ * The base implementation of `baseForIn` and `baseForOwn` which iterates
+ * over `object` properties returned by `keysFunc` invoking `iteratee` for
+ * each property. Iteratee functions may exit iteration early by explicitly
+ * returning `false`.
+ *
+ * @private
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {Function} keysFunc The function to get the keys of `object`.
+ * @returns {Object} Returns `object`.
+ */
+var baseFor = createBaseFor();
+
+module.exports = baseFor;
+
+},{"./createBaseFor":277}],271:[function(require,module,exports){
+var baseFor = require('./baseFor'),
+    keysIn = require('../object/keysIn');
+
+/**
+ * The base implementation of `_.forIn` without support for callback
+ * shorthands and `this` binding.
+ *
+ * @private
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Object} Returns `object`.
+ */
+function baseForIn(object, iteratee) {
+  return baseFor(object, iteratee, keysIn);
+}
+
+module.exports = baseForIn;
+
+},{"../object/keysIn":293,"./baseFor":270}],272:[function(require,module,exports){
+arguments[4][186][0].apply(exports,arguments)
+},{"./indexOfNaN":281,"dup":186}],273:[function(require,module,exports){
+arguments[4][187][0].apply(exports,arguments)
+},{"dup":187}],274:[function(require,module,exports){
+arguments[4][188][0].apply(exports,arguments)
+},{"./baseIndexOf":272,"./cacheIndexOf":275,"./createCache":278,"dup":188}],275:[function(require,module,exports){
+arguments[4][190][0].apply(exports,arguments)
+},{"../lang/isObject":291,"dup":190}],276:[function(require,module,exports){
+arguments[4][191][0].apply(exports,arguments)
+},{"../lang/isObject":291,"dup":191}],277:[function(require,module,exports){
+var toObject = require('./toObject');
+
+/**
+ * Creates a base function for `_.forIn` or `_.forInRight`.
+ *
+ * @private
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {Function} Returns the new base function.
+ */
+function createBaseFor(fromRight) {
+  return function(object, iteratee, keysFunc) {
+    var iterable = toObject(object),
+        props = keysFunc(object),
+        length = props.length,
+        index = fromRight ? length : -1;
+
+    while ((fromRight ? index-- : ++index < length)) {
+      var key = props[index];
+      if (iteratee(iterable[key], key, iterable) === false) {
+        break;
+      }
+    }
+    return object;
+  };
+}
+
+module.exports = createBaseFor;
+
+},{"./toObject":286}],278:[function(require,module,exports){
+arguments[4][193][0].apply(exports,arguments)
+},{"./SetCache":267,"./getNative":280,"dup":193}],279:[function(require,module,exports){
+arguments[4][195][0].apply(exports,arguments)
+},{"./baseProperty":273,"dup":195}],280:[function(require,module,exports){
+arguments[4][196][0].apply(exports,arguments)
+},{"../lang/isNative":290,"dup":196}],281:[function(require,module,exports){
+arguments[4][197][0].apply(exports,arguments)
+},{"dup":197}],282:[function(require,module,exports){
+arguments[4][198][0].apply(exports,arguments)
+},{"./getLength":279,"./isLength":284,"dup":198}],283:[function(require,module,exports){
+arguments[4][199][0].apply(exports,arguments)
+},{"dup":199}],284:[function(require,module,exports){
+arguments[4][201][0].apply(exports,arguments)
+},{"dup":201}],285:[function(require,module,exports){
+arguments[4][202][0].apply(exports,arguments)
+},{"dup":202}],286:[function(require,module,exports){
+var isObject = require('../lang/isObject');
+
+/**
+ * Converts `value` to an object if it's not one.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {Object} Returns the object.
+ */
+function toObject(value) {
+  return isObject(value) ? value : Object(value);
+}
+
+module.exports = toObject;
+
+},{"../lang/isObject":291}],287:[function(require,module,exports){
+arguments[4][208][0].apply(exports,arguments)
+},{"../internal/isArrayLike":282,"../internal/isObjectLike":285,"dup":208}],288:[function(require,module,exports){
+arguments[4][209][0].apply(exports,arguments)
+},{"../internal/getNative":280,"../internal/isLength":284,"../internal/isObjectLike":285,"dup":209}],289:[function(require,module,exports){
+arguments[4][210][0].apply(exports,arguments)
+},{"./isObject":291,"dup":210}],290:[function(require,module,exports){
+arguments[4][211][0].apply(exports,arguments)
+},{"../internal/isObjectLike":285,"./isFunction":289,"dup":211}],291:[function(require,module,exports){
+arguments[4][212][0].apply(exports,arguments)
+},{"dup":212}],292:[function(require,module,exports){
+var baseForIn = require('../internal/baseForIn'),
+    isArguments = require('./isArguments'),
+    isObjectLike = require('../internal/isObjectLike');
+
+/** `Object#toString` result references. */
+var objectTag = '[object Object]';
+
+/** Used for native method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objToString = objectProto.toString;
+
+/**
+ * Checks if `value` is a plain object, that is, an object created by the
+ * `Object` constructor or one with a `[[Prototype]]` of `null`.
+ *
+ * **Note:** This method assumes objects created by the `Object` constructor
+ * have no inherited enumerable properties.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ * }
+ *
+ * _.isPlainObject(new Foo);
+ * // => false
+ *
+ * _.isPlainObject([1, 2, 3]);
+ * // => false
+ *
+ * _.isPlainObject({ 'x': 0, 'y': 0 });
+ * // => true
+ *
+ * _.isPlainObject(Object.create(null));
+ * // => true
+ */
+function isPlainObject(value) {
+  var Ctor;
+
+  // Exit early for non `Object` objects.
+  if (!(isObjectLike(value) && objToString.call(value) == objectTag && !isArguments(value)) ||
+      (!hasOwnProperty.call(value, 'constructor') && (Ctor = value.constructor, typeof Ctor == 'function' && !(Ctor instanceof Ctor)))) {
+    return false;
+  }
+  // IE < 9 iterates inherited properties before own properties. If the first
+  // iterated property is an object's own property then there are no inherited
+  // enumerable properties.
+  var result;
+  // In most environments an object's own properties are iterated before
+  // its inherited properties. If the last iterated property is an object's
+  // own property then there are no inherited enumerable properties.
+  baseForIn(value, function(subValue, key) {
+    result = key;
+  });
+  return result === undefined || hasOwnProperty.call(value, result);
+}
+
+module.exports = isPlainObject;
+
+},{"../internal/baseForIn":271,"../internal/isObjectLike":285,"./isArguments":287}],293:[function(require,module,exports){
+arguments[4][216][0].apply(exports,arguments)
+},{"../internal/isIndex":283,"../internal/isLength":284,"../lang/isArguments":287,"../lang/isArray":288,"../lang/isObject":291,"dup":216}],294:[function(require,module,exports){
+/**
+ * A no-operation function that returns `undefined` regardless of the
+ * arguments it receives.
+ *
+ * @static
+ * @memberOf _
+ * @category Utility
+ * @example
+ *
+ * var object = { 'user': 'fred' };
+ *
+ * _.noop(object) === undefined;
+ * // => true
+ */
+function noop() {
+  // No operation performed.
+}
+
+module.exports = noop;
+
+},{}],295:[function(require,module,exports){
+'use strict';
+
 module.exports = require('react/lib/ReactDOM');
 
-},{"react/lib/ReactDOM":198}],164:[function(require,module,exports){
+},{"react/lib/ReactDOM":330}],296:[function(require,module,exports){
 arguments[4][1][0].apply(exports,arguments)
-},{"./ReactMount":228,"./findDOMNode":271,"dup":1,"fbjs/lib/focusNode":301}],165:[function(require,module,exports){
+},{"./ReactMount":360,"./findDOMNode":403,"dup":1,"fbjs/lib/focusNode":433}],297:[function(require,module,exports){
 arguments[4][2][0].apply(exports,arguments)
-},{"./EventConstants":177,"./EventPropagators":181,"./FallbackCompositionState":182,"./SyntheticCompositionEvent":253,"./SyntheticInputEvent":257,"dup":2,"fbjs/lib/ExecutionEnvironment":293,"fbjs/lib/keyOf":311}],166:[function(require,module,exports){
+},{"./EventConstants":309,"./EventPropagators":313,"./FallbackCompositionState":314,"./SyntheticCompositionEvent":385,"./SyntheticInputEvent":389,"dup":2,"fbjs/lib/ExecutionEnvironment":425,"fbjs/lib/keyOf":443}],298:[function(require,module,exports){
 arguments[4][3][0].apply(exports,arguments)
-},{"dup":3}],167:[function(require,module,exports){
+},{"dup":3}],299:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"./CSSProperty":166,"./ReactPerf":234,"./dangerousStyleValue":268,"_process":160,"dup":4,"fbjs/lib/ExecutionEnvironment":293,"fbjs/lib/camelizeStyleName":295,"fbjs/lib/hyphenateStyleName":306,"fbjs/lib/memoizeStringOnly":313,"fbjs/lib/warning":318}],168:[function(require,module,exports){
+},{"./CSSProperty":298,"./ReactPerf":366,"./dangerousStyleValue":400,"_process":160,"dup":4,"fbjs/lib/ExecutionEnvironment":425,"fbjs/lib/camelizeStyleName":427,"fbjs/lib/hyphenateStyleName":438,"fbjs/lib/memoizeStringOnly":445,"fbjs/lib/warning":450}],300:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
-},{"./Object.assign":185,"./PooledClass":186,"_process":160,"dup":5,"fbjs/lib/invariant":307}],169:[function(require,module,exports){
+},{"./Object.assign":317,"./PooledClass":318,"_process":160,"dup":5,"fbjs/lib/invariant":439}],301:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"./EventConstants":177,"./EventPluginHub":178,"./EventPropagators":181,"./ReactUpdates":246,"./SyntheticEvent":255,"./getEventTarget":277,"./isEventSupported":282,"./isTextInputElement":283,"dup":6,"fbjs/lib/ExecutionEnvironment":293,"fbjs/lib/keyOf":311}],170:[function(require,module,exports){
+},{"./EventConstants":309,"./EventPluginHub":310,"./EventPropagators":313,"./ReactUpdates":378,"./SyntheticEvent":387,"./getEventTarget":409,"./isEventSupported":414,"./isTextInputElement":415,"dup":6,"fbjs/lib/ExecutionEnvironment":425,"fbjs/lib/keyOf":443}],302:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],171:[function(require,module,exports){
+},{"dup":7}],303:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{"./Danger":174,"./ReactMultiChildUpdateTypes":230,"./ReactPerf":234,"./setInnerHTML":287,"./setTextContent":288,"_process":160,"dup":8,"fbjs/lib/invariant":307}],172:[function(require,module,exports){
+},{"./Danger":306,"./ReactMultiChildUpdateTypes":362,"./ReactPerf":366,"./setInnerHTML":419,"./setTextContent":420,"_process":160,"dup":8,"fbjs/lib/invariant":439}],304:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"_process":160,"dup":9,"fbjs/lib/invariant":307}],173:[function(require,module,exports){
+},{"_process":160,"dup":9,"fbjs/lib/invariant":439}],305:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
-},{"./DOMProperty":172,"./ReactPerf":234,"./quoteAttributeValueForBrowser":285,"_process":160,"dup":10,"fbjs/lib/warning":318}],174:[function(require,module,exports){
+},{"./DOMProperty":304,"./ReactPerf":366,"./quoteAttributeValueForBrowser":417,"_process":160,"dup":10,"fbjs/lib/warning":450}],306:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"_process":160,"dup":11,"fbjs/lib/ExecutionEnvironment":293,"fbjs/lib/createNodesFromMarkup":298,"fbjs/lib/emptyFunction":299,"fbjs/lib/getMarkupWrap":303,"fbjs/lib/invariant":307}],175:[function(require,module,exports){
+},{"_process":160,"dup":11,"fbjs/lib/ExecutionEnvironment":425,"fbjs/lib/createNodesFromMarkup":430,"fbjs/lib/emptyFunction":431,"fbjs/lib/getMarkupWrap":435,"fbjs/lib/invariant":439}],307:[function(require,module,exports){
 arguments[4][12][0].apply(exports,arguments)
-},{"dup":12,"fbjs/lib/keyOf":311}],176:[function(require,module,exports){
+},{"dup":12,"fbjs/lib/keyOf":443}],308:[function(require,module,exports){
 arguments[4][13][0].apply(exports,arguments)
-},{"./EventConstants":177,"./EventPropagators":181,"./ReactMount":228,"./SyntheticMouseEvent":259,"dup":13,"fbjs/lib/keyOf":311}],177:[function(require,module,exports){
+},{"./EventConstants":309,"./EventPropagators":313,"./ReactMount":360,"./SyntheticMouseEvent":391,"dup":13,"fbjs/lib/keyOf":443}],309:[function(require,module,exports){
 arguments[4][14][0].apply(exports,arguments)
-},{"dup":14,"fbjs/lib/keyMirror":310}],178:[function(require,module,exports){
+},{"dup":14,"fbjs/lib/keyMirror":442}],310:[function(require,module,exports){
 arguments[4][15][0].apply(exports,arguments)
-},{"./EventPluginRegistry":179,"./EventPluginUtils":180,"./ReactErrorUtils":219,"./accumulateInto":265,"./forEachAccumulated":273,"_process":160,"dup":15,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],179:[function(require,module,exports){
+},{"./EventPluginRegistry":311,"./EventPluginUtils":312,"./ReactErrorUtils":351,"./accumulateInto":397,"./forEachAccumulated":405,"_process":160,"dup":15,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],311:[function(require,module,exports){
 arguments[4][16][0].apply(exports,arguments)
-},{"_process":160,"dup":16,"fbjs/lib/invariant":307}],180:[function(require,module,exports){
+},{"_process":160,"dup":16,"fbjs/lib/invariant":439}],312:[function(require,module,exports){
 arguments[4][17][0].apply(exports,arguments)
-},{"./EventConstants":177,"./ReactErrorUtils":219,"_process":160,"dup":17,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],181:[function(require,module,exports){
+},{"./EventConstants":309,"./ReactErrorUtils":351,"_process":160,"dup":17,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],313:[function(require,module,exports){
 arguments[4][18][0].apply(exports,arguments)
-},{"./EventConstants":177,"./EventPluginHub":178,"./accumulateInto":265,"./forEachAccumulated":273,"_process":160,"dup":18,"fbjs/lib/warning":318}],182:[function(require,module,exports){
+},{"./EventConstants":309,"./EventPluginHub":310,"./accumulateInto":397,"./forEachAccumulated":405,"_process":160,"dup":18,"fbjs/lib/warning":450}],314:[function(require,module,exports){
 arguments[4][19][0].apply(exports,arguments)
-},{"./Object.assign":185,"./PooledClass":186,"./getTextContentAccessor":280,"dup":19}],183:[function(require,module,exports){
+},{"./Object.assign":317,"./PooledClass":318,"./getTextContentAccessor":412,"dup":19}],315:[function(require,module,exports){
 arguments[4][20][0].apply(exports,arguments)
-},{"./DOMProperty":172,"dup":20,"fbjs/lib/ExecutionEnvironment":293}],184:[function(require,module,exports){
+},{"./DOMProperty":304,"dup":20,"fbjs/lib/ExecutionEnvironment":425}],316:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"./ReactPropTypeLocations":236,"./ReactPropTypes":237,"_process":160,"dup":21,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],185:[function(require,module,exports){
+},{"./ReactPropTypeLocations":368,"./ReactPropTypes":369,"_process":160,"dup":21,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],317:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22}],186:[function(require,module,exports){
+},{"dup":22}],318:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"_process":160,"dup":23,"fbjs/lib/invariant":307}],187:[function(require,module,exports){
+},{"_process":160,"dup":23,"fbjs/lib/invariant":439}],319:[function(require,module,exports){
 arguments[4][24][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactDOM":198,"./ReactDOMServer":208,"./ReactIsomorphic":226,"./deprecated":269,"dup":24}],188:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactDOM":330,"./ReactDOMServer":340,"./ReactIsomorphic":358,"./deprecated":401,"dup":24}],320:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"./ReactInstanceMap":225,"./findDOMNode":271,"_process":160,"dup":25,"fbjs/lib/warning":318}],189:[function(require,module,exports){
+},{"./ReactInstanceMap":357,"./findDOMNode":403,"_process":160,"dup":25,"fbjs/lib/warning":450}],321:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"./EventConstants":177,"./EventPluginHub":178,"./EventPluginRegistry":179,"./Object.assign":185,"./ReactEventEmitterMixin":220,"./ReactPerf":234,"./ViewportMetrics":264,"./isEventSupported":282,"dup":26}],190:[function(require,module,exports){
+},{"./EventConstants":309,"./EventPluginHub":310,"./EventPluginRegistry":311,"./Object.assign":317,"./ReactEventEmitterMixin":352,"./ReactPerf":366,"./ViewportMetrics":396,"./isEventSupported":414,"dup":26}],322:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"./ReactReconciler":239,"./instantiateReactComponent":281,"./shouldUpdateReactComponent":289,"./traverseAllChildren":290,"_process":160,"dup":27,"fbjs/lib/warning":318}],191:[function(require,module,exports){
+},{"./ReactReconciler":371,"./instantiateReactComponent":413,"./shouldUpdateReactComponent":421,"./traverseAllChildren":422,"_process":160,"dup":27,"fbjs/lib/warning":450}],323:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"./PooledClass":186,"./ReactElement":215,"./traverseAllChildren":290,"dup":28,"fbjs/lib/emptyFunction":299}],192:[function(require,module,exports){
+},{"./PooledClass":318,"./ReactElement":347,"./traverseAllChildren":422,"dup":28,"fbjs/lib/emptyFunction":431}],324:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactComponent":193,"./ReactElement":215,"./ReactNoopUpdateQueue":232,"./ReactPropTypeLocationNames":235,"./ReactPropTypeLocations":236,"_process":160,"dup":29,"fbjs/lib/emptyObject":300,"fbjs/lib/invariant":307,"fbjs/lib/keyMirror":310,"fbjs/lib/keyOf":311,"fbjs/lib/warning":318}],193:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactComponent":325,"./ReactElement":347,"./ReactNoopUpdateQueue":364,"./ReactPropTypeLocationNames":367,"./ReactPropTypeLocations":368,"_process":160,"dup":29,"fbjs/lib/emptyObject":432,"fbjs/lib/invariant":439,"fbjs/lib/keyMirror":442,"fbjs/lib/keyOf":443,"fbjs/lib/warning":450}],325:[function(require,module,exports){
 arguments[4][30][0].apply(exports,arguments)
-},{"./ReactNoopUpdateQueue":232,"./canDefineProperty":267,"_process":160,"dup":30,"fbjs/lib/emptyObject":300,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],194:[function(require,module,exports){
+},{"./ReactNoopUpdateQueue":364,"./canDefineProperty":399,"_process":160,"dup":30,"fbjs/lib/emptyObject":432,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],326:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"./ReactDOMIDOperations":203,"./ReactMount":228,"dup":31}],195:[function(require,module,exports){
+},{"./ReactDOMIDOperations":335,"./ReactMount":360,"dup":31}],327:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"_process":160,"dup":32,"fbjs/lib/invariant":307}],196:[function(require,module,exports){
+},{"_process":160,"dup":32,"fbjs/lib/invariant":439}],328:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactComponentEnvironment":195,"./ReactCurrentOwner":197,"./ReactElement":215,"./ReactInstanceMap":225,"./ReactPerf":234,"./ReactPropTypeLocationNames":235,"./ReactPropTypeLocations":236,"./ReactReconciler":239,"./ReactUpdateQueue":245,"./shouldUpdateReactComponent":289,"_process":160,"dup":33,"fbjs/lib/emptyObject":300,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],197:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactComponentEnvironment":327,"./ReactCurrentOwner":329,"./ReactElement":347,"./ReactInstanceMap":357,"./ReactPerf":366,"./ReactPropTypeLocationNames":367,"./ReactPropTypeLocations":368,"./ReactReconciler":371,"./ReactUpdateQueue":377,"./shouldUpdateReactComponent":421,"_process":160,"dup":33,"fbjs/lib/emptyObject":432,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],329:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],198:[function(require,module,exports){
+},{"dup":34}],330:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./ReactCurrentOwner":197,"./ReactDOMTextComponent":209,"./ReactDefaultInjection":212,"./ReactInstanceHandles":224,"./ReactMount":228,"./ReactPerf":234,"./ReactReconciler":239,"./ReactUpdates":246,"./ReactVersion":247,"./findDOMNode":271,"./renderSubtreeIntoContainer":286,"_process":160,"dup":35,"fbjs/lib/ExecutionEnvironment":293,"fbjs/lib/warning":318}],199:[function(require,module,exports){
+},{"./ReactCurrentOwner":329,"./ReactDOMTextComponent":341,"./ReactDefaultInjection":344,"./ReactInstanceHandles":356,"./ReactMount":360,"./ReactPerf":366,"./ReactReconciler":371,"./ReactUpdates":378,"./ReactVersion":379,"./findDOMNode":403,"./renderSubtreeIntoContainer":418,"_process":160,"dup":35,"fbjs/lib/ExecutionEnvironment":425,"fbjs/lib/warning":450}],331:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"dup":36}],200:[function(require,module,exports){
+},{"dup":36}],332:[function(require,module,exports){
 arguments[4][37][0].apply(exports,arguments)
-},{"./AutoFocusUtils":164,"./CSSPropertyOperations":167,"./DOMProperty":172,"./DOMPropertyOperations":173,"./EventConstants":177,"./Object.assign":185,"./ReactBrowserEventEmitter":189,"./ReactComponentBrowserEnvironment":194,"./ReactDOMButton":199,"./ReactDOMInput":204,"./ReactDOMOption":205,"./ReactDOMSelect":206,"./ReactDOMTextarea":210,"./ReactMount":228,"./ReactMultiChild":229,"./ReactPerf":234,"./ReactUpdateQueue":245,"./canDefineProperty":267,"./escapeTextContentForBrowser":270,"./isEventSupported":282,"./setInnerHTML":287,"./setTextContent":288,"./validateDOMNesting":291,"_process":160,"dup":37,"fbjs/lib/invariant":307,"fbjs/lib/keyOf":311,"fbjs/lib/shallowEqual":316,"fbjs/lib/warning":318}],201:[function(require,module,exports){
+},{"./AutoFocusUtils":296,"./CSSPropertyOperations":299,"./DOMProperty":304,"./DOMPropertyOperations":305,"./EventConstants":309,"./Object.assign":317,"./ReactBrowserEventEmitter":321,"./ReactComponentBrowserEnvironment":326,"./ReactDOMButton":331,"./ReactDOMInput":336,"./ReactDOMOption":337,"./ReactDOMSelect":338,"./ReactDOMTextarea":342,"./ReactMount":360,"./ReactMultiChild":361,"./ReactPerf":366,"./ReactUpdateQueue":377,"./canDefineProperty":399,"./escapeTextContentForBrowser":402,"./isEventSupported":414,"./setInnerHTML":419,"./setTextContent":420,"./validateDOMNesting":423,"_process":160,"dup":37,"fbjs/lib/invariant":439,"fbjs/lib/keyOf":443,"fbjs/lib/shallowEqual":448,"fbjs/lib/warning":450}],333:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"./ReactElement":215,"./ReactElementValidator":216,"_process":160,"dup":38,"fbjs/lib/mapObject":312}],202:[function(require,module,exports){
+},{"./ReactElement":347,"./ReactElementValidator":348,"_process":160,"dup":38,"fbjs/lib/mapObject":444}],334:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"dup":39}],203:[function(require,module,exports){
+},{"dup":39}],335:[function(require,module,exports){
 arguments[4][40][0].apply(exports,arguments)
-},{"./DOMChildrenOperations":171,"./DOMPropertyOperations":173,"./ReactMount":228,"./ReactPerf":234,"_process":160,"dup":40,"fbjs/lib/invariant":307}],204:[function(require,module,exports){
+},{"./DOMChildrenOperations":303,"./DOMPropertyOperations":305,"./ReactMount":360,"./ReactPerf":366,"_process":160,"dup":40,"fbjs/lib/invariant":439}],336:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"./LinkedValueUtils":184,"./Object.assign":185,"./ReactDOMIDOperations":203,"./ReactMount":228,"./ReactUpdates":246,"_process":160,"dup":41,"fbjs/lib/invariant":307}],205:[function(require,module,exports){
+},{"./LinkedValueUtils":316,"./Object.assign":317,"./ReactDOMIDOperations":335,"./ReactMount":360,"./ReactUpdates":378,"_process":160,"dup":41,"fbjs/lib/invariant":439}],337:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactChildren":191,"./ReactDOMSelect":206,"_process":160,"dup":42,"fbjs/lib/warning":318}],206:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactChildren":323,"./ReactDOMSelect":338,"_process":160,"dup":42,"fbjs/lib/warning":450}],338:[function(require,module,exports){
 arguments[4][43][0].apply(exports,arguments)
-},{"./LinkedValueUtils":184,"./Object.assign":185,"./ReactMount":228,"./ReactUpdates":246,"_process":160,"dup":43,"fbjs/lib/warning":318}],207:[function(require,module,exports){
+},{"./LinkedValueUtils":316,"./Object.assign":317,"./ReactMount":360,"./ReactUpdates":378,"_process":160,"dup":43,"fbjs/lib/warning":450}],339:[function(require,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"./getNodeForCharacterOffset":279,"./getTextContentAccessor":280,"dup":44,"fbjs/lib/ExecutionEnvironment":293}],208:[function(require,module,exports){
+},{"./getNodeForCharacterOffset":411,"./getTextContentAccessor":412,"dup":44,"fbjs/lib/ExecutionEnvironment":425}],340:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"./ReactDefaultInjection":212,"./ReactServerRendering":243,"./ReactVersion":247,"dup":45}],209:[function(require,module,exports){
+},{"./ReactDefaultInjection":344,"./ReactServerRendering":375,"./ReactVersion":379,"dup":45}],341:[function(require,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"./DOMChildrenOperations":171,"./DOMPropertyOperations":173,"./Object.assign":185,"./ReactComponentBrowserEnvironment":194,"./ReactMount":228,"./escapeTextContentForBrowser":270,"./setTextContent":288,"./validateDOMNesting":291,"_process":160,"dup":46}],210:[function(require,module,exports){
+},{"./DOMChildrenOperations":303,"./DOMPropertyOperations":305,"./Object.assign":317,"./ReactComponentBrowserEnvironment":326,"./ReactMount":360,"./escapeTextContentForBrowser":402,"./setTextContent":420,"./validateDOMNesting":423,"_process":160,"dup":46}],342:[function(require,module,exports){
 arguments[4][47][0].apply(exports,arguments)
-},{"./LinkedValueUtils":184,"./Object.assign":185,"./ReactDOMIDOperations":203,"./ReactUpdates":246,"_process":160,"dup":47,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],211:[function(require,module,exports){
+},{"./LinkedValueUtils":316,"./Object.assign":317,"./ReactDOMIDOperations":335,"./ReactUpdates":378,"_process":160,"dup":47,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],343:[function(require,module,exports){
 arguments[4][48][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactUpdates":246,"./Transaction":263,"dup":48,"fbjs/lib/emptyFunction":299}],212:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactUpdates":378,"./Transaction":395,"dup":48,"fbjs/lib/emptyFunction":431}],344:[function(require,module,exports){
 arguments[4][49][0].apply(exports,arguments)
-},{"./BeforeInputEventPlugin":165,"./ChangeEventPlugin":169,"./ClientReactRootIndex":170,"./DefaultEventPluginOrder":175,"./EnterLeaveEventPlugin":176,"./HTMLDOMPropertyConfig":183,"./ReactBrowserComponentMixin":188,"./ReactComponentBrowserEnvironment":194,"./ReactDOMComponent":200,"./ReactDOMTextComponent":209,"./ReactDefaultBatchingStrategy":211,"./ReactDefaultPerf":213,"./ReactEventListener":221,"./ReactInjection":222,"./ReactInstanceHandles":224,"./ReactMount":228,"./ReactReconcileTransaction":238,"./SVGDOMPropertyConfig":248,"./SelectEventPlugin":249,"./ServerReactRootIndex":250,"./SimpleEventPlugin":251,"_process":160,"dup":49,"fbjs/lib/ExecutionEnvironment":293}],213:[function(require,module,exports){
+},{"./BeforeInputEventPlugin":297,"./ChangeEventPlugin":301,"./ClientReactRootIndex":302,"./DefaultEventPluginOrder":307,"./EnterLeaveEventPlugin":308,"./HTMLDOMPropertyConfig":315,"./ReactBrowserComponentMixin":320,"./ReactComponentBrowserEnvironment":326,"./ReactDOMComponent":332,"./ReactDOMTextComponent":341,"./ReactDefaultBatchingStrategy":343,"./ReactDefaultPerf":345,"./ReactEventListener":353,"./ReactInjection":354,"./ReactInstanceHandles":356,"./ReactMount":360,"./ReactReconcileTransaction":370,"./SVGDOMPropertyConfig":380,"./SelectEventPlugin":381,"./ServerReactRootIndex":382,"./SimpleEventPlugin":383,"_process":160,"dup":49,"fbjs/lib/ExecutionEnvironment":425}],345:[function(require,module,exports){
 arguments[4][50][0].apply(exports,arguments)
-},{"./DOMProperty":172,"./ReactDefaultPerfAnalysis":214,"./ReactMount":228,"./ReactPerf":234,"dup":50,"fbjs/lib/performanceNow":315}],214:[function(require,module,exports){
+},{"./DOMProperty":304,"./ReactDefaultPerfAnalysis":346,"./ReactMount":360,"./ReactPerf":366,"dup":50,"fbjs/lib/performanceNow":447}],346:[function(require,module,exports){
 arguments[4][51][0].apply(exports,arguments)
-},{"./Object.assign":185,"dup":51}],215:[function(require,module,exports){
+},{"./Object.assign":317,"dup":51}],347:[function(require,module,exports){
 arguments[4][52][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactCurrentOwner":197,"./canDefineProperty":267,"_process":160,"dup":52}],216:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactCurrentOwner":329,"./canDefineProperty":399,"_process":160,"dup":52}],348:[function(require,module,exports){
 arguments[4][53][0].apply(exports,arguments)
-},{"./ReactCurrentOwner":197,"./ReactElement":215,"./ReactPropTypeLocationNames":235,"./ReactPropTypeLocations":236,"./canDefineProperty":267,"./getIteratorFn":278,"_process":160,"dup":53,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],217:[function(require,module,exports){
+},{"./ReactCurrentOwner":329,"./ReactElement":347,"./ReactPropTypeLocationNames":367,"./ReactPropTypeLocations":368,"./canDefineProperty":399,"./getIteratorFn":410,"_process":160,"dup":53,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],349:[function(require,module,exports){
 arguments[4][54][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactElement":215,"./ReactEmptyComponentRegistry":218,"./ReactReconciler":239,"dup":54}],218:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactElement":347,"./ReactEmptyComponentRegistry":350,"./ReactReconciler":371,"dup":54}],350:[function(require,module,exports){
 arguments[4][55][0].apply(exports,arguments)
-},{"dup":55}],219:[function(require,module,exports){
+},{"dup":55}],351:[function(require,module,exports){
 arguments[4][56][0].apply(exports,arguments)
-},{"_process":160,"dup":56}],220:[function(require,module,exports){
+},{"_process":160,"dup":56}],352:[function(require,module,exports){
 arguments[4][57][0].apply(exports,arguments)
-},{"./EventPluginHub":178,"dup":57}],221:[function(require,module,exports){
+},{"./EventPluginHub":310,"dup":57}],353:[function(require,module,exports){
 arguments[4][58][0].apply(exports,arguments)
-},{"./Object.assign":185,"./PooledClass":186,"./ReactInstanceHandles":224,"./ReactMount":228,"./ReactUpdates":246,"./getEventTarget":277,"dup":58,"fbjs/lib/EventListener":292,"fbjs/lib/ExecutionEnvironment":293,"fbjs/lib/getUnboundedScrollPosition":304}],222:[function(require,module,exports){
+},{"./Object.assign":317,"./PooledClass":318,"./ReactInstanceHandles":356,"./ReactMount":360,"./ReactUpdates":378,"./getEventTarget":409,"dup":58,"fbjs/lib/EventListener":424,"fbjs/lib/ExecutionEnvironment":425,"fbjs/lib/getUnboundedScrollPosition":436}],354:[function(require,module,exports){
 arguments[4][59][0].apply(exports,arguments)
-},{"./DOMProperty":172,"./EventPluginHub":178,"./ReactBrowserEventEmitter":189,"./ReactClass":192,"./ReactComponentEnvironment":195,"./ReactEmptyComponent":217,"./ReactNativeComponent":231,"./ReactPerf":234,"./ReactRootIndex":241,"./ReactUpdates":246,"dup":59}],223:[function(require,module,exports){
+},{"./DOMProperty":304,"./EventPluginHub":310,"./ReactBrowserEventEmitter":321,"./ReactClass":324,"./ReactComponentEnvironment":327,"./ReactEmptyComponent":349,"./ReactNativeComponent":363,"./ReactPerf":366,"./ReactRootIndex":373,"./ReactUpdates":378,"dup":59}],355:[function(require,module,exports){
 arguments[4][60][0].apply(exports,arguments)
-},{"./ReactDOMSelection":207,"dup":60,"fbjs/lib/containsNode":296,"fbjs/lib/focusNode":301,"fbjs/lib/getActiveElement":302}],224:[function(require,module,exports){
+},{"./ReactDOMSelection":339,"dup":60,"fbjs/lib/containsNode":428,"fbjs/lib/focusNode":433,"fbjs/lib/getActiveElement":434}],356:[function(require,module,exports){
 arguments[4][61][0].apply(exports,arguments)
-},{"./ReactRootIndex":241,"_process":160,"dup":61,"fbjs/lib/invariant":307}],225:[function(require,module,exports){
+},{"./ReactRootIndex":373,"_process":160,"dup":61,"fbjs/lib/invariant":439}],357:[function(require,module,exports){
 arguments[4][62][0].apply(exports,arguments)
-},{"dup":62}],226:[function(require,module,exports){
+},{"dup":62}],358:[function(require,module,exports){
 arguments[4][63][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactChildren":191,"./ReactClass":192,"./ReactComponent":193,"./ReactDOMFactories":201,"./ReactElement":215,"./ReactElementValidator":216,"./ReactPropTypes":237,"./ReactVersion":247,"./onlyChild":284,"_process":160,"dup":63}],227:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactChildren":323,"./ReactClass":324,"./ReactComponent":325,"./ReactDOMFactories":333,"./ReactElement":347,"./ReactElementValidator":348,"./ReactPropTypes":369,"./ReactVersion":379,"./onlyChild":416,"_process":160,"dup":63}],359:[function(require,module,exports){
 arguments[4][64][0].apply(exports,arguments)
-},{"./adler32":266,"dup":64}],228:[function(require,module,exports){
+},{"./adler32":398,"dup":64}],360:[function(require,module,exports){
 arguments[4][65][0].apply(exports,arguments)
-},{"./DOMProperty":172,"./Object.assign":185,"./ReactBrowserEventEmitter":189,"./ReactCurrentOwner":197,"./ReactDOMFeatureFlags":202,"./ReactElement":215,"./ReactEmptyComponentRegistry":218,"./ReactInstanceHandles":224,"./ReactInstanceMap":225,"./ReactMarkupChecksum":227,"./ReactPerf":234,"./ReactReconciler":239,"./ReactUpdateQueue":245,"./ReactUpdates":246,"./instantiateReactComponent":281,"./setInnerHTML":287,"./shouldUpdateReactComponent":289,"./validateDOMNesting":291,"_process":160,"dup":65,"fbjs/lib/containsNode":296,"fbjs/lib/emptyObject":300,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],229:[function(require,module,exports){
+},{"./DOMProperty":304,"./Object.assign":317,"./ReactBrowserEventEmitter":321,"./ReactCurrentOwner":329,"./ReactDOMFeatureFlags":334,"./ReactElement":347,"./ReactEmptyComponentRegistry":350,"./ReactInstanceHandles":356,"./ReactInstanceMap":357,"./ReactMarkupChecksum":359,"./ReactPerf":366,"./ReactReconciler":371,"./ReactUpdateQueue":377,"./ReactUpdates":378,"./instantiateReactComponent":413,"./setInnerHTML":419,"./shouldUpdateReactComponent":421,"./validateDOMNesting":423,"_process":160,"dup":65,"fbjs/lib/containsNode":428,"fbjs/lib/emptyObject":432,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],361:[function(require,module,exports){
 arguments[4][66][0].apply(exports,arguments)
-},{"./ReactChildReconciler":190,"./ReactComponentEnvironment":195,"./ReactCurrentOwner":197,"./ReactMultiChildUpdateTypes":230,"./ReactReconciler":239,"./flattenChildren":272,"_process":160,"dup":66}],230:[function(require,module,exports){
+},{"./ReactChildReconciler":322,"./ReactComponentEnvironment":327,"./ReactCurrentOwner":329,"./ReactMultiChildUpdateTypes":362,"./ReactReconciler":371,"./flattenChildren":404,"_process":160,"dup":66}],362:[function(require,module,exports){
 arguments[4][67][0].apply(exports,arguments)
-},{"dup":67,"fbjs/lib/keyMirror":310}],231:[function(require,module,exports){
+},{"dup":67,"fbjs/lib/keyMirror":442}],363:[function(require,module,exports){
 arguments[4][68][0].apply(exports,arguments)
-},{"./Object.assign":185,"_process":160,"dup":68,"fbjs/lib/invariant":307}],232:[function(require,module,exports){
+},{"./Object.assign":317,"_process":160,"dup":68,"fbjs/lib/invariant":439}],364:[function(require,module,exports){
 arguments[4][69][0].apply(exports,arguments)
-},{"_process":160,"dup":69,"fbjs/lib/warning":318}],233:[function(require,module,exports){
+},{"_process":160,"dup":69,"fbjs/lib/warning":450}],365:[function(require,module,exports){
 arguments[4][70][0].apply(exports,arguments)
-},{"_process":160,"dup":70,"fbjs/lib/invariant":307}],234:[function(require,module,exports){
+},{"_process":160,"dup":70,"fbjs/lib/invariant":439}],366:[function(require,module,exports){
 arguments[4][71][0].apply(exports,arguments)
-},{"_process":160,"dup":71}],235:[function(require,module,exports){
+},{"_process":160,"dup":71}],367:[function(require,module,exports){
 arguments[4][72][0].apply(exports,arguments)
-},{"_process":160,"dup":72}],236:[function(require,module,exports){
+},{"_process":160,"dup":72}],368:[function(require,module,exports){
 arguments[4][73][0].apply(exports,arguments)
-},{"dup":73,"fbjs/lib/keyMirror":310}],237:[function(require,module,exports){
+},{"dup":73,"fbjs/lib/keyMirror":442}],369:[function(require,module,exports){
 arguments[4][74][0].apply(exports,arguments)
-},{"./ReactElement":215,"./ReactPropTypeLocationNames":235,"./getIteratorFn":278,"dup":74,"fbjs/lib/emptyFunction":299}],238:[function(require,module,exports){
+},{"./ReactElement":347,"./ReactPropTypeLocationNames":367,"./getIteratorFn":410,"dup":74,"fbjs/lib/emptyFunction":431}],370:[function(require,module,exports){
 arguments[4][75][0].apply(exports,arguments)
-},{"./CallbackQueue":168,"./Object.assign":185,"./PooledClass":186,"./ReactBrowserEventEmitter":189,"./ReactDOMFeatureFlags":202,"./ReactInputSelection":223,"./Transaction":263,"dup":75}],239:[function(require,module,exports){
+},{"./CallbackQueue":300,"./Object.assign":317,"./PooledClass":318,"./ReactBrowserEventEmitter":321,"./ReactDOMFeatureFlags":334,"./ReactInputSelection":355,"./Transaction":395,"dup":75}],371:[function(require,module,exports){
 arguments[4][76][0].apply(exports,arguments)
-},{"./ReactRef":240,"dup":76}],240:[function(require,module,exports){
+},{"./ReactRef":372,"dup":76}],372:[function(require,module,exports){
 arguments[4][77][0].apply(exports,arguments)
-},{"./ReactOwner":233,"dup":77}],241:[function(require,module,exports){
+},{"./ReactOwner":365,"dup":77}],373:[function(require,module,exports){
 arguments[4][78][0].apply(exports,arguments)
-},{"dup":78}],242:[function(require,module,exports){
+},{"dup":78}],374:[function(require,module,exports){
 arguments[4][79][0].apply(exports,arguments)
-},{"dup":79}],243:[function(require,module,exports){
+},{"dup":79}],375:[function(require,module,exports){
 arguments[4][80][0].apply(exports,arguments)
-},{"./ReactDefaultBatchingStrategy":211,"./ReactElement":215,"./ReactInstanceHandles":224,"./ReactMarkupChecksum":227,"./ReactServerBatchingStrategy":242,"./ReactServerRenderingTransaction":244,"./ReactUpdates":246,"./instantiateReactComponent":281,"_process":160,"dup":80,"fbjs/lib/emptyObject":300,"fbjs/lib/invariant":307}],244:[function(require,module,exports){
+},{"./ReactDefaultBatchingStrategy":343,"./ReactElement":347,"./ReactInstanceHandles":356,"./ReactMarkupChecksum":359,"./ReactServerBatchingStrategy":374,"./ReactServerRenderingTransaction":376,"./ReactUpdates":378,"./instantiateReactComponent":413,"_process":160,"dup":80,"fbjs/lib/emptyObject":432,"fbjs/lib/invariant":439}],376:[function(require,module,exports){
 arguments[4][81][0].apply(exports,arguments)
-},{"./CallbackQueue":168,"./Object.assign":185,"./PooledClass":186,"./Transaction":263,"dup":81,"fbjs/lib/emptyFunction":299}],245:[function(require,module,exports){
+},{"./CallbackQueue":300,"./Object.assign":317,"./PooledClass":318,"./Transaction":395,"dup":81,"fbjs/lib/emptyFunction":431}],377:[function(require,module,exports){
 arguments[4][82][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactCurrentOwner":197,"./ReactElement":215,"./ReactInstanceMap":225,"./ReactUpdates":246,"_process":160,"dup":82,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],246:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactCurrentOwner":329,"./ReactElement":347,"./ReactInstanceMap":357,"./ReactUpdates":378,"_process":160,"dup":82,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],378:[function(require,module,exports){
 arguments[4][83][0].apply(exports,arguments)
-},{"./CallbackQueue":168,"./Object.assign":185,"./PooledClass":186,"./ReactPerf":234,"./ReactReconciler":239,"./Transaction":263,"_process":160,"dup":83,"fbjs/lib/invariant":307}],247:[function(require,module,exports){
+},{"./CallbackQueue":300,"./Object.assign":317,"./PooledClass":318,"./ReactPerf":366,"./ReactReconciler":371,"./Transaction":395,"_process":160,"dup":83,"fbjs/lib/invariant":439}],379:[function(require,module,exports){
 arguments[4][84][0].apply(exports,arguments)
-},{"dup":84}],248:[function(require,module,exports){
+},{"dup":84}],380:[function(require,module,exports){
 arguments[4][85][0].apply(exports,arguments)
-},{"./DOMProperty":172,"dup":85}],249:[function(require,module,exports){
+},{"./DOMProperty":304,"dup":85}],381:[function(require,module,exports){
 arguments[4][86][0].apply(exports,arguments)
-},{"./EventConstants":177,"./EventPropagators":181,"./ReactInputSelection":223,"./SyntheticEvent":255,"./isTextInputElement":283,"dup":86,"fbjs/lib/ExecutionEnvironment":293,"fbjs/lib/getActiveElement":302,"fbjs/lib/keyOf":311,"fbjs/lib/shallowEqual":316}],250:[function(require,module,exports){
+},{"./EventConstants":309,"./EventPropagators":313,"./ReactInputSelection":355,"./SyntheticEvent":387,"./isTextInputElement":415,"dup":86,"fbjs/lib/ExecutionEnvironment":425,"fbjs/lib/getActiveElement":434,"fbjs/lib/keyOf":443,"fbjs/lib/shallowEqual":448}],382:[function(require,module,exports){
 arguments[4][87][0].apply(exports,arguments)
-},{"dup":87}],251:[function(require,module,exports){
+},{"dup":87}],383:[function(require,module,exports){
 arguments[4][88][0].apply(exports,arguments)
-},{"./EventConstants":177,"./EventPropagators":181,"./ReactMount":228,"./SyntheticClipboardEvent":252,"./SyntheticDragEvent":254,"./SyntheticEvent":255,"./SyntheticFocusEvent":256,"./SyntheticKeyboardEvent":258,"./SyntheticMouseEvent":259,"./SyntheticTouchEvent":260,"./SyntheticUIEvent":261,"./SyntheticWheelEvent":262,"./getEventCharCode":274,"_process":160,"dup":88,"fbjs/lib/EventListener":292,"fbjs/lib/emptyFunction":299,"fbjs/lib/invariant":307,"fbjs/lib/keyOf":311}],252:[function(require,module,exports){
+},{"./EventConstants":309,"./EventPropagators":313,"./ReactMount":360,"./SyntheticClipboardEvent":384,"./SyntheticDragEvent":386,"./SyntheticEvent":387,"./SyntheticFocusEvent":388,"./SyntheticKeyboardEvent":390,"./SyntheticMouseEvent":391,"./SyntheticTouchEvent":392,"./SyntheticUIEvent":393,"./SyntheticWheelEvent":394,"./getEventCharCode":406,"_process":160,"dup":88,"fbjs/lib/EventListener":424,"fbjs/lib/emptyFunction":431,"fbjs/lib/invariant":439,"fbjs/lib/keyOf":443}],384:[function(require,module,exports){
 arguments[4][89][0].apply(exports,arguments)
-},{"./SyntheticEvent":255,"dup":89}],253:[function(require,module,exports){
+},{"./SyntheticEvent":387,"dup":89}],385:[function(require,module,exports){
 arguments[4][90][0].apply(exports,arguments)
-},{"./SyntheticEvent":255,"dup":90}],254:[function(require,module,exports){
+},{"./SyntheticEvent":387,"dup":90}],386:[function(require,module,exports){
 arguments[4][91][0].apply(exports,arguments)
-},{"./SyntheticMouseEvent":259,"dup":91}],255:[function(require,module,exports){
+},{"./SyntheticMouseEvent":391,"dup":91}],387:[function(require,module,exports){
 arguments[4][92][0].apply(exports,arguments)
-},{"./Object.assign":185,"./PooledClass":186,"_process":160,"dup":92,"fbjs/lib/emptyFunction":299,"fbjs/lib/warning":318}],256:[function(require,module,exports){
+},{"./Object.assign":317,"./PooledClass":318,"_process":160,"dup":92,"fbjs/lib/emptyFunction":431,"fbjs/lib/warning":450}],388:[function(require,module,exports){
 arguments[4][93][0].apply(exports,arguments)
-},{"./SyntheticUIEvent":261,"dup":93}],257:[function(require,module,exports){
+},{"./SyntheticUIEvent":393,"dup":93}],389:[function(require,module,exports){
 arguments[4][94][0].apply(exports,arguments)
-},{"./SyntheticEvent":255,"dup":94}],258:[function(require,module,exports){
+},{"./SyntheticEvent":387,"dup":94}],390:[function(require,module,exports){
 arguments[4][95][0].apply(exports,arguments)
-},{"./SyntheticUIEvent":261,"./getEventCharCode":274,"./getEventKey":275,"./getEventModifierState":276,"dup":95}],259:[function(require,module,exports){
+},{"./SyntheticUIEvent":393,"./getEventCharCode":406,"./getEventKey":407,"./getEventModifierState":408,"dup":95}],391:[function(require,module,exports){
 arguments[4][96][0].apply(exports,arguments)
-},{"./SyntheticUIEvent":261,"./ViewportMetrics":264,"./getEventModifierState":276,"dup":96}],260:[function(require,module,exports){
+},{"./SyntheticUIEvent":393,"./ViewportMetrics":396,"./getEventModifierState":408,"dup":96}],392:[function(require,module,exports){
 arguments[4][97][0].apply(exports,arguments)
-},{"./SyntheticUIEvent":261,"./getEventModifierState":276,"dup":97}],261:[function(require,module,exports){
+},{"./SyntheticUIEvent":393,"./getEventModifierState":408,"dup":97}],393:[function(require,module,exports){
 arguments[4][98][0].apply(exports,arguments)
-},{"./SyntheticEvent":255,"./getEventTarget":277,"dup":98}],262:[function(require,module,exports){
+},{"./SyntheticEvent":387,"./getEventTarget":409,"dup":98}],394:[function(require,module,exports){
 arguments[4][99][0].apply(exports,arguments)
-},{"./SyntheticMouseEvent":259,"dup":99}],263:[function(require,module,exports){
+},{"./SyntheticMouseEvent":391,"dup":99}],395:[function(require,module,exports){
 arguments[4][100][0].apply(exports,arguments)
-},{"_process":160,"dup":100,"fbjs/lib/invariant":307}],264:[function(require,module,exports){
+},{"_process":160,"dup":100,"fbjs/lib/invariant":439}],396:[function(require,module,exports){
 arguments[4][101][0].apply(exports,arguments)
-},{"dup":101}],265:[function(require,module,exports){
+},{"dup":101}],397:[function(require,module,exports){
 arguments[4][102][0].apply(exports,arguments)
-},{"_process":160,"dup":102,"fbjs/lib/invariant":307}],266:[function(require,module,exports){
+},{"_process":160,"dup":102,"fbjs/lib/invariant":439}],398:[function(require,module,exports){
 arguments[4][103][0].apply(exports,arguments)
-},{"dup":103}],267:[function(require,module,exports){
+},{"dup":103}],399:[function(require,module,exports){
 arguments[4][104][0].apply(exports,arguments)
-},{"_process":160,"dup":104}],268:[function(require,module,exports){
+},{"_process":160,"dup":104}],400:[function(require,module,exports){
 arguments[4][105][0].apply(exports,arguments)
-},{"./CSSProperty":166,"dup":105}],269:[function(require,module,exports){
+},{"./CSSProperty":298,"dup":105}],401:[function(require,module,exports){
 arguments[4][106][0].apply(exports,arguments)
-},{"./Object.assign":185,"_process":160,"dup":106,"fbjs/lib/warning":318}],270:[function(require,module,exports){
+},{"./Object.assign":317,"_process":160,"dup":106,"fbjs/lib/warning":450}],402:[function(require,module,exports){
 arguments[4][107][0].apply(exports,arguments)
-},{"dup":107}],271:[function(require,module,exports){
+},{"dup":107}],403:[function(require,module,exports){
 arguments[4][108][0].apply(exports,arguments)
-},{"./ReactCurrentOwner":197,"./ReactInstanceMap":225,"./ReactMount":228,"_process":160,"dup":108,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],272:[function(require,module,exports){
+},{"./ReactCurrentOwner":329,"./ReactInstanceMap":357,"./ReactMount":360,"_process":160,"dup":108,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],404:[function(require,module,exports){
 arguments[4][109][0].apply(exports,arguments)
-},{"./traverseAllChildren":290,"_process":160,"dup":109,"fbjs/lib/warning":318}],273:[function(require,module,exports){
+},{"./traverseAllChildren":422,"_process":160,"dup":109,"fbjs/lib/warning":450}],405:[function(require,module,exports){
 arguments[4][110][0].apply(exports,arguments)
-},{"dup":110}],274:[function(require,module,exports){
+},{"dup":110}],406:[function(require,module,exports){
 arguments[4][111][0].apply(exports,arguments)
-},{"dup":111}],275:[function(require,module,exports){
+},{"dup":111}],407:[function(require,module,exports){
 arguments[4][112][0].apply(exports,arguments)
-},{"./getEventCharCode":274,"dup":112}],276:[function(require,module,exports){
+},{"./getEventCharCode":406,"dup":112}],408:[function(require,module,exports){
 arguments[4][113][0].apply(exports,arguments)
-},{"dup":113}],277:[function(require,module,exports){
+},{"dup":113}],409:[function(require,module,exports){
 arguments[4][114][0].apply(exports,arguments)
-},{"dup":114}],278:[function(require,module,exports){
+},{"dup":114}],410:[function(require,module,exports){
 arguments[4][115][0].apply(exports,arguments)
-},{"dup":115}],279:[function(require,module,exports){
+},{"dup":115}],411:[function(require,module,exports){
 arguments[4][116][0].apply(exports,arguments)
-},{"dup":116}],280:[function(require,module,exports){
+},{"dup":116}],412:[function(require,module,exports){
 arguments[4][117][0].apply(exports,arguments)
-},{"dup":117,"fbjs/lib/ExecutionEnvironment":293}],281:[function(require,module,exports){
+},{"dup":117,"fbjs/lib/ExecutionEnvironment":425}],413:[function(require,module,exports){
 arguments[4][118][0].apply(exports,arguments)
-},{"./Object.assign":185,"./ReactCompositeComponent":196,"./ReactEmptyComponent":217,"./ReactNativeComponent":231,"_process":160,"dup":118,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],282:[function(require,module,exports){
+},{"./Object.assign":317,"./ReactCompositeComponent":328,"./ReactEmptyComponent":349,"./ReactNativeComponent":363,"_process":160,"dup":118,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],414:[function(require,module,exports){
 arguments[4][119][0].apply(exports,arguments)
-},{"dup":119,"fbjs/lib/ExecutionEnvironment":293}],283:[function(require,module,exports){
+},{"dup":119,"fbjs/lib/ExecutionEnvironment":425}],415:[function(require,module,exports){
 arguments[4][120][0].apply(exports,arguments)
-},{"dup":120}],284:[function(require,module,exports){
+},{"dup":120}],416:[function(require,module,exports){
 arguments[4][121][0].apply(exports,arguments)
-},{"./ReactElement":215,"_process":160,"dup":121,"fbjs/lib/invariant":307}],285:[function(require,module,exports){
+},{"./ReactElement":347,"_process":160,"dup":121,"fbjs/lib/invariant":439}],417:[function(require,module,exports){
 arguments[4][122][0].apply(exports,arguments)
-},{"./escapeTextContentForBrowser":270,"dup":122}],286:[function(require,module,exports){
+},{"./escapeTextContentForBrowser":402,"dup":122}],418:[function(require,module,exports){
 arguments[4][123][0].apply(exports,arguments)
-},{"./ReactMount":228,"dup":123}],287:[function(require,module,exports){
+},{"./ReactMount":360,"dup":123}],419:[function(require,module,exports){
 arguments[4][124][0].apply(exports,arguments)
-},{"dup":124,"fbjs/lib/ExecutionEnvironment":293}],288:[function(require,module,exports){
+},{"dup":124,"fbjs/lib/ExecutionEnvironment":425}],420:[function(require,module,exports){
 arguments[4][125][0].apply(exports,arguments)
-},{"./escapeTextContentForBrowser":270,"./setInnerHTML":287,"dup":125,"fbjs/lib/ExecutionEnvironment":293}],289:[function(require,module,exports){
+},{"./escapeTextContentForBrowser":402,"./setInnerHTML":419,"dup":125,"fbjs/lib/ExecutionEnvironment":425}],421:[function(require,module,exports){
 arguments[4][126][0].apply(exports,arguments)
-},{"dup":126}],290:[function(require,module,exports){
+},{"dup":126}],422:[function(require,module,exports){
 arguments[4][127][0].apply(exports,arguments)
-},{"./ReactCurrentOwner":197,"./ReactElement":215,"./ReactInstanceHandles":224,"./getIteratorFn":278,"_process":160,"dup":127,"fbjs/lib/invariant":307,"fbjs/lib/warning":318}],291:[function(require,module,exports){
+},{"./ReactCurrentOwner":329,"./ReactElement":347,"./ReactInstanceHandles":356,"./getIteratorFn":410,"_process":160,"dup":127,"fbjs/lib/invariant":439,"fbjs/lib/warning":450}],423:[function(require,module,exports){
 arguments[4][128][0].apply(exports,arguments)
-},{"./Object.assign":185,"_process":160,"dup":128,"fbjs/lib/emptyFunction":299,"fbjs/lib/warning":318}],292:[function(require,module,exports){
+},{"./Object.assign":317,"_process":160,"dup":128,"fbjs/lib/emptyFunction":431,"fbjs/lib/warning":450}],424:[function(require,module,exports){
 arguments[4][129][0].apply(exports,arguments)
-},{"./emptyFunction":299,"_process":160,"dup":129}],293:[function(require,module,exports){
+},{"./emptyFunction":431,"_process":160,"dup":129}],425:[function(require,module,exports){
 arguments[4][130][0].apply(exports,arguments)
-},{"dup":130}],294:[function(require,module,exports){
+},{"dup":130}],426:[function(require,module,exports){
 arguments[4][131][0].apply(exports,arguments)
-},{"dup":131}],295:[function(require,module,exports){
+},{"dup":131}],427:[function(require,module,exports){
 arguments[4][132][0].apply(exports,arguments)
-},{"./camelize":294,"dup":132}],296:[function(require,module,exports){
+},{"./camelize":426,"dup":132}],428:[function(require,module,exports){
 arguments[4][133][0].apply(exports,arguments)
-},{"./isTextNode":309,"dup":133}],297:[function(require,module,exports){
+},{"./isTextNode":441,"dup":133}],429:[function(require,module,exports){
 arguments[4][134][0].apply(exports,arguments)
-},{"./toArray":317,"dup":134}],298:[function(require,module,exports){
+},{"./toArray":449,"dup":134}],430:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
-},{"./ExecutionEnvironment":293,"./createArrayFromMixed":297,"./getMarkupWrap":303,"./invariant":307,"_process":160,"dup":135}],299:[function(require,module,exports){
+},{"./ExecutionEnvironment":425,"./createArrayFromMixed":429,"./getMarkupWrap":435,"./invariant":439,"_process":160,"dup":135}],431:[function(require,module,exports){
 arguments[4][136][0].apply(exports,arguments)
-},{"dup":136}],300:[function(require,module,exports){
+},{"dup":136}],432:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
-},{"_process":160,"dup":137}],301:[function(require,module,exports){
+},{"_process":160,"dup":137}],433:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
-},{"dup":138}],302:[function(require,module,exports){
+},{"dup":138}],434:[function(require,module,exports){
 arguments[4][139][0].apply(exports,arguments)
-},{"dup":139}],303:[function(require,module,exports){
+},{"dup":139}],435:[function(require,module,exports){
 arguments[4][140][0].apply(exports,arguments)
-},{"./ExecutionEnvironment":293,"./invariant":307,"_process":160,"dup":140}],304:[function(require,module,exports){
+},{"./ExecutionEnvironment":425,"./invariant":439,"_process":160,"dup":140}],436:[function(require,module,exports){
 arguments[4][141][0].apply(exports,arguments)
-},{"dup":141}],305:[function(require,module,exports){
+},{"dup":141}],437:[function(require,module,exports){
 arguments[4][142][0].apply(exports,arguments)
-},{"dup":142}],306:[function(require,module,exports){
+},{"dup":142}],438:[function(require,module,exports){
 arguments[4][143][0].apply(exports,arguments)
-},{"./hyphenate":305,"dup":143}],307:[function(require,module,exports){
+},{"./hyphenate":437,"dup":143}],439:[function(require,module,exports){
 arguments[4][144][0].apply(exports,arguments)
-},{"_process":160,"dup":144}],308:[function(require,module,exports){
+},{"_process":160,"dup":144}],440:[function(require,module,exports){
 arguments[4][145][0].apply(exports,arguments)
-},{"dup":145}],309:[function(require,module,exports){
+},{"dup":145}],441:[function(require,module,exports){
 arguments[4][146][0].apply(exports,arguments)
-},{"./isNode":308,"dup":146}],310:[function(require,module,exports){
+},{"./isNode":440,"dup":146}],442:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
-},{"./invariant":307,"_process":160,"dup":147}],311:[function(require,module,exports){
+},{"./invariant":439,"_process":160,"dup":147}],443:[function(require,module,exports){
 arguments[4][148][0].apply(exports,arguments)
-},{"dup":148}],312:[function(require,module,exports){
+},{"dup":148}],444:[function(require,module,exports){
 arguments[4][149][0].apply(exports,arguments)
-},{"dup":149}],313:[function(require,module,exports){
+},{"dup":149}],445:[function(require,module,exports){
 arguments[4][150][0].apply(exports,arguments)
-},{"dup":150}],314:[function(require,module,exports){
+},{"dup":150}],446:[function(require,module,exports){
 arguments[4][151][0].apply(exports,arguments)
-},{"./ExecutionEnvironment":293,"dup":151}],315:[function(require,module,exports){
+},{"./ExecutionEnvironment":425,"dup":151}],447:[function(require,module,exports){
 arguments[4][152][0].apply(exports,arguments)
-},{"./performance":314,"dup":152}],316:[function(require,module,exports){
+},{"./performance":446,"dup":152}],448:[function(require,module,exports){
 arguments[4][153][0].apply(exports,arguments)
-},{"dup":153}],317:[function(require,module,exports){
+},{"dup":153}],449:[function(require,module,exports){
 arguments[4][154][0].apply(exports,arguments)
-},{"./invariant":307,"_process":160,"dup":154}],318:[function(require,module,exports){
+},{"./invariant":439,"_process":160,"dup":154}],450:[function(require,module,exports){
 arguments[4][155][0].apply(exports,arguments)
-},{"./emptyFunction":299,"_process":160,"dup":155}],319:[function(require,module,exports){
+},{"./emptyFunction":431,"_process":160,"dup":155}],451:[function(require,module,exports){
 arguments[4][156][0].apply(exports,arguments)
-},{"./lib/React":187,"dup":156}],320:[function(require,module,exports){
+},{"./lib/React":319,"dup":156}],452:[function(require,module,exports){
 arguments[4][159][0].apply(exports,arguments)
-},{"dup":159}],321:[function(require,module,exports){
+},{"dup":159}],453:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -32823,7 +38607,7 @@ var DropDown = React.createClass({displayName: "DropDown",
 
 module.exports = DropDown;
 
-},{"react":319}],322:[function(require,module,exports){
+},{"react":451}],454:[function(require,module,exports){
 var React = require('react');
 
 var InputText = React.createClass({displayName: "InputText",
@@ -32872,7 +38656,7 @@ var InputText = React.createClass({displayName: "InputText",
 
 module.exports = InputText;
 
-},{"react":319}],323:[function(require,module,exports){
+},{"react":451}],455:[function(require,module,exports){
 var MainControllerView = require('./components/mainControllerView');
 var React = require('react');
 var ReactDom = require('react-dom');
@@ -32923,7 +38707,7 @@ window.onload = function () {
     ReactDom.render(React.createElement(MainControllerView, {templates: templates, saved_templates: saved_templates}), document.getElementById('app'));
 };
 
-},{"./components/mainControllerView":324,"react":319,"react-dom":163}],324:[function(require,module,exports){
+},{"./components/mainControllerView":456,"react":451,"react-dom":295}],456:[function(require,module,exports){
 var React = require('React');
 var TemplatePanel = require('./templateView');
 var TemplateCollectionModel = require('../models/templateCollectionModel');
@@ -32970,7 +38754,7 @@ var MainControllerView = React.createClass({displayName: "MainControllerView",
 
 module.exports = MainControllerView;
 
-},{"../models/templateCollectionModel":331,"../models/templateModel":332,"./templateView":329,"React":156,"underscore":320}],325:[function(require,module,exports){
+},{"../models/templateCollectionModel":463,"../models/templateModel":464,"./templateView":461,"React":156,"underscore":452}],457:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
@@ -33039,13 +38823,13 @@ var OptionsList = React.createClass({displayName: "OptionsList",
     },
 
     onRemove: function (index) {
-
+        this.props.onRemoved(index);
     },
 
     render: function () {
         function renderOption(option, index) {
             return (
-                React.createElement("div", {key: option, className: "form-group"}, 
+                React.createElement("li", {key: option, className: "list-group-item list-group-item-default"}, 
                     React.createElement(OptionListItem, {index: index, options: this.props.options, onRemove: this.onRemove})
                 )
             );
@@ -33065,7 +38849,9 @@ var OptionsList = React.createClass({displayName: "OptionsList",
                 ), 
 
                 React.createElement("div", null, 
-                    this.props.options.map(renderOption, this)
+                    React.createElement("ul", {className: "list-group"}, 
+                        this.props.options.map(renderOption, this)
+                    )
                 ), 
 
                 React.createElement("div", {className: "select-item-add"}, 
@@ -33098,7 +38884,7 @@ var OptionsList = React.createClass({displayName: "OptionsList",
 
 module.exports = OptionsList;
 
-},{"./optionsListItem":326,"classnames":161,"react":319,"react-dom":163,"underscore":320}],326:[function(require,module,exports){
+},{"./optionsListItem":458,"classnames":161,"react":451,"react-dom":295,"underscore":452}],458:[function(require,module,exports){
 var React = require('react');
 var classNames = require('classnames');
 var _ = require('underscore');
@@ -33125,16 +38911,17 @@ var OptionsListItem = React.createClass({displayName: "OptionsListItem",
     },
 
     render: function () {
-        var wrapperClasses = classNames({
-            'has-error': [null, undefined].indexOf(this.props.error) === -1,
-            'form-group': true
-        });
-
         return (
-            React.createElement("div", {className: wrapperClasses}, 
-                React.createElement("div", null, 
-                    React.createElement("span", null, this.state.value)
-                )
+            React.createElement("div", {className: "select-item-option"}, 
+                React.createElement("div", {className: "pull-left"}, 
+                    React.createElement("span", {className: "dont-break-out"}, this.state.value)
+                ), 
+
+                React.createElement("div", {className: "pull-right"}, 
+                    React.createElement("button", {className: "btn btn-default btn-xs", onClick: this.onRemove}, React.createElement("i", {className: "fa fa-close fa-fw"}), " ")
+                ), 
+
+                React.createElement("div", {className: "clearfix"})
             )
         );
     }
@@ -33142,23 +38929,67 @@ var OptionsListItem = React.createClass({displayName: "OptionsListItem",
 
 module.exports = OptionsListItem;
 
-},{"classnames":161,"react":319,"underscore":320}],327:[function(require,module,exports){
+},{"classnames":161,"react":451,"underscore":452}],459:[function(require,module,exports){
 var React = require('react');
 var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
 var TemplatePanelBody = require('./templatePanelBody');
+var DragSource = require('react-dnd').DragSource;
+var DropTarget = require('react-dnd').DropTarget;
+var ReactDOM = require('react-dom');
+
+var panelSource = {
+    beginDrag: function (props) {
+        return {
+            targetId: props.template.get('id'),
+            id: props.template.get('id'),
+            index: props.index
+        };
+    }
+};
+
+var panelTarget = {
+    hover: function (props, monitor, component) {
+        var dragIndex = monitor.getItem().index;
+        var hoverIndex = props.index;
+
+        if (dragIndex === hoverIndex) {
+            return;
+        }
+
+        var hoverBoundingRect = ReactDOM.findDOMNode(component).getBoundingClientRect();
+        var hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        var clientOffset = monitor.getClientOffset();
+        var hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+        if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+            return;
+        }
+
+        if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+            return;
+        }
+        props.movePanel(dragIndex, hoverIndex);
+        monitor.getItem().index = hoverIndex;
+    }
+};
 
 var TemplatePanel = React.createClass({displayName: "TemplatePanel",
     propTypes: {
+        connectDragSource: React.PropTypes.func.isRequired,
+        connectDropTarget: React.PropTypes.func.isRequired,
+        isDragging: React.PropTypes.bool.isRequired,
         template: React.PropTypes.object.isRequired,
-        onRemove: React.PropTypes.func.isRequired
+        onRemove: React.PropTypes.func.isRequired,
+        movePanel: React.PropTypes.func.isRequired,
+        index: React.PropTypes.number.isRequired
     },
 
     getInitialState: function () {
         return {
             isEditing: false,
             name: this.props.template.get('name'),
-            isValid: true
+            isValid: true,
         };
     },
 
@@ -33248,7 +39079,8 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
             'panel-success': this.state.isEditing && this.state.isValid,
             'panel-danger': !this.state.isValid,
             'panel-primary': !this.state.isEditing && this.state.isValid,
-            'panel': true
+            'panel': true,
+            'no-opacity': this.props.isDragging
         });
 
         var panelBodyClasses = classNames({
@@ -33256,7 +39088,10 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
             'hidden': !this.state.isEditing
         });
 
-        return (
+        var connectDragSource = this.props.connectDragSource;
+        var connectDropTarget = this.props.connectDropTarget;
+
+        return connectDragSource(connectDropTarget((
             React.createElement("div", {className: panelClasses}, 
                 React.createElement("div", {className: "panel-heading"}, 
                     React.createElement("div", {className: "pull-left"}, header), 
@@ -33274,14 +39109,25 @@ var TemplatePanel = React.createClass({displayName: "TemplatePanel",
                     React.createElement(TemplatePanelBody, {template: this.props.template})
                 )
             )
-        );
+        )));
     }
 });
+
+TemplatePanel = DropTarget('TemplatePanel', panelTarget, function (connect) {
+    return {connectDropTarget: connect.dropTarget()};
+})(TemplatePanel);
+
+TemplatePanel = DragSource('TemplatePanel', panelSource, function (connect, monitor) {
+    return {
+        connectDragSource: connect.dragSource(),
+        isDragging: monitor.isDragging()
+    };
+})(TemplatePanel);
 
 
 module.exports = TemplatePanel;
 
-},{"../../../pubsub-simple":333,"./templatePanelBody":328,"classnames":161,"react":319}],328:[function(require,module,exports){
+},{"../../../pubsub-simple":465,"./templatePanelBody":460,"classnames":161,"react":451,"react-dnd":231,"react-dom":295}],460:[function(require,module,exports){
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
@@ -33298,7 +39144,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
     },
 
     composeTemplateState: function () {
-        return {
+        var panelBodyState = {
             template: {
                 name: {
                     value: this.props.template.get('name'),
@@ -33311,13 +39157,19 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
                 placeholder: {
                     value: this.props.template.get('placeholder'),
                     error: this.props.template.get('placeholder_error')
-                },
-                options: {
-                    value: this.props.template.get('options'),
-                    error: this.props.template.get('options_error')
                 }
             }
         };
+
+        var type = this.props.template.get('type');
+        if (type === 2 || type === 5) {
+            panelBodyState.template.options = {
+                value: this.props.template.get('options'),
+                error: this.props.template.get('options_error')
+            }
+        }
+
+        return panelBodyState;
     },
 
     componentDidMount: function () {
@@ -33347,18 +39199,19 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
         this.props.template.trigger('change', this.props.template, {});
     },
 
-    onOptionRemoved: function (toRemove) {
+    onOptionRemoved: function (index) {
         var options = this.props.template.get('options');
-        options.splice(options.indexOf(toRemove), 1);
+        options.splice(index, 1);
         var error = this.props.template.preValidate('options', options);
         this.props.template.set({'options_error': error});
         this.props.template.trigger('change', this.props.template);
     },
 
     render: function () {
-
         var options = null;
-        if (this.state.template.type.value === 2) {
+        var type = this.state.template.type.value;
+
+        if (type === 2 || type === 5) {
             options = React.createElement(Options, {onAdded: this.onOptionAdded, 
                                onRemoved: this.onOptionRemoved, 
                                error: this.state.template.options.error, 
@@ -33404,10 +39257,12 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
 
 module.exports = TemplatePanelBody;
 
-},{"../../common/dropDown":321,"../../common/inputText":322,"../models/inputTypes":330,"./optionsList":325,"react":319}],329:[function(require,module,exports){
+},{"../../common/dropDown":453,"../../common/inputText":454,"../models/inputTypes":462,"./optionsList":457,"react":451}],461:[function(require,module,exports){
 var React = require('react');
 var TemplatePanel = require('./templatePanel');
 var TemplateModel = require('../models/templateModel');
+var HTML5Backend = require('react-dnd-html5-backend');
+var DragDropContext = require('react-dnd').DragDropContext;
 
 var TemplateView = React.createClass({displayName: "TemplateView",
     propTypes: {
@@ -33451,10 +39306,18 @@ var TemplateView = React.createClass({displayName: "TemplateView",
         this.templatesCollectionChanged();
     },
 
+    onMovePanel: function (dragIndex, hoverIndex) {
+        var templatesCollection = this.props.templates;
+        var dragCard = templatesCollection.models[hoverIndex];
+        templatesCollection.remove(dragCard, {silent: true});
+        templatesCollection.add(dragCard, {at: dragIndex});
+    },
+
     render: function () {
-        var showItem = function (template) {
+        var showItem = function (template, index) {
             return (
-                React.createElement(TemplatePanel, {onRemove: this.onRemove, key: template.get('id'), template: template})
+                React.createElement(TemplatePanel, {index: index, onRemove: this.onRemove, movePanel: this.onMovePanel, 
+                               key: template.get('id'), template: template})
             );
         };
 
@@ -33473,9 +39336,9 @@ var TemplateView = React.createClass({displayName: "TemplateView",
     }
 });
 
-module.exports = TemplateView;
+module.exports = DragDropContext(HTML5Backend)(TemplateView);
 
-},{"../models/templateModel":332,"./templatePanel":327,"react":319}],330:[function(require,module,exports){
+},{"../models/templateModel":464,"./templatePanel":459,"react":451,"react-dnd":231,"react-dnd-html5-backend":171}],462:[function(require,module,exports){
 module.exports = {
     getInputTypes: function () {
         return [
@@ -33488,7 +39351,7 @@ module.exports = {
     }
 };
 
-},{}],331:[function(require,module,exports){
+},{}],463:[function(require,module,exports){
 var TemplateModel = require('./templateModel');
 var Backbone = require('backbone');
 
@@ -33498,7 +39361,7 @@ var TemplatesCollectionModel = Backbone.Collection.extend({
 
 module.exports = TemplatesCollectionModel;
 
-},{"./templateModel":332,"backbone":158}],332:[function(require,module,exports){
+},{"./templateModel":464,"backbone":158}],464:[function(require,module,exports){
 var Backbone = require('backbone');
 var Validation = require('backbone-validation');
 var _ = require('underscore');
@@ -33527,7 +39390,7 @@ var TemplateModel = Backbone.Model.extend({
         ],
 
         options: function (value, attr, computedState) {
-            if (value.length === 0) {
+            if (value.length === 0 && computedState.type === 2 || computedState.type === 5) {
                 return 'Must have at least one select list option';
             }
         }
@@ -33536,7 +39399,7 @@ var TemplateModel = Backbone.Model.extend({
 
 module.exports = TemplateModel;
 
-},{"backbone":158,"backbone-validation":157,"underscore":320}],333:[function(require,module,exports){
+},{"backbone":158,"backbone-validation":157,"underscore":452}],465:[function(require,module,exports){
 var pubsub = {};
 
 (function(q) {
@@ -33587,4 +39450,4 @@ var pubsub = {};
 
 module.exports = pubsub;
 
-},{}]},{},[323]);
+},{}]},{},[455]);

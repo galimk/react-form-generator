@@ -44,12 +44,29 @@
 .custom-fields-component .header-input {
   margin-right: 50px;
 }
-.custom-fields-component .select-item {
-  font-size: 14px !important;
-  margin-right: 5px;
-  margin-top: 5px;
-  display: inline-block;
+.custom-fields-component .select-item-option {
+  width: 100%;
 }
 .custom-fields-component .select-item-add {
   margin-top: 10px;
+}
+.custom-fields-component .list-group {
+  margin-bottom: 5px;
+}
+.custom-fields-component .dont-break-out {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -ms-word-break: break-all;
+  /* This is the dangerous one in WebKit, as it breaks things wherever */
+  word-break: break-all;
+  /* Instead use this non-standard one: */
+  word-break: break-word;
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+.custom-fields-component .no-opacity {
+  opacity: 0;
 }
