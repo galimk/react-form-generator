@@ -1,12 +1,9 @@
 .custom-fields-component button.action-button {
   width: 100% !important;
 }
-@media screen and (min-width: 992px) {
-  .custom-fields-component .right {
-    padding-left: 5px !important;
-  }
-  .custom-fields-component .left {
-    padding-right: 5px !important;
+@media screen and (max-width: 992px) {
+  .custom-fields-component .when-collapsed {
+    margin-top: 10px;
   }
 }
 @media screen and (max-width: 991px) {

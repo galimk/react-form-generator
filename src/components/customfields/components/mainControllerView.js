@@ -1,7 +1,8 @@
 var React = require('React');
-var TemplatePanel = require('./templateView');
+var TemplateView = require('./templateView');
 var TemplateCollectionModel = require('../models/templateCollectionModel');
 var TemplateModel = require('../models/templateModel');
+var PreviewPanel = require('./previewPanel');
 var _ = require('underscore');
 
 var TemplatesCollection = new TemplateCollectionModel();
@@ -15,10 +16,10 @@ var MainControllerView = React.createClass({
     getInitialState: function () {
         this.populateTemplateCollection();
 
-        return { templates: TemplatesCollection };
+        return {templates: TemplatesCollection};
     },
 
-    populateTemplateCollection: function() {
+    populateTemplateCollection: function () {
         _.each(this.props.templates, function (template) {
             var templateModel = new TemplateModel(template);
             TemplatesCollection.add(templateModel);
@@ -33,8 +34,11 @@ var MainControllerView = React.createClass({
         return (
             <div className="container custom-fields-component">
                 <div className="row">
-                    <div className="col-md-6">
-                        <TemplatePanel templates={TemplatesCollection} />
+                    <div className="col-md-4">
+                        <TemplateView templates={TemplatesCollection}/>
+                    </div>
+                    <div className="col-md-8 when-collapsed">
+                        <PreviewPanel templates={TemplatesCollection}/>
                     </div>
                 </div>
             </div>

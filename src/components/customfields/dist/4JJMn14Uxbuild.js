@@ -38709,9 +38709,10 @@ window.onload = function () {
 
 },{"./components/mainControllerView":456,"react":451,"react-dom":295}],456:[function(require,module,exports){
 var React = require('React');
-var TemplatePanel = require('./templateView');
+var TemplateView = require('./templateView');
 var TemplateCollectionModel = require('../models/templateCollectionModel');
 var TemplateModel = require('../models/templateModel');
+var PreviewPanel = require('./previewPanel');
 var _ = require('underscore');
 
 var TemplatesCollection = new TemplateCollectionModel();
@@ -38725,10 +38726,10 @@ var MainControllerView = React.createClass({displayName: "MainControllerView",
     getInitialState: function () {
         this.populateTemplateCollection();
 
-        return { templates: TemplatesCollection };
+        return {templates: TemplatesCollection};
     },
 
-    populateTemplateCollection: function() {
+    populateTemplateCollection: function () {
         _.each(this.props.templates, function (template) {
             var templateModel = new TemplateModel(template);
             TemplatesCollection.add(templateModel);
@@ -38743,8 +38744,11 @@ var MainControllerView = React.createClass({displayName: "MainControllerView",
         return (
             React.createElement("div", {className: "container custom-fields-component"}, 
                 React.createElement("div", {className: "row"}, 
-                    React.createElement("div", {className: "col-md-6"}, 
-                        React.createElement(TemplatePanel, {templates: TemplatesCollection})
+                    React.createElement("div", {className: "col-md-4"}, 
+                        React.createElement(TemplateView, {templates: TemplatesCollection})
+                    ), 
+                    React.createElement("div", {className: "col-md-8 when-collapsed"}, 
+                        React.createElement(PreviewPanel, {templates: TemplatesCollection})
                     )
                 )
             )
@@ -38754,7 +38758,7 @@ var MainControllerView = React.createClass({displayName: "MainControllerView",
 
 module.exports = MainControllerView;
 
-},{"../models/templateCollectionModel":463,"../models/templateModel":464,"./templateView":461,"React":156,"underscore":452}],457:[function(require,module,exports){
+},{"../models/templateCollectionModel":464,"../models/templateModel":465,"./previewPanel":459,"./templateView":462,"React":156,"underscore":452}],457:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
@@ -38930,6 +38934,57 @@ var OptionsListItem = React.createClass({displayName: "OptionsListItem",
 module.exports = OptionsListItem;
 
 },{"classnames":161,"react":451,"underscore":452}],459:[function(require,module,exports){
+var React = require('react');
+var InputTypes = require('../models/inputTypes');
+
+var PreviewPanel = React.createClass({displayName: "PreviewPanel",
+    propTypes: {
+        templates: React.PropTypes.object.isRequired
+    },
+
+    getInitialState: function () {
+        return {
+            templates: this.props.templates
+        };
+    },
+
+    componentDidMount: function () {
+        this.props.templates.on('change rest add remove', this.templatesCollectionChanged, this);
+
+    },
+
+    componentWillUnmount: function () {
+        this.props.templates.off('change rest add remove', this.templatesCollectionChanged, this);
+    },
+
+    templatesCollectionChanged: function () {
+        this.setState({
+            templates: this.props.templates
+        });
+    },
+
+    render: function () {
+        var getComponent = function (model) {
+            var component = InputTypes.getComponent(model);
+            return React.createElement("div", {key: model.get('id')}, component)
+        };
+
+        return (
+            React.createElement("div", {className: "panel panel-primary"}, 
+                React.createElement("div", {className: "panel-heading"}, 
+                    "Preview"
+                ), 
+                React.createElement("div", {className: "panel-body"}, 
+                    this.props.templates.map(getComponent, this)
+                )
+            )
+        );
+    }
+});
+
+module.exports = PreviewPanel;
+
+},{"../models/inputTypes":463,"react":451}],460:[function(require,module,exports){
 var React = require('react');
 var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
@@ -39133,7 +39188,7 @@ TemplatePanel = DragSource('TemplatePanel', panelSource, function (connect, moni
 
 module.exports = TemplatePanel;
 
-},{"../../../pubsub-simple":465,"./templatePanelBody":460,"classnames":161,"react":451,"react-dnd":231,"react-dom":295}],460:[function(require,module,exports){
+},{"../../../pubsub-simple":466,"./templatePanelBody":461,"classnames":161,"react":451,"react-dnd":231,"react-dom":295}],461:[function(require,module,exports){
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
@@ -39263,7 +39318,7 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
 
 module.exports = TemplatePanelBody;
 
-},{"../../common/dropDown":453,"../../common/inputText":454,"../models/inputTypes":462,"./optionsList":457,"react":451}],461:[function(require,module,exports){
+},{"../../common/dropDown":453,"../../common/inputText":454,"../models/inputTypes":463,"./optionsList":457,"react":451}],462:[function(require,module,exports){
 var React = require('react');
 var TemplatePanel = require('./templatePanel');
 var TemplateModel = require('../models/templateModel');
@@ -39344,20 +39399,72 @@ var TemplateView = React.createClass({displayName: "TemplateView",
 
 module.exports = DragDropContext(HTML5Backend)(TemplateView);
 
-},{"../models/templateModel":464,"./templatePanel":459,"react":451,"react-dnd":231,"react-dnd-html5-backend":171}],462:[function(require,module,exports){
+},{"../models/templateModel":465,"./templatePanel":460,"react":451,"react-dnd":231,"react-dnd-html5-backend":171}],463:[function(require,module,exports){
+var _ = require('underscore');
+var React = require('react');
+var InputText = require('../../common/inputText');
+var DropDown = require('../../common/dropDown');
+
+var inputTypes = [
+    {text: 'Text Box', key: 1, createComponent: createTextBox},
+    {text: 'Select List', key: 2, createComponent: createSelectList},
+    {text: 'Checkbox', key: 3, createComponent: createCheckBox},
+    {text: 'Text Area', key: 4, createComponent: createTextArea},
+    {text: 'Checkbox List', key: 5, createComponent: createCheckBoxList}
+];
+
+function createTextBox(model) {
+    return React.createElement(InputText, {name: model.get('Id'), 
+                      label: model.get('name'), 
+                      placeholder: model.get('placeholder'), value: ""})
+}
+
+function createSelectList(model) {
+    var options = [];
+    var modelOptions = model.get('options');
+    _.each(modelOptions, function (option) {
+        options.push({key: option, text: option});
+    });
+
+    return React.createElement(DropDown, {name: model.get('Id'), 
+                     label: model.get('name'), 
+                     placeholder: model.get('placeholder'), 
+                     list: options, 
+                     itemKey: "key", 
+                     itemText: "text", 
+                     value: ""})
+}
+
+function createCheckBox(model) {
+    return React.createElement("div", null, " check box component ")
+}
+
+function createTextArea(model) {
+    return React.createElement("div", null, " text area component ")
+}
+
+function createCheckBoxList(model) {
+    return React.createElement("div", null, " check box component ")
+}
+
 module.exports = {
     getInputTypes: function () {
-        return [
-            {text: 'Text Box', key: 1},
-            {text: 'Select List', key: 2},
-            {text: 'Checkbox', key: 3},
-            {text: 'Text Area', key: 4},
-            {text: 'Checkbox List', key: 5}
-        ];
+        return inputTypes;
+    },
+    getComponent: function (model) {
+        var type = model.get('type');
+        var found = _.filter(inputTypes, function (term) {
+            return term.key === type;
+        });
+        if (found.length === 0) {
+            return null;
+        } else {
+            return found[0].createComponent(model);
+        }
     }
 };
 
-},{}],463:[function(require,module,exports){
+},{"../../common/dropDown":453,"../../common/inputText":454,"react":451,"underscore":452}],464:[function(require,module,exports){
 var TemplateModel = require('./templateModel');
 var Backbone = require('backbone');
 
@@ -39367,7 +39474,7 @@ var TemplatesCollectionModel = Backbone.Collection.extend({
 
 module.exports = TemplatesCollectionModel;
 
-},{"./templateModel":464,"backbone":158}],464:[function(require,module,exports){
+},{"./templateModel":465,"backbone":158}],465:[function(require,module,exports){
 var Backbone = require('backbone');
 var Validation = require('backbone-validation');
 var _ = require('underscore');
@@ -39405,7 +39512,7 @@ var TemplateModel = Backbone.Model.extend({
 
 module.exports = TemplateModel;
 
-},{"backbone":158,"backbone-validation":157,"underscore":452}],465:[function(require,module,exports){
+},{"backbone":158,"backbone-validation":157,"underscore":452}],466:[function(require,module,exports){
 var pubsub = {};
 
 (function(q) {
