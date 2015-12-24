@@ -2,6 +2,7 @@ var _ = require('underscore');
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
+var CheckboxList = require('../components/checkboxList');
 
 var inputTypes = [
     {text: 'Text Box', key: 1, createComponent: createTextBox},
@@ -42,7 +43,7 @@ function createTextArea(model) {
 }
 
 function createCheckBoxList(model) {
-    return <div> check box component </div>
+    return <CheckboxList template={model}/>
 }
 
 module.exports = {

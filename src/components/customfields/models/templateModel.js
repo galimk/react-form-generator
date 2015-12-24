@@ -9,7 +9,7 @@ var TemplateModel = Backbone.Model.extend({
         name: '',
         type: 1,
         placeholder: '',
-        is_required: false,
+        required: false,
         options: []
     },
 
@@ -26,7 +26,8 @@ var TemplateModel = Backbone.Model.extend({
         ],
 
         options: function (value, attr, computedState) {
-            if (value.length === 0 && computedState.type === 2 || computedState.type === 5) {
+            if (value.length === 0 && (computedState.type === 2 || computedState.type === 5)) {
+                debugger;
                 return 'Must have at least one select list option';
             }
         }
