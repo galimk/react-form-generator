@@ -4,6 +4,16 @@ var TemplateModel = require('../models/templateModel');
 var HTML5Backend = require('react-dnd-html5-backend');
 var DragDropContext = require('react-dnd').DragDropContext;
 
+function _getLastModel(models){
+    var max = 0;
+    for(var i = 0; i <= models.length - 1; i++){
+        if(i > max) {
+            max = i;
+        }
+    }
+    return max + 1;
+}
+
 var TemplateView = React.createClass({
     propTypes: {
         templates: React.PropTypes.object.isRequired
@@ -12,11 +22,11 @@ var TemplateView = React.createClass({
     addNewField: function () {
         var templates = this.props.templates;
 
-        var lastId = 1;
-
         if (templates.length > 0) {
-            latestId = templates.models[templates.length - 1].get('id');
+            var latestId = _getLastModel(templates.models);
             latestId += 1;
+            //latestId = templates.models[templates.length - 1].get('id');
+            //latestId += 1;
         }
 
         templates.add(new TemplateModel({
