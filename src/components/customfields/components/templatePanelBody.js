@@ -1,6 +1,7 @@
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
+var CheckBox = require('../../common/checkbox');
 var InputTypes = require('../models/inputTypes');
 var Options = require('./optionsList');
 
@@ -27,7 +28,8 @@ var TemplatePanelBody = React.createClass({
                 placeholder: {
                     value: this.props.template.get('placeholder'),
                     error: this.props.template.get('placeholder_error')
-                }
+                },
+                required: this.props.template.get('required')
             }
         };
 
@@ -77,6 +79,12 @@ var TemplatePanelBody = React.createClass({
         this.props.template.trigger('change', this.props.template);
     },
 
+    onRequiredChanged: function () {
+        console.log('here!');
+        var required = !this.state.template.required;
+        this.props.template.set('required', required);
+    },
+
     render: function () {
         var options = null;
         var type = this.state.template.type.value;
@@ -119,6 +127,11 @@ var TemplatePanelBody = React.createClass({
                 <div>
                     {options}
                 </div>
+
+                <CheckBox label="Required"
+                          onChange={this.onRequiredChanged}
+                          checked={this.state.template.required}
+                          name={"required_" + this.props.template.get("id")}/>
             </div>
         );
     }

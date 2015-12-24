@@ -38545,6 +38545,38 @@ arguments[4][156][0].apply(exports,arguments)
 },{"./lib/React":319,"dup":156}],452:[function(require,module,exports){
 arguments[4][159][0].apply(exports,arguments)
 },{"dup":159}],453:[function(require,module,exports){
+var React = require('react');
+
+var CheckBox = React.createClass({displayName: "CheckBox",
+    propTypes: {
+        label: React.PropTypes.string.isRequired,
+        name: React.PropTypes.string.isRequired,
+        onChange: React.PropTypes.func.isRequired,
+        checked: React.PropTypes.bool.isRequired
+    },
+
+    onChangeInternal: function () {
+        this.props.onChange(this.props.name);
+    },
+
+    render: function () {
+        return (
+            React.createElement("div", {className: "checkbox checkbox-success"}, 
+                React.createElement("input", {type: "checkbox", 
+                       id: this.props.name, 
+                       name: this.props.name, 
+                       checked: this.props.checked, 
+                       onChange: this.onChangeInternal, 
+                       className: "styled styled-success"}), 
+                React.createElement("label", {htmlFor: this.props.name}, this.props.label)
+            )
+        );
+    }
+});
+
+module.exports = CheckBox;
+
+},{"react":451}],454:[function(require,module,exports){
 "use strict";
 
 var React = require('react');
@@ -38607,7 +38639,7 @@ var DropDown = React.createClass({displayName: "DropDown",
 
 module.exports = DropDown;
 
-},{"react":451}],454:[function(require,module,exports){
+},{"react":451}],455:[function(require,module,exports){
 var React = require('react');
 
 var InputText = React.createClass({displayName: "InputText",
@@ -38656,7 +38688,7 @@ var InputText = React.createClass({displayName: "InputText",
 
 module.exports = InputText;
 
-},{"react":451}],455:[function(require,module,exports){
+},{"react":451}],456:[function(require,module,exports){
 var MainControllerView = require('./components/mainControllerView');
 var React = require('react');
 var ReactDom = require('react-dom');
@@ -38707,7 +38739,91 @@ window.onload = function () {
     ReactDom.render(React.createElement(MainControllerView, {templates: templates, saved_templates: saved_templates}), document.getElementById('app'));
 };
 
-},{"./components/mainControllerView":456,"react":451,"react-dom":295}],456:[function(require,module,exports){
+},{"./components/mainControllerView":458,"react":451,"react-dom":295}],457:[function(require,module,exports){
+var React = require('React');
+var Checkbox = require('../../common/checkbox');
+var _ = require('underscore');
+
+var CheckboxList = React.createClass({displayName: "CheckboxList",
+    propTypes: {
+        template: React.PropTypes.object.isRequired,
+        onChange: React.PropTypes.func
+    },
+
+    checkedItems: [],
+
+    componentDidMount: function () {
+        this.props.template.on('change', this.templateChanged, this);
+    },
+
+    componentWillUnmount: function () {
+        this.props.template.off('change', this.templateChanged, this);
+    },
+
+    composeState: function () {
+        var itemsArray = [];
+        var modelOptions = this.props.template.get('options');
+
+        for (var i = 0; i < modelOptions.length; i++) {
+            var id = 'chk_' + i;
+            itemsArray.push({
+                id: id,
+                checked: this.checkedItems.indexOf(id) !== -1,
+                text: modelOptions[i]
+            });
+        }
+
+        return {
+            items: itemsArray,
+            label: this.props.template.get('name')
+        };
+    },
+
+    templateChanged: function () {
+        this.setState(this.composeState());
+    },
+
+    getInitialState: function () {
+        return this.composeState();
+    },
+
+    onItemCheckedChanged: function (id) {
+        var itemIndex = this.checkedItems.indexOf(id);
+
+        if (itemIndex === -1) {
+            this.checkedItems.push(id);
+        } else {
+            this.checkedItems.splice(itemIndex, 1);
+        }
+
+        this.setState(this.composeState());
+    },
+
+    render: function () {
+        var showItem = function (item) {
+            return (
+                React.createElement(Checkbox, {key: item.id, name: item.id, checked: item.checked, label: item.text, 
+                          onChange: this.onItemCheckedChanged})
+            )
+        };
+
+        return (
+            React.createElement("div", {className: "form-group"}, 
+                React.createElement("label", null, this.state.label), 
+
+                React.createElement("div", null, 
+                    this.state.items.map(showItem, this)
+                )
+
+            )
+
+        );
+    }
+});
+
+module.exports = CheckboxList;
+
+},{"../../common/checkbox":453,"React":156,"underscore":452}],458:[function(require,module,exports){
 var React = require('React');
 var TemplateView = require('./templateView');
 var TemplateCollectionModel = require('../models/templateCollectionModel');
@@ -38758,7 +38874,7 @@ var MainControllerView = React.createClass({displayName: "MainControllerView",
 
 module.exports = MainControllerView;
 
-},{"../models/templateCollectionModel":464,"../models/templateModel":465,"./previewPanel":459,"./templateView":462,"React":156,"underscore":452}],457:[function(require,module,exports){
+},{"../models/templateCollectionModel":466,"../models/templateModel":467,"./previewPanel":461,"./templateView":464,"React":156,"underscore":452}],459:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
@@ -38888,7 +39004,7 @@ var OptionsList = React.createClass({displayName: "OptionsList",
 
 module.exports = OptionsList;
 
-},{"./optionsListItem":458,"classnames":161,"react":451,"react-dom":295,"underscore":452}],458:[function(require,module,exports){
+},{"./optionsListItem":460,"classnames":161,"react":451,"react-dom":295,"underscore":452}],460:[function(require,module,exports){
 var React = require('react');
 var classNames = require('classnames');
 var _ = require('underscore');
@@ -38933,7 +39049,7 @@ var OptionsListItem = React.createClass({displayName: "OptionsListItem",
 
 module.exports = OptionsListItem;
 
-},{"classnames":161,"react":451,"underscore":452}],459:[function(require,module,exports){
+},{"classnames":161,"react":451,"underscore":452}],461:[function(require,module,exports){
 var React = require('react');
 var InputTypes = require('../models/inputTypes');
 
@@ -38984,7 +39100,7 @@ var PreviewPanel = React.createClass({displayName: "PreviewPanel",
 
 module.exports = PreviewPanel;
 
-},{"../models/inputTypes":463,"react":451}],460:[function(require,module,exports){
+},{"../models/inputTypes":465,"react":451}],462:[function(require,module,exports){
 var React = require('react');
 var PubSub = require('../../../pubsub-simple');
 var classNames = require('classnames');
@@ -39188,10 +39304,11 @@ TemplatePanel = DragSource('TemplatePanel', panelSource, function (connect, moni
 
 module.exports = TemplatePanel;
 
-},{"../../../pubsub-simple":466,"./templatePanelBody":461,"classnames":161,"react":451,"react-dnd":231,"react-dom":295}],461:[function(require,module,exports){
+},{"../../../pubsub-simple":468,"./templatePanelBody":463,"classnames":161,"react":451,"react-dnd":231,"react-dom":295}],463:[function(require,module,exports){
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
+var CheckBox = require('../../common/checkbox');
 var InputTypes = require('../models/inputTypes');
 var Options = require('./optionsList');
 
@@ -39218,7 +39335,8 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
                 placeholder: {
                     value: this.props.template.get('placeholder'),
                     error: this.props.template.get('placeholder_error')
-                }
+                },
+                required: this.props.template.get('required')
             }
         };
 
@@ -39268,6 +39386,12 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
         this.props.template.trigger('change', this.props.template);
     },
 
+    onRequiredChanged: function () {
+        console.log('here!');
+        var required = !this.state.template.required;
+        this.props.template.set('required', required);
+    },
+
     render: function () {
         var options = null;
         var type = this.state.template.type.value;
@@ -39309,7 +39433,12 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
 
                 React.createElement("div", null, 
                     options
-                )
+                ), 
+
+                React.createElement(CheckBox, {label: "Required", 
+                          onChange: this.onRequiredChanged, 
+                          checked: this.state.template.required, 
+                          name: "required_" + this.props.template.get("id")})
             )
         );
     }
@@ -39318,12 +39447,22 @@ var TemplatePanelBody = React.createClass({displayName: "TemplatePanelBody",
 
 module.exports = TemplatePanelBody;
 
-},{"../../common/dropDown":453,"../../common/inputText":454,"../models/inputTypes":463,"./optionsList":457,"react":451}],462:[function(require,module,exports){
+},{"../../common/checkbox":453,"../../common/dropDown":454,"../../common/inputText":455,"../models/inputTypes":465,"./optionsList":459,"react":451}],464:[function(require,module,exports){
 var React = require('react');
 var TemplatePanel = require('./templatePanel');
 var TemplateModel = require('../models/templateModel');
 var HTML5Backend = require('react-dnd-html5-backend');
 var DragDropContext = require('react-dnd').DragDropContext;
+
+function _getLastModel(models){
+    var max = 0;
+    for(var i = 0; i <= models.length - 1; i++){
+        if(i > max) {
+            max = i;
+        }
+    }
+    return max + 1;
+}
 
 var TemplateView = React.createClass({displayName: "TemplateView",
     propTypes: {
@@ -39333,11 +39472,11 @@ var TemplateView = React.createClass({displayName: "TemplateView",
     addNewField: function () {
         var templates = this.props.templates;
 
-        var lastId = 1;
-
         if (templates.length > 0) {
-            latestId = templates.models[templates.length - 1].get('id');
+            var latestId = _getLastModel(templates.models);
             latestId += 1;
+            //latestId = templates.models[templates.length - 1].get('id');
+            //latestId += 1;
         }
 
         templates.add(new TemplateModel({
@@ -39399,11 +39538,12 @@ var TemplateView = React.createClass({displayName: "TemplateView",
 
 module.exports = DragDropContext(HTML5Backend)(TemplateView);
 
-},{"../models/templateModel":465,"./templatePanel":460,"react":451,"react-dnd":231,"react-dnd-html5-backend":171}],463:[function(require,module,exports){
+},{"../models/templateModel":467,"./templatePanel":462,"react":451,"react-dnd":231,"react-dnd-html5-backend":171}],465:[function(require,module,exports){
 var _ = require('underscore');
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
+var CheckboxList = require('../components/checkboxList');
 
 var inputTypes = [
     {text: 'Text Box', key: 1, createComponent: createTextBox},
@@ -39444,7 +39584,7 @@ function createTextArea(model) {
 }
 
 function createCheckBoxList(model) {
-    return React.createElement("div", null, " check box component ")
+    return React.createElement(CheckboxList, {template: model})
 }
 
 module.exports = {
@@ -39464,7 +39604,7 @@ module.exports = {
     }
 };
 
-},{"../../common/dropDown":453,"../../common/inputText":454,"react":451,"underscore":452}],464:[function(require,module,exports){
+},{"../../common/dropDown":454,"../../common/inputText":455,"../components/checkboxList":457,"react":451,"underscore":452}],466:[function(require,module,exports){
 var TemplateModel = require('./templateModel');
 var Backbone = require('backbone');
 
@@ -39474,7 +39614,7 @@ var TemplatesCollectionModel = Backbone.Collection.extend({
 
 module.exports = TemplatesCollectionModel;
 
-},{"./templateModel":465,"backbone":158}],465:[function(require,module,exports){
+},{"./templateModel":467,"backbone":158}],467:[function(require,module,exports){
 var Backbone = require('backbone');
 var Validation = require('backbone-validation');
 var _ = require('underscore');
@@ -39486,7 +39626,7 @@ var TemplateModel = Backbone.Model.extend({
         name: '',
         type: 1,
         placeholder: '',
-        is_required: false,
+        required: false,
         options: []
     },
 
@@ -39503,7 +39643,8 @@ var TemplateModel = Backbone.Model.extend({
         ],
 
         options: function (value, attr, computedState) {
-            if (value.length === 0 && computedState.type === 2 || computedState.type === 5) {
+            if (value.length === 0 && (computedState.type === 2 || computedState.type === 5)) {
+                debugger;
                 return 'Must have at least one select list option';
             }
         }
@@ -39512,7 +39653,7 @@ var TemplateModel = Backbone.Model.extend({
 
 module.exports = TemplateModel;
 
-},{"backbone":158,"backbone-validation":157,"underscore":452}],466:[function(require,module,exports){
+},{"backbone":158,"backbone-validation":157,"underscore":452}],468:[function(require,module,exports){
 var pubsub = {};
 
 (function(q) {
@@ -39563,4 +39704,4 @@ var pubsub = {};
 
 module.exports = pubsub;
 
-},{}]},{},[455]);
+},{}]},{},[456]);
