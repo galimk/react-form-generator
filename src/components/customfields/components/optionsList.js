@@ -50,7 +50,7 @@ var OptionsList = React.createClass({
     },
 
     inputKeyDownHandler: function (e) {
-        if (this.state.addValidationError !== null) {
+        if (this.state.addValidationError !== null || this.state.value.trim().length === 0) {
             return;
         }
         if (e.keyCode == 13) {
@@ -83,7 +83,7 @@ var OptionsList = React.createClass({
             'has-error': this.props.error && this.props.error.length > 0 || this.state.addValidationError !== null
         });
 
-        var disabled = this.state.addValidationError !== null;
+        var disabled = this.state.addValidationError !== null || this.state.value.trim().length === 0;
 
         return (
             <div className={wrapperClass}>

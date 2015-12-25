@@ -4,6 +4,7 @@ var DropDown = require('../../common/dropDown');
 var CheckBox = require('../../common/checkbox');
 var InputTypes = require('../models/inputTypes');
 var Options = require('./optionsList');
+var MaxLengthMinLength = require('./maxLengthMinLength');
 
 var TemplatePanelBody = React.createClass({
     propTypes: {
@@ -80,20 +81,24 @@ var TemplatePanelBody = React.createClass({
     },
 
     onRequiredChanged: function () {
-        console.log('here!');
         var required = !this.state.template.required;
         this.props.template.set('required', required);
     },
 
     render: function () {
         var options = null;
+        var minMax = null;
         var type = this.state.template.type.value;
 
-        if (type === 2 || type === 5) {
+        if (InputTypes.supportsListItems(type)) {
             options = <Options onAdded={this.onOptionAdded}
                                onRemoved={this.onOptionRemoved}
                                error={this.state.template.options.error}
                                options={this.state.template.options.value}/>;
+        }
+
+        if (InputTypes.supportsMinMax(type)) {
+            minMax = <MaxLengthMinLength template={this.props.template} />
         }
 
         return (
@@ -128,10 +133,16 @@ var TemplatePanelBody = React.createClass({
                     {options}
                 </div>
 
-                <CheckBox label="Required"
-                          onChange={this.onRequiredChanged}
-                          checked={this.state.template.required}
-                          name={"required_" + this.props.template.get("id")}/>
+                <div>
+                    {minMax}
+                </div>
+
+                <div className="bold-checkbox">
+                    <CheckBox label="Required"
+                              onChange={this.onRequiredChanged}
+                              checked={this.state.template.required}
+                              name={"required_" + this.props.template.get("id")}/>
+                </div>
             </div>
         );
     }

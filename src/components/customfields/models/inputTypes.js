@@ -50,6 +50,12 @@ module.exports = {
     getInputTypes: function () {
         return inputTypes;
     },
+    supportsMinMax: function (type) {
+        return type === 1 || type === 4;
+    },
+    supportsListItems: function (type) {
+        return type === 2 || type === 5;
+    },
     getComponent: function (model) {
         var type = model.get('type');
         var found = _.filter(inputTypes, function (term) {
