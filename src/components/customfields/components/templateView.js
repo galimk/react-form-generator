@@ -5,13 +5,14 @@ var HTML5Backend = require('react-dnd-html5-backend');
 var DragDropContext = require('react-dnd').DragDropContext;
 
 function _getLastModel(models){
-    var max = 0;
-    for(var i = 0; i <= models.length - 1; i++){
-        if(i > max) {
-            max = i;
+    var maxId = 0;
+    for(var tModel in models){
+        var modelId = models[tModel].get('id');
+        if (modelId > maxId){
+            maxId = modelId;
         }
     }
-    return max + 1;
+    return maxId + 1;
 }
 
 var TemplateView = React.createClass({
@@ -24,9 +25,6 @@ var TemplateView = React.createClass({
 
         if (templates.length > 0) {
             var latestId = _getLastModel(templates.models);
-            latestId += 1;
-            //latestId = templates.models[templates.length - 1].get('id');
-            //latestId += 1;
         }
 
         templates.add(new TemplateModel({
