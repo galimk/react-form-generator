@@ -54,6 +54,8 @@ module.exports = function (gulp) {
         gulp.src(ModulesPath.BootstrapMinFile)
             .pipe(gulp.dest(MainPath.DistDir));
 
+        console.log()
+
         gulp.src(ModulesPath.BootstrapThemeMinFile)
             .pipe(gulp.dest(MainPath.DistDir));
 

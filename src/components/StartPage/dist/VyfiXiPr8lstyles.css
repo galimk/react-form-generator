@@ -1,0 +1,69 @@
+.custom-fields-component button.action-button {
+  width: 100% !important;
+}
+@media screen and (max-width: 992px) {
+  .custom-fields-component .when-collapsed {
+    margin-top: 10px;
+  }
+}
+@media screen and (max-width: 991px) {
+  .custom-fields-component .right {
+    margin-top: 5px !important;
+  }
+  .custom-fields-component .left {
+    margin-bottom: 5px !important;
+  }
+}
+.custom-fields-component .action-button-panel {
+  margin-top: 10px;
+}
+.custom-fields-component .template {
+  color: #fff;
+  background-color: #337ab7;
+}
+.custom-fields-component .template-header-editing {
+  background-color: #449d44;
+}
+.custom-fields-component .template-header {
+  padding: 10px;
+  position: relative;
+}
+.custom-fields-component .edit {
+  position: absolute;
+  right: 35px;
+  top: 12px;
+}
+.custom-fields-component .delete {
+  position: absolute;
+  right: 15px;
+  top: 12px;
+}
+.custom-fields-component .header-input {
+  margin-right: 50px;
+}
+.custom-fields-component .select-item-option {
+  width: 100%;
+}
+.custom-fields-component .select-item-add {
+  margin-top: 10px;
+}
+.custom-fields-component .list-group {
+  margin-bottom: 5px;
+}
+.custom-fields-component .dont-break-out {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -ms-word-break: break-all;
+  /* This is the dangerous one in WebKit, as it breaks things wherever */
+  word-break: break-all;
+  /* Instead use this non-standard one: */
+  word-break: break-word;
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+.custom-fields-component .no-opacity {
+  opacity: 0;
+}
