@@ -24,8 +24,8 @@ function _returnPathObject(basePath, configPaths){
 var bundle_id = shortId.generate();
 var styles_id = shortId.generate();
 
-var MainPath = _returnPathObject('./src/components/StartPage/',{
-    MainJsFile:'Main.js',
+var MainPath = _returnPathObject('./src/components/shell/',{
+    MainJsFile:'main.js',
     DistDir: 'dist',
     FontsFolder: 'dist/fonts',
     IndexHtmlFile: 'index.html',
@@ -42,14 +42,14 @@ var ModulesPath = _returnPathObject('./node_modules/', {
 });
 
 module.exports = function(gulp){
-  gulp.task('StartPage-clean', function(){
-     gulp.src(MainPath.DistDir + '/*Build.js', {read: false})
+  gulp.task('shell-clean', function(){
+     gulp.src(MainPath.DistDir + '/*build.js', {read: false})
       .pipe(clean());
       return gulp.src(MainPath.DistDir + '/*styles.css', {read: false})
       .pipe(clean());
   });
 
-    gulp.task('StartPage-files-copy', function() {
+    gulp.task('shell-files-copy', function() {
         gulp.src(MainPath.LessFile).pipe(less())
             .pipe(rename({prefix: styles_id}))
             .pipe(gulp.dest(MainPath.DistDir));
@@ -67,29 +67,29 @@ module.exports = function(gulp){
             .pipe(gulp.dest(MainPath.DistDir));
 
         return gulp.src(MainPath.IndexHtmlFile)
-            .pipe(replace('{Buildjs}', bundle_id + 'Build.js'))
+            .pipe(replace('{buildjs}', bundle_id + 'build.js'))
             .pipe(replace('{stylescss}', styles_id + 'styles.css'))
             .pipe(gulp.dest(MainPath.DistDir));
     });
 
-    gulp.task('StartPage-build-js', function(){
+    gulp.task('shell-build-js', function(){
        return browserify(MainPath.MainJsFile)
         .transform('reactify')
         .on('error', console.error.bind(console))
         .bundle()
-        .pipe(source('Build.js'))
+        .pipe(source('build.js'))
         .pipe(rename({prefix: bundle_id}))
         .pipe(gulp.dest(MainPath.DistDir));
     });
 
-    gulp.task('StartPage-reload', function(callback){
+    gulp.task('shell-reload', function(callback){
        gulp.src(MainPath.IndexHtmlFile).pipe(connect.reload());
         fs.readFile(Mainpapth.IndexHtmlFile, function(err, file){
             callback();
         });
     });
 
-    gulp.task('StartPage-connect', function(){
+    gulp.task('shell-connect', function(){
         return connect.server({
             root: MainPath.DistDir,
             port: 8080,
@@ -98,7 +98,7 @@ module.exports = function(gulp){
         });
     });
 
-    gulp.task('StartPage-open', ['Startpage-connect'], function(callback){
+    gulp.task('shell-open', ['shell-connect'], function(callback){
        gulp.src(MainPath.DistIndexHtmlFile)
         .pipe(open({uri: 'http://localhostpage:8080/'}));
         fs.readFile(MainPath.IndexHtmlFile, function(err, file){
@@ -106,21 +106,21 @@ module.exports = function(gulp){
         });
     });
 
-    gulp.task('StartPage-build-open', function(callback){
-        return runSequence(['StartPage-clean', 'StartPage-build-js', 'StartPage-files-copy']
-            ,'StartPage-reload', callback);
+    gulp.task('shell-build-open', function(callback){
+        return runSequence(['shell-clean', 'shell-build-js', 'shell-files-copy']
+            ,'shell-reload', callback);
     });
 
-    gulp.task('StartPage-build-reload', function(callback){
-        return runSequence(['StartPage-clean', 'StartPage-build-js', 'StartPage-files-copy']
-            ,'StartPage-reload', callback);
+    gulp.task('shell-build-reload', function(callback){
+        return runSequence(['shell-clean', 'shell-build-js', 'shell-files-copy']
+            ,'shell-reload', callback);
     });
 
-    gulp.task('StartPage', ['StartPage-build-open'], function(){
+    gulp.task('shell', ['shell-build-open'], function(){
         bundle_id = shortid.generate();
         styles_id = shortid.generate();
-        gulp.watch(MainPath.AllFiles,['StartPage-build-reload']);
-        gulp.watch(MainPath.IndexHtmlFile, ['StartPage-build-reload']);
-        gulp.watch(MainPath.LessFile, ['StartPage-build-reload']);
+        gulp.watch(MainPath.AllFiles,['shell-build-reload']);
+        gulp.watch(MainPath.IndexHtmlFile, ['shell-build-reload']);
+        gulp.watch(MainPath.LessFile, ['shell-build-reload']);
     });
 };
