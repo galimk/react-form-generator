@@ -10,7 +10,9 @@ var TemplateModel = Backbone.Model.extend({
         type: 1,
         placeholder: '',
         required: false,
-        options: []
+        options: [],
+        maxLength: null,
+        minLength: null
     },
 
     validation: {
