@@ -33,7 +33,7 @@ var MaxLengthMinLength = React.createClass({
 
     maxChanged: function (e) {
         this.props.template.set('maxLength', e.target.value);
-    this.invokeValidation();``
+        this.invokeValidation();
     },
 
     minChanged: function (e) {
