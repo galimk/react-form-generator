@@ -27,3 +27,4 @@ build/Release
 node_modules
 
 src/components/customfields/dist/
+src/components/shell/dist
