@@ -28,3 +28,11 @@ node_modules
 
 src/components/customfields/dist/
 src/components/shell/dist
+.idea/.name
+.idea/encodings.xml
+.idea/jsLibraryMappings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/neon react components.iml
+.idea/vcs.xml
+.idea/workspace.xml
