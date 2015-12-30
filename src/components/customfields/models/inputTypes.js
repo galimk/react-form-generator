@@ -2,7 +2,9 @@ var _ = require('underscore');
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
+var Checkbox = require('../../common/checkBox');
 var CheckboxList = require('../components/checkboxList');
+var InputTextArea = require('../../common/inputTextArea');
 
 var inputTypes = [
     {text: 'Text Box', key: 1, createComponent: createTextBox},
@@ -13,7 +15,7 @@ var inputTypes = [
 ];
 
 function createTextBox(model) {
-    return <InputText name={model.get('Id')}
+    return <InputText name={model.get('id')}
                       label={model.get('name')}
                       placeholder={model.get('placeholder')} value=""/>
 }
@@ -25,7 +27,7 @@ function createSelectList(model) {
         options.push({key: option, text: option});
     });
 
-    return <DropDown name={model.get('Id')}
+    return <DropDown name={model.get('id')}
                      label={model.get('name')}
                      placeholder={model.get('placeholder')}
                      list={options}
@@ -35,11 +37,14 @@ function createSelectList(model) {
 }
 
 function createCheckBox(model) {
-    return <div> check box component </div>
+    return <div className="bold-checkbox"><Checkbox name={model.get('id')} label={model.get('name')} checked="false" /></div>
 }
 
 function createTextArea(model) {
-    return <div> text area component </div>
+    return <InputTextArea name={model.get('id')}
+                           label={model.get('name')}
+                           placeholder={model.get('placeholder')}
+                           value=""/>
 }
 
 function createCheckBoxList(model) {
@@ -55,6 +60,9 @@ module.exports = {
     },
     supportsListItems: function (type) {
         return type === 2 || type === 5;
+    },
+    supportsPlaceholder: function(type) {
+        return type === 1 || type === 4
     },
     getComponent: function (model) {
         var type = model.get('type');

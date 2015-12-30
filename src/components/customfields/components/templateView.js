@@ -26,7 +26,6 @@ var TemplateView = React.createClass({
         if (templates.length > 0) {
             var latestId = _getLastModel(templates.models);
         }
-
         templates.add(new TemplateModel({
             id: latestId,
             name: 'New Input'

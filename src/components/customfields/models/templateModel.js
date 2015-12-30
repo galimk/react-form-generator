@@ -1,5 +1,6 @@
 var Backbone = require('backbone');
 var Validation = require('backbone-validation');
+var InputTypes = require('./inputTypes');
 var _ = require('underscore');
 _.extend(Backbone.Model.prototype, Validation.mixin);
 
@@ -28,7 +29,7 @@ var TemplateModel = Backbone.Model.extend({
         ],
 
         options: function (value, attr, computedState) {
-            if (value.length === 0 && (computedState.type === 2 || computedState.type === 5)) {
+            if (value.length === 0 && InputTypes.supportsListItems(computedState.type)) {
                 return 'Must have at least one select list option';
             }
         },

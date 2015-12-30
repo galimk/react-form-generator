@@ -19,10 +19,6 @@ var OptionsList = React.createClass({
         }
     },
 
-    onRemove: function (index) {
-
-    },
-
     onChange: function (e) {
         var validationError = null;
 

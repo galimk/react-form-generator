@@ -63,18 +63,26 @@ var TemplatePanelBody = React.createClass({
         setter[e.target.name + '_error'] = errorMessages ? errorMessages : undefined;
         setter[e.target.name] = e.target.value;
         this.props.template.set(setter);
+        if (e.target.name === 'type' && InputTypes.supportsListItems(e.target.value)) {
+            this.setOptions(this.props.template.get('options'));
+        }
     },
 
     onOptionAdded: function (newOption) {
         var options = this.props.template.get('options');
         this.props.template.set({'options_error': null});
         options.push(newOption);
-        this.props.template.trigger('change', this.props.template, {});
+        this.setOptions(options);
     },
 
     onOptionRemoved: function (index) {
         var options = this.props.template.get('options');
         options.splice(index, 1);
+        this.setOptions(options);
+    },
+
+    setOptions: function (options) {
+        options = options ? options : [];
         var error = this.props.template.preValidate('options', options);
         this.props.template.set({'options_error': error});
         this.props.template.trigger('change', this.props.template);
@@ -89,6 +97,7 @@ var TemplatePanelBody = React.createClass({
         var options = null;
         var minMax = null;
         var type = this.state.template.type.value;
+        var placeHolder = null;
 
         if (InputTypes.supportsListItems(type)) {
             options = <Options onAdded={this.onOptionAdded}
@@ -98,7 +107,15 @@ var TemplatePanelBody = React.createClass({
         }
 
         if (InputTypes.supportsMinMax(type)) {
-            minMax = <MaxLengthMinLength template={this.props.template} />
+            minMax = <MaxLengthMinLength template={this.props.template}/>
+        }
+
+        if (InputTypes.supportsPlaceholder(type)) {
+            placeHolder = <InputText name="placeholder"
+                                     label="Placeholder"
+                                     value={this.state.template.placeholder.value}
+                                     error={this.state.template.placeholder.error}
+                                     onChange={this.onChange}/>
         }
 
         return (
@@ -122,12 +139,7 @@ var TemplatePanelBody = React.createClass({
                           itemText="text"
                     />
 
-                <InputText name="placeholder"
-                           label="Placeholder"
-                           value={this.state.template.placeholder.value}
-                           error={this.state.template.placeholder.error}
-                           onChange={this.onChange}
-                    />
+                {placeHolder}
 
                 <div>
                     {options}
