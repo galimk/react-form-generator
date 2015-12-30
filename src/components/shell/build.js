@@ -50,6 +50,7 @@ module.exports = function(gulp){
   });
 
     gulp.task('shell-files-copy', function() {
+
         gulp.src(MainPath.LessFile).pipe(less())
             .pipe(rename({prefix: styles_id}))
             .pipe(gulp.dest(MainPath.DistDir));
@@ -57,7 +58,7 @@ module.exports = function(gulp){
         gulp.src(ModulesPath.BootStrapMinFile)
             .pipe(gulp.dest(MainPath.DistDir));
 
-        gulp.src(ModulesPath.BootstrapThemeMinFile)
+        gulp.src(ModulesPath.BootStrapThemeMinFile)
             .pipe(gulp.dest(MainPath.DistDir));
 
         gulp.src(ModulesPath.FontsFolder)
@@ -84,7 +85,7 @@ module.exports = function(gulp){
 
     gulp.task('shell-reload', function(callback){
        gulp.src(MainPath.IndexHtmlFile).pipe(connect.reload());
-        fs.readFile(Mainpapth.IndexHtmlFile, function(err, file){
+        fs.readFile(MainPath.IndexHtmlFile, function(err, file){
             callback();
         });
     });
@@ -92,15 +93,17 @@ module.exports = function(gulp){
     gulp.task('shell-connect', function(){
         return connect.server({
             root: MainPath.DistDir,
-            port: 8080,
-            base: 'http://localhostpage',
+            port: 9005,
+            base: 'http://localhost',
             livereload: true
         });
     });
 
     gulp.task('shell-open', ['shell-connect'], function(callback){
-       gulp.src(MainPath.DistIndexHtmlFile)
-        .pipe(open({uri: 'http://localhostpage:8080/'}));
+       gulp.src(MainPath.DistIndexHtml)
+        .pipe(open({uri: 'http://localhost:9005/'}));
+        console.log('HERE!!!');
+
         fs.readFile(MainPath.IndexHtmlFile, function(err, file){
            callback();
         });
@@ -108,7 +111,7 @@ module.exports = function(gulp){
 
     gulp.task('shell-build-open', function(callback){
         return runSequence(['shell-clean', 'shell-build-js', 'shell-files-copy']
-            ,'shell-reload', callback);
+            ,'shell-open', callback);
     });
 
     gulp.task('shell-build-reload', function(callback){
@@ -117,8 +120,8 @@ module.exports = function(gulp){
     });
 
     gulp.task('shell', ['shell-build-open'], function(){
-        bundle_id = shortid.generate();
-        styles_id = shortid.generate();
+        bundle_id = shortId.generate();
+        styles_id = shortId.generate();
         gulp.watch(MainPath.AllFiles,['shell-build-reload']);
         gulp.watch(MainPath.IndexHtmlFile, ['shell-build-reload']);
         gulp.watch(MainPath.LessFile, ['shell-build-reload']);
