@@ -28,7 +28,7 @@ var MainPath = getPathObject('./src/components/customfields/', {
     IndexHtmlFile: 'index.html',
     DistIndexHtmlFile: 'dist/index.html',
     LessFile: 'less/styles.less',
-    AllFilesMask: 'components/**/*.*'
+    AllFilesMask: '**/*.*'
 });
 
 var ModulesPath = getPathObject('./node_modules/', {

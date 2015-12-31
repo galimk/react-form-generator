@@ -14,37 +14,49 @@ var inputTypes = [
     {text: 'Checkbox List', key: 5, createComponent: createCheckBoxList}
 ];
 
-function createTextBox(model) {
-    return <InputText name={model.get('id')}
-                      label={model.get('name')}
-                      placeholder={model.get('placeholder')} value=""/>
+function createTextBox(template, value, onChangeCallback, error) {
+    return <InputText name={'input_' + template.get('id')}
+                      label={template.get('name')}
+                      placeholder={template.get('placeholder')}
+                      value={value}
+                      onChange={onChangeCallback}
+                      error={error}/>
 }
 
-function createSelectList(model) {
+function createSelectList(template, value, onChangeCallback, error) {
     var options = [];
-    var modelOptions = model.get('options');
+    var modelOptions = template.get('options');
     _.each(modelOptions, function (option) {
         options.push({key: option, text: option});
     });
 
-    return <DropDown name={model.get('id')}
-                     label={model.get('name')}
-                     placeholder={model.get('placeholder')}
+    return <DropDown name={'input_' + template.get('id')}
+                     label={template.get('name')}
+                     placeholder={template.get('placeholder')}
                      list={options}
                      itemKey="key"
                      itemText="text"
-                     value=""/>
+                     value={value}
+                     onChange={onChangeCallback}
+                     error={error}/>
 }
 
-function createCheckBox(model) {
-    return <div className="bold-checkbox"><Checkbox name={model.get('id')} label={model.get('name')} checked="false" /></div>
+function createCheckBox(template, value, onChangeCallback, error) {
+    return <div className="bold-checkbox"><Checkbox
+        name={'input_' + template.get('id')} label={template.get('name')}
+        checked={value}
+        onChange={onChangeCallback}
+        error={error}/>
+    </div>
 }
 
-function createTextArea(model) {
-    return <InputTextArea name={model.get('id')}
-                           label={model.get('name')}
-                           placeholder={model.get('placeholder')}
-                           value=""/>
+function createTextArea(template, value, onChangeCallback, error) {
+    return <InputTextArea name={'input_' + template.get('id')}
+                          label={template.get('name')}
+                          placeholder={template.get('placeholder')}
+                          value={value}
+                          onChange={onChangeCallback}
+                          error={error}/>
 }
 
 function createCheckBoxList(model) {
@@ -61,7 +73,7 @@ module.exports = {
     supportsListItems: function (type) {
         return type === 2 || type === 5;
     },
-    supportsPlaceholder: function(type) {
+    supportsPlaceholder: function (type) {
         return type === 1 || type === 4
     },
     getComponent: function (model) {

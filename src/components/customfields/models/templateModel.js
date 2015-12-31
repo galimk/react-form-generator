@@ -55,14 +55,12 @@ var TemplateModel = Backbone.Model.extend({
                 return;
 
             if (computedState.minLength && value <= computedState.minLength) {
-                debugger;
                 return "Maximum characters must be greater than minimum characters";
             }
 
             if (value > 4000) {
                 return "Maximum characters cannot exceed 4000 characters";
             }
-
         }
     }
 });

@@ -5,7 +5,8 @@ var CheckBox = React.createClass({
         label: React.PropTypes.string.isRequired,
         name: React.PropTypes.string.isRequired,
         onChange: React.PropTypes.func.isRequired,
-        checked: React.PropTypes.bool.isRequired
+        checked: React.PropTypes.bool.isRequired,
+        error: React.PropTypes.string
     },
 
     onChangeInternal: function () {

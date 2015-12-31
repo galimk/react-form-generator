@@ -5,10 +5,10 @@ var _ = require('underscore');
 var CheckboxList = React.createClass({
     propTypes: {
         template: React.PropTypes.object.isRequired,
-        onChange: React.PropTypes.func
+        onChange: React.PropTypes.func,
+        values: React.PropTypes.array.isRequired,
+        error: React.PropTypes.string
     },
-
-    checkedItems: [],
 
     componentDidMount: function () {
         this.props.template.on('change', this.templateChanged, this);
@@ -21,19 +21,21 @@ var CheckboxList = React.createClass({
     composeState: function () {
         var itemsArray = [];
         var modelOptions = this.props.template.get('options');
+        var checkedItems = this.props.values;
 
         for (var i = 0; i < modelOptions.length; i++) {
             var id = 'chk_' + i;
             itemsArray.push({
                 id: id,
-                checked: this.checkedItems.indexOf(id) !== -1,
+                checked: checkedItems.indexOf(id) !== -1,
                 text: modelOptions[i]
             });
         }
 
         return {
             items: itemsArray,
-            label: this.props.template.get('name')
+            label: this.props.template.get('name'),
+            checkedItems: checkedItems
         };
     },
 
@@ -46,15 +48,21 @@ var CheckboxList = React.createClass({
     },
 
     onItemCheckedChanged: function (id) {
-        var itemIndex = this.checkedItems.indexOf(id);
+        var checkedItems = this.state.checkedItems;
+
+        var itemIndex = checkedItems.indexOf(id);
 
         if (itemIndex === -1) {
-            this.checkedItems.push(id);
+            checkedItems.push(id);
         } else {
-            this.checkedItems.splice(itemIndex, 1);
+            checkedItems.splice(itemIndex, 1);
         }
 
-        this.setState(this.composeState());
+        this.setState({
+            checkedItems: checkedItems
+        });
+
+        this.props.onChange(checkedItems);
     },
 
     render: function () {
