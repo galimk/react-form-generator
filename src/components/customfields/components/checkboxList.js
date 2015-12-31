@@ -7,7 +7,8 @@ var CheckboxList = React.createClass({
         template: React.PropTypes.object.isRequired,
         onChange: React.PropTypes.func,
         values: React.PropTypes.array.isRequired,
-        error: React.PropTypes.string
+        error: React.PropTypes.string,
+        name: React.PropTypes.string.isRequired
     },
 
     componentDidMount: function () {
@@ -62,7 +63,7 @@ var CheckboxList = React.createClass({
             checkedItems: checkedItems
         });
 
-        this.props.onChange(checkedItems);
+        this.props.onChange(checkedItems, this.props.name);
     },
 
     render: function () {

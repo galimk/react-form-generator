@@ -11,6 +11,10 @@ var InputTextArea = React.createClass({
         error: React.PropTypes.string
     },
 
+    internalOnChange: function (e) {
+        this.props.onChange(e, this.props.name);
+    },
+
     render: function () {
         var wrapperClass = 'form-group';
 
@@ -27,7 +31,7 @@ var InputTextArea = React.createClass({
                               placeholder={this.props.placeholder}
                               ref={this.props.name}
                               value={this.props.value}
-                              onChange={this.props.onChange}>
+                              onChange={this.props.internalOnChange}>
 
                     </textarea>
                     <div className="help-block">

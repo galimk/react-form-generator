@@ -9,8 +9,8 @@ var CheckBox = React.createClass({
         error: React.PropTypes.string
     },
 
-    onChangeInternal: function () {
-        this.props.onChange(this.props.name);
+    onChangeInternal: function (e) {
+        this.props.onChange(e.target.checked, this.props.name);
     },
 
     render: function () {

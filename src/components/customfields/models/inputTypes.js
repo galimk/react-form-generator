@@ -59,8 +59,8 @@ function createTextArea(template, value, onChangeCallback, error) {
                           error={error}/>
 }
 
-function createCheckBoxList(model) {
-    return <CheckboxList template={model}/>
+function createCheckBoxList(model, value, onChangeCallback, error) {
+    return <CheckboxList template={model} values={value} onChange={onChangeCallback} error={error} />
 }
 
 module.exports = {
@@ -76,15 +76,15 @@ module.exports = {
     supportsPlaceholder: function (type) {
         return type === 1 || type === 4
     },
-    getComponent: function (model) {
-        var type = model.get('type');
+    getComponent: function (template, value, onChangeCallback, error) {
+        var type = template.get('type');
         var found = _.filter(inputTypes, function (term) {
             return term.key === type;
         });
         if (found.length === 0) {
             return null;
         } else {
-            return found[0].createComponent(model);
+            return found[0].createComponent(template, value, onChangeCallback, error);
         }
     }
 };

@@ -14,7 +14,7 @@ var self = {
         var validationObject = {};
         _.each(templates.models, function (template) {
             var validationRules = self.createValidationRulesArray(template.get('type'));
-            validationObject[template.get('id')] = function (value, attr, computedState) {
+            validationObject['input_' + template.get('id')] = function (value, attr, computedState) {
                 var validationMessage = undefined;
                 _.each(validationRules, function (validationRule) {
                     if (validationMessage !== undefined && validationMessage !== null && validationMessage !== '') {

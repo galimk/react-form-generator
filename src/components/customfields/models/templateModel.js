@@ -5,6 +5,24 @@ var _ = require('underscore');
 _.extend(Backbone.Model.prototype, Validation.mixin);
 
 var TemplateModel = Backbone.Model.extend({
+    getDefaultValue: function () {
+        var type = this.get('type');
+        switch (type) {
+            case 1:
+            case 4:
+                return null;
+                break;
+            case 2:
+                return null;
+                break;
+            case 3:
+                return false;
+                break
+            case 5:
+                return []
+        }
+    },
+
     defaults: {
         id: 0,
         name: '',

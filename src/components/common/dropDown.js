@@ -21,7 +21,7 @@ var DropDown = React.createClass({
                 name: this.props.name,
                 value: parseInt(e.target.value)
             }
-        });
+        }, this.props.name);
     },
 
     render: function () {

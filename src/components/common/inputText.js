@@ -11,6 +11,10 @@ var InputText = React.createClass({
         error: React.PropTypes.string
     },
 
+    internalOnChange: function (e) {
+        this.props.onChange(e, this.props.name);
+    },
+
     render: function () {
         var wrapperClass = 'form-group';
 
@@ -21,6 +25,7 @@ var InputText = React.createClass({
         return (
             <div className={wrapperClass}>
                 <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
+
                 <div className="field">
                     <input type="text"
                            name={this.props.name}
@@ -28,7 +33,7 @@ var InputText = React.createClass({
                            placeholder={this.props.placeholder}
                            ref={this.props.name}
                            value={this.props.value}
-                           onChange={this.props.onChange}
+                           onChange={this.internalOnChange}
                         />
 
                     <div className="help-block">
