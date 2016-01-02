@@ -8,7 +8,7 @@ var DropDown = React.createClass({
         label: React.PropTypes.string.isRequired,
         onChange: React.PropTypes.func.isRequired,
         placeholder: React.PropTypes.string,
-        value: React.PropTypes.number,
+        value: React.PropTypes.any,
         error: React.PropTypes.string,
         list: React.PropTypes.array.isRequired,
         itemKey: React.PropTypes.string.isRequired,

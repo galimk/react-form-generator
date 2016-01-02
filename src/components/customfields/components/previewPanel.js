@@ -34,8 +34,21 @@ var PreviewPanel = React.createClass({
     },
 
     modelChanged: function () {
-
+        this.setState({
+            modelValues: this.composeModelValues()
+        });
     },
+
+    composeModelValues: function () {
+        var modelValues = [];
+        var that = this;
+        _.each(this.props.templates.models, function (template) {
+            var inputId = 'input_' + template.get('id');
+            modelValues[inputId] = that.model.get(inputId);
+        });
+        return modelValues;
+    },
+
 
     templatesCollectionChanged: function () {
         this.setState({
@@ -52,7 +65,7 @@ var PreviewPanel = React.createClass({
 
             return <div key={template.get('id')}>{component}</div>
         };
-
+        console.log('rendering....');
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
@@ -71,7 +84,7 @@ var PreviewPanel = React.createClass({
     },
 
     onModelValueChanged: function (e, inputName) {
-        console.log(inputName + ' - ' + e.target.value);
+        this.model.set(inputName, e.target.value);
     }
 });
 
