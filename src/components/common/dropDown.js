@@ -12,14 +12,15 @@ var DropDown = React.createClass({
         error: React.PropTypes.string,
         list: React.PropTypes.array.isRequired,
         itemKey: React.PropTypes.string.isRequired,
-        itemText: React.PropTypes.string.isRequired
+        itemText: React.PropTypes.string.isRequired,
+        keyType: React.PropTypes.string
     },
 
     internalChange: function (e) {
         this.props.onChange({
             target: {
                 name: this.props.name,
-                value: parseInt(e.target.value)
+                value: this.props.keyType === 'string' ? e.target.value : parseInt(e.target.value)
             }
         }, this.props.name);
     },

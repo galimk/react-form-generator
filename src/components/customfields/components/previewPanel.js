@@ -8,10 +8,7 @@ var PreviewPanel = React.createClass({
         templates: React.PropTypes.object.isRequired
     },
 
-    model: null,
-
     getInitialState: function () {
-        this.model = previewModel.createModel(this.props.templates);
         var modelValues = [];
         _.each(this.props.templates.models, function (template) {
             modelValues['input_' + template.get('id')] = template.getDefaultValue();
@@ -25,17 +22,24 @@ var PreviewPanel = React.createClass({
     },
 
     componentDidMount: function () {
+        var modelClass = previewModel.createModel(this.props.templates);
+        this.model = new modelClass();
+        this.model.on('change', this.modelChanged, this);
         this.props.templates.on('change rest add remove', this.templatesCollectionChanged, this);
     },
 
     componentWillUnmount: function () {
         this.props.templates.off('change rest add remove', this.templatesCollectionChanged, this);
+        this.model.off('change', this.modelChanged, this);
+    },
+
+    modelChanged: function () {
+
     },
 
     templatesCollectionChanged: function () {
         this.setState({
             templates: this.props.templates,
-            model: previewModel.createModel(this.props.templates)
         });
     },
 
@@ -66,10 +70,9 @@ var PreviewPanel = React.createClass({
         );
     },
 
-    onModelValueChanged: function (value, inputName) {
-
-
-    },
+    onModelValueChanged: function (e, inputName) {
+        console.log(inputName + ' - ' + e.target.value);
+    }
 });
 
 module.exports = PreviewPanel;

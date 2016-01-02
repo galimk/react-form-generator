@@ -34,9 +34,10 @@ function createSelectList(template, value, onChangeCallback, error) {
                      label={template.get('name')}
                      placeholder={template.get('placeholder')}
                      list={options}
+                     keyType="string"
+                     value={value}
                      itemKey="key"
                      itemText="text"
-                     value={value}
                      onChange={onChangeCallback}
                      error={error}/>
 }
@@ -60,7 +61,7 @@ function createTextArea(template, value, onChangeCallback, error) {
 }
 
 function createCheckBoxList(model, value, onChangeCallback, error) {
-    return <CheckboxList template={model} values={value} onChange={onChangeCallback} error={error} />
+    return <CheckboxList template={model} values={value} onChange={onChangeCallback} error={error}/>
 }
 
 module.exports = {
