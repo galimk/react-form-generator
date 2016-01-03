@@ -17,7 +17,7 @@ var self = {
             validationObject['input_' + template.get('id')] = function (value, attr, computedState) {
                 var validationMessage = undefined;
                 _.each(validationRules, function (validationRule) {
-                    if (validationMessage !== undefined && validationMessage !== null && validationMessage !== '') {
+                    if (validationMessage === undefined || validationMessage === null || validationMessage === '') {
                         validationMessage = validationRule(value, attr, computedState, template);
                     }
                 });
@@ -51,7 +51,7 @@ var self = {
     },
 
     validateRequired: function (value, attr, computedState, template) {
-        if (template.get('required') === true && (value === undefined || value === null || value === '')) {
+        if (template.get('required') && (value === undefined || value === null || value === '')) {
             return template.get('name') + ' is required';
         }
     }

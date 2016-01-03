@@ -75,7 +75,7 @@ module.exports = {
         return type === 2 || type === 5;
     },
     supportsPlaceholder: function (type) {
-        return type === 1 || type === 4
+        return  [1,2,4,5].indexOf(type) !== -1;
     },
     getComponent: function (template, value, onChangeCallback, error) {
         var type = template.get('type');

@@ -49,6 +49,29 @@ var PreviewPanel = React.createClass({
         return modelValues;
     },
 
+    runValidationHandler: function () {
+        this.setState({
+            modelErrors: this.composeModelErrors()
+        });
+    },
+
+    clearValidationHandler: function () {
+        this.setState({
+            modelErrors: []
+        })
+    },
+
+    composeModelErrors: function () {
+        var modelErrors = [];
+        var that = this;
+        _.each(this.props.templates.models, function (template) {
+            var inputId = 'input_' + template.get('id');
+            var value = that.model.get(inputId);
+            var error = that.model.preValidate(inputId, value);
+            modelErrors[inputId] = error;
+        });
+        return modelErrors;
+    },
 
     templatesCollectionChanged: function () {
         this.setState({
@@ -65,7 +88,6 @@ var PreviewPanel = React.createClass({
 
             return <div key={template.get('id')}>{component}</div>
         };
-        console.log('rendering....');
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
@@ -75,8 +97,8 @@ var PreviewPanel = React.createClass({
                     {this.props.templates.map(getComponent, this)}
 
                     <div className="text-center preview-panel-buttons">
-                        <button className="btn btn-default">Clear</button>
-                        <button className="btn btn-primary">Submit</button>
+                        <button className="btn btn-default" onClick={this.clearValidationHandler}>Clear</button>
+                        <button className="btn btn-primary" onClick={this.runValidationHandler}>Validate</button>
                     </div>
                 </div>
             </div>
@@ -85,6 +107,12 @@ var PreviewPanel = React.createClass({
 
     onModelValueChanged: function (e, inputName) {
         this.model.set(inputName, e.target.value);
+        var modelErrors = this.state.modelErrors;
+        var error = this.model.preValidate(inputName, e.target.value);
+        modelErrors[inputName] = error;
+        this.setState({
+            modelErrors: modelErrors
+        });
     }
 });
 

@@ -17,12 +17,19 @@ var DropDown = React.createClass({
     },
 
     internalChange: function (e) {
-        this.props.onChange({
+        var onChangeObject = {
             target: {
                 name: this.props.name,
                 value: this.props.keyType === 'string' ? e.target.value : parseInt(e.target.value)
             }
-        }, this.props.name);
+        };
+
+        var value = parseInt(e.target.value);
+        if (value === -1) {
+            onChangeObject.target.value = null;
+        }
+
+        this.props.onChange(onChangeObject, this.props.name);
     },
 
     render: function () {
@@ -38,10 +45,16 @@ var DropDown = React.createClass({
             );
         };
 
+        var defaultOption = null;
+        if (this.props.placeholder !== 'undefined' &&
+            this.props.placeholder !== null &&
+            this.props.placeholder !== '') {
+            defaultOption = <option value="-1">{this.props.placeholder}</option>
+        }
+
         return (
             <div className={wrapperClass}>
-                <label htmlFor={this.props.name}>{this.props.label}</label>
-
+                <label htmlFor={this.props.name} className="control-label">{this.props.label}</label>
                 <div className="field">
                     <select name={this.props.name}
                             className="form-control"
@@ -49,10 +62,14 @@ var DropDown = React.createClass({
                             ref={this.props.value}
                             onChange={this.internalChange}
                             value={this.props.value}>
+                        {defaultOption}
                         {this.props.list.map(renderItem, this)}
                     </select>
-
-                    <div className="input"></div>
+                    <div className="help-block">
+                        <ul className="list-unstyled">
+                            <li>{this.props.error}</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         );
