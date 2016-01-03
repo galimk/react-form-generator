@@ -29,7 +29,7 @@ var CheckboxList = React.createClass({
             var id = 'chk_' + i;
             itemsArray.push({
                 id: id,
-                checked: checkedItems.indexOf(id) !== -1,
+                checked: checkedItems.indexOf(modelOptions[i]) !== -1,
                 text: modelOptions[i]
             });
         }
@@ -51,11 +51,11 @@ var CheckboxList = React.createClass({
 
     onItemCheckedChanged: function (val, id) {
         var checkedItems = this.state.checkedItems;
-
-        var itemIndex = checkedItems.indexOf(id);
+        var value = this.getValueById(id);
+        var itemIndex = checkedItems.indexOf(value);
 
         if (itemIndex === -1) {
-            checkedItems.push(id);
+            checkedItems.push(value);
         } else {
             checkedItems.splice(itemIndex, 1);
         }
@@ -67,23 +67,19 @@ var CheckboxList = React.createClass({
         this.props.onChange({
             target: {
                 name: this.props.name,
-                value: this.getCheckedValues(checkedItems)
+                value: checkedItems
             }
         }, this.props.name);
 
         this.setState(this.composeState());
     },
 
-    getCheckedValues: function (checkedItems) {
-        var checkedValues = [];
-        var that = this;
-
-        _.each(checkedItems, function (checkedItemId) {
-            var found = _.findWhere(that.state.items, {id: checkedItemId});
-            checkedValues.push(found.text);
-        });
-
-        return checkedValues;
+    getValueById: function (id) {
+        var found = _.findWhere(this.state.items, {id: id});
+        if (found) {
+            return found.text;
+        }
+        return null;
     },
 
     render: function () {

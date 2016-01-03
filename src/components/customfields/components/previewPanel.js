@@ -22,15 +22,19 @@ var PreviewPanel = React.createClass({
     },
 
     componentDidMount: function () {
-        var modelClass = previewModel.createModel(this.props.templates);
-        this.model = new modelClass();
-        this.model.on('change', this.modelChanged, this);
+        this.createValidatableModel();
         this.props.templates.on('change rest add remove', this.templatesCollectionChanged, this);
     },
 
     componentWillUnmount: function () {
         this.props.templates.off('change rest add remove', this.templatesCollectionChanged, this);
         this.model.off('change', this.modelChanged, this);
+    },
+
+    createValidatableModel: function () {
+        var modelClass = previewModel.createModel(this.props.templates);
+        this.model = new modelClass();
+        this.model.on('change', this.modelChanged, this);
     },
 
     modelChanged: function () {
@@ -74,6 +78,9 @@ var PreviewPanel = React.createClass({
     },
 
     templatesCollectionChanged: function () {
+        this.clearValidationHandler();
+        this.model.off('change', this.modelChanged, this);
+        this.createValidatableModel();
         this.setState({
             templates: this.props.templates,
         });
@@ -106,9 +113,18 @@ var PreviewPanel = React.createClass({
     },
 
     onModelValueChanged: function (e, inputName) {
-        this.model.set(inputName, e.target.value);
+        var value = null;
+        if (typeof e === 'boolean') {
+            value = e;
+        } else {
+            value = e.target.value;
+        }
+
+        var setter = {};
+        setter[inputName] = value;
+        this.model.set(setter);
         var modelErrors = this.state.modelErrors;
-        var error = this.model.preValidate(inputName, e.target.value);
+        var error = this.model.preValidate(inputName, value);
         modelErrors[inputName] = error;
         this.setState({
             modelErrors: modelErrors

@@ -44,10 +44,24 @@ var self = {
     },
 
     validateTextInputs: function (value, attr, computedState, template) {
+        if ([null, undefined, ''].indexOf(value) !== -1) {
+            return;
+        }
+
+        var minLength = template.get('minLength');
+        var maxLength = template.get('maxLength');
+
+        if (minLength && value.length < minLength) {
+            return 'Minimum ' + minLength + ' characters are required for ' + template.get('name');
+        }
+
+        if (maxLength && value.length > maxLength) {
+            return 'Maximum ' + maxLength + ' characters are allowed for ' + template.get('name');
+        }
     },
 
     validateRequired: function (value, attr, computedState, template) {
-        if (template.get('required') && (value === undefined || value === null || value === '')) {
+        if (template.get('required') && (value === undefined || value === null || value === '' || value.length === 0 || value === false)) {
             if (template.get('type') === InputTypes.getInputTypesEnum().CheckboxList) {
                 return 'Selection required';
             } else if (template.get('type') === InputTypes.getInputTypesEnum().Checkbox) {

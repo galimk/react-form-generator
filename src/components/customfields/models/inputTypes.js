@@ -51,11 +51,21 @@ function createSelectList(template, value, onChangeCallback, error) {
 }
 
 function createCheckBox(template, value, onChangeCallback, error) {
-    return <div className="bold-checkbox"><Checkbox
-        name={'input_' + template.get('id')} label={template.get('name')}
-        checked={value}
-        onChange={onChangeCallback}
-        error={error}/>
+    var checked = false;
+    if ([null, undefined].indexOf(value) === -1) {
+        if (typeof value === 'boolean') {
+            checked = value;
+        }
+    }
+
+    return <div className="bold-checkbox">
+        <Checkbox
+            name={'input_' + template.get('id')}
+            label={template.get('name')}
+            checked={checked}
+            onChange={onChangeCallback}
+            error={error}
+            />
     </div>
 }
 

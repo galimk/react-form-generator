@@ -1,4 +1,5 @@
 var React = require('react');
+var classNames = require('classnames');
 
 var CheckBox = React.createClass({
     propTypes: {
@@ -14,15 +15,27 @@ var CheckBox = React.createClass({
     },
 
     render: function () {
+        var wrapperClass = classNames({
+            'form-group': true,
+            'has-error': [null, undefined, ''].indexOf(this.props.error) === -1
+        });
+
         return (
-            <div className="checkbox checkbox-success">
-                <input type="checkbox"
-                       id={this.props.name}
-                       name={this.props.name}
-                       checked={this.props.checked}
-                       onChange={this.onChangeInternal}
-                       className="styled styled-success"/>
-                <label htmlFor={this.props.name}>{this.props.label}</label>
+            <div className={wrapperClass}>
+                <div className="checkbox checkbox-success">
+                    <input type="checkbox"
+                           id={this.props.name}
+                           name={this.props.name}
+                           checked={this.props.checked}
+                           onChange={this.onChangeInternal}
+                           className="styled styled-success"/>
+                    <label htmlFor={this.props.name}>{this.props.label}</label>
+                </div>
+                <div className="help-block">
+                    <ul className="list-unstyled">
+                        <li>{this.props.error}</li>
+                    </ul>
+                </div>
             </div>
         );
     }
