@@ -7,12 +7,20 @@ var CheckboxList = require('../components/checkboxList');
 var InputTextArea = require('../../common/inputTextArea');
 
 var inputTypes = [
-    {text: 'Text Box', key: 1, createComponent: createTextBox},
+    {text: 'Text Input', key: 1, createComponent: createTextBox},
     {text: 'Select List', key: 2, createComponent: createSelectList},
     {text: 'Checkbox', key: 3, createComponent: createCheckBox},
     {text: 'Text Area', key: 4, createComponent: createTextArea},
     {text: 'Checkbox List', key: 5, createComponent: createCheckBoxList}
 ];
+
+var typesEnum = {
+    Checkbox: 3,
+    TextInput: 1,
+    SelectList: 2,
+    TextArea: 4,
+    CheckboxList: 5
+};
 
 function createTextBox(template, value, onChangeCallback, error) {
     return <InputText name={'input_' + template.get('id')}
@@ -60,11 +68,21 @@ function createTextArea(template, value, onChangeCallback, error) {
                           error={error}/>
 }
 
-function createCheckBoxList(model, value, onChangeCallback, error) {
-    return <CheckboxList template={model} values={value} onChange={onChangeCallback} error={error}/>
+function createCheckBoxList(template, value, onChangeCallback, error) {
+    if (value === null || value === undefined) {
+        value = [];
+    }
+    return <CheckboxList name={'input_' + template.get('id')}
+                         template={template}
+                         values={value}
+                         onChange={onChangeCallback}
+                         error={error}/>
 }
 
 module.exports = {
+    getInputTypesEnum: function () {
+        return typesEnum;
+    },
     getInputTypes: function () {
         return inputTypes;
     },
@@ -75,7 +93,7 @@ module.exports = {
         return type === 2 || type === 5;
     },
     supportsPlaceholder: function (type) {
-        return  [1,2,4,5].indexOf(type) !== -1;
+        return [1, 2, 4, 5].indexOf(type) !== -1;
     },
     getComponent: function (template, value, onChangeCallback, error) {
         var type = template.get('type');

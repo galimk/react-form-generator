@@ -41,18 +41,20 @@ var self = {
     },
 
     validateSelectList: function (value, attr, computedState, template) {
-
-
     },
 
     validateTextInputs: function (value, attr, computedState, template) {
-
-
     },
 
     validateRequired: function (value, attr, computedState, template) {
         if (template.get('required') && (value === undefined || value === null || value === '')) {
-            return template.get('name') + ' is required';
+            if (template.get('type') === InputTypes.getInputTypesEnum().CheckboxList) {
+                return 'Selection required';
+            } else if (template.get('type') === InputTypes.getInputTypesEnum().Checkbox) {
+                return template.get('name') + ' must be checked';
+            } else {
+                return template.get('name') + ' is required';
+            }
         }
     }
 };

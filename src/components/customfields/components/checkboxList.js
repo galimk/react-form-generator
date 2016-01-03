@@ -1,6 +1,7 @@
 var React = require('React');
 var Checkbox = require('../../common/checkbox');
 var _ = require('underscore');
+var classNames = require('classnames');
 
 var CheckboxList = React.createClass({
     propTypes: {
@@ -48,7 +49,7 @@ var CheckboxList = React.createClass({
         return this.composeState();
     },
 
-    onItemCheckedChanged: function (id) {
+    onItemCheckedChanged: function (val, id) {
         var checkedItems = this.state.checkedItems;
 
         var itemIndex = checkedItems.indexOf(id);
@@ -63,7 +64,26 @@ var CheckboxList = React.createClass({
             checkedItems: checkedItems
         });
 
-        this.props.onChange(checkedItems, this.props.name);
+        this.props.onChange({
+            target: {
+                name: this.props.name,
+                value: this.getCheckedValues(checkedItems)
+            }
+        }, this.props.name);
+
+        this.setState(this.composeState());
+    },
+
+    getCheckedValues: function (checkedItems) {
+        var checkedValues = [];
+        var that = this;
+
+        _.each(checkedItems, function (checkedItemId) {
+            var found = _.findWhere(that.state.items, {id: checkedItemId});
+            checkedValues.push(found.text);
+        });
+
+        return checkedValues;
     },
 
     render: function () {
@@ -74,12 +94,23 @@ var CheckboxList = React.createClass({
             )
         };
 
+        var wrapperClass = classNames({
+            'form-group': true,
+            'has-error': [null, undefined, ''].indexOf(this.props.error) === -1
+        });
+
         return (
-            <div className="form-group">
-                <label>{this.state.label}</label>
+            <div className={wrapperClass}>
+                <label className="control-label">{this.state.label}</label>
 
                 <div>
                     {this.state.items.map(showItem, this)}
+                </div>
+
+                <div className="help-block">
+                    <ul className="list-unstyled">
+                        <li>{this.props.error}</li>
+                    </ul>
                 </div>
 
             </div>
