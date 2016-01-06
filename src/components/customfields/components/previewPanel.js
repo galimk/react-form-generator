@@ -2,6 +2,8 @@ var React = require('react');
 var previewModel = require('../models/previewModel');
 var InputTypes = require('../models/inputTypes');
 var _ = require('underscore');
+var classnames = require('classnames');
+var PreviewPanelRowWrapper = require('./previewPanelRowWrapper');
 
 var PreviewPanel = React.createClass({
     propTypes: {
@@ -17,7 +19,8 @@ var PreviewPanel = React.createClass({
         return {
             templates: this.props.templates,
             modelValues: modelValues,
-            modelErrors: []
+            modelErrors: [],
+            layoutEditable: false
         };
     },
 
@@ -86,19 +89,45 @@ var PreviewPanel = React.createClass({
         });
     },
 
+    switchLayout: function () {
+        this.setState({layoutEditable: !this.state.layoutEditable});
+    },
+
     render: function () {
-        var getComponent = function (template) {
+        var getComponent = function (template, index) {
             var templateId = 'input_' + template.get('id');
             var component = InputTypes.getComponent(template,
                 this.state.modelValues[templateId], this.onModelValueChanged,
                 this.state.modelErrors[templateId]);
 
-            return <div key={template.get('id')}>{component}</div>
+            if (!this.state.layoutEditable) {
+                return <div key={template.get('id')}>{component}</div>
+            } else {
+                return <PreviewPanelRowWrapper title={'Row ' + index}
+                                               key={template.get('id')}>{component}</PreviewPanelRowWrapper>
+            }
+
+
         };
+
+        var switchButtonClass = classnames({
+            'btn-warning': this.state.layoutEditable,
+            'active': this.state.layoutEditable,
+            'btn': true,
+            'btn-xs': true,
+            'btn-default': true
+        });
+
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">
-                    Preview
+                    <div className="pull-left">Preview</div>
+                    <div className="pull-right">
+                        <button onClick={this.switchLayout} className={switchButtonClass}>
+                            <i className="fa fa-table fa-fw"></i>
+                        </button>
+                    </div>
+                    <div className="clearfix"/>
                 </div>
                 <div className="panel-body">
                     {this.props.templates.map(getComponent, this)}

@@ -32,12 +32,12 @@ var MainControllerView = React.createClass({
 
     render: function () {
         return (
-            <div className="container custom-fields-component">
+            <div className="container-fluid custom-fields-component">
                 <div className="row">
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                         <TemplateView templates={TemplatesCollection}/>
                     </div>
-                    <div className="col-md-8 when-collapsed">
+                    <div className="col-md-9 when-collapsed">
                         <PreviewPanel templates={TemplatesCollection}/>
                     </div>
                 </div>

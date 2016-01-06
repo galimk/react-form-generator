@@ -35,7 +35,8 @@ var ModulesPath = getPathObject('./node_modules/', {
     BootstrapMinFile: 'bootstrap/dist/css/bootstrap.min.css',
     BootstrapThemeMinFile: 'bootstrap/dist/css/bootstrap-theme.min.css',
     FontAwesomeCss: 'font-awesome/css/font-awesome.css',
-    FontsFolder: 'font-awesome/fonts/**/*.*'
+    FontsFolder: 'font-awesome/fonts/**/*.*',
+
 });
 
 module.exports = function (gulp) {
