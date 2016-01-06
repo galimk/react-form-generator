@@ -5,44 +5,53 @@ var React = require('react');
 
 var LoginModal = React.createClass({
     render: function () {
-        var modalStyle = {
-            marginLeft: '-175px',
-            marginTop: '-150px',
-            left: '50%',
-            top: '50%',
-            position: 'absolute'
+        var mainPanel = {
+            margin: '150px auto 20px',
+            maxWidth: '600px'
         };
-        var PswdButtonStyle = {
-            margin: '45px'
+        var forgotPassword = {
+            marginTop: '10px'
         };
-        var signUpButtonStyle = {
-            marginLeft: '-5px'
+        var formLeft = {
+            float: 'left',
+            width: '280px',
+            paddingRight: '30px',
+        };
+        var formRight = {
+            float: 'right',
+            borderLeft: '1px solid #bbb',
+            width: '280px',
+            padding: '0 35px 35px'
         };
         return (
-            <div>
-                <div className="modal-dialog" id="loginModal" style={modalStyle}>
-                    <div className="modal-body col-md-7">
-                        <form className="center-block">
+            <div id="loginBox" style={mainPanel}>
+                <div className="panel panel-info">
+                    <div className="panel-heading">
+                        <div className="panel-title">
+                            Sign in
+                        </div>
+                    </div>
+                    <div className="panel-body">
+                        <div style={formLeft}>
                             <div className="form-group">
-                                <input type="text" id="loginInputEmail" className="form-control input-sm"
-                                       placeholder="Email"/>
+                                <input type="text" className="form-control" placeholder="Email"/>
                             </div>
                             <div className="form-group">
-                                <input type="text" id="loginInputPassword" className="form-control input-sm"
-                                       placeholder="Password"/>
+                                <input type="text" className="form-control" placeholder="Password"/>
                             </div>
                             <div className="form-group">
-                            <span className="pull-left">
-                                <button className="btn btn-primary btn-sm">Log in</button>
-                            </span>
-                                <span className="-align-center" style={PswdButtonStyle}>
-                                    <button className="btn btn-danger btn-sm">Forgot password</button>
+                                <button className="btn btn-info">Sign In</button>
+                                <span className="pull-right" style={forgotPassword}>
+                                    <a href="#">Forgot Password?</a>
                                 </span>
-                            <span className="pull-right">
-                                <button className="btn btn-warning btn-sm" style={signUpButtonStyle}>Sign up</button>
-                            </span>
                             </div>
-                        </form>
+                        </div>
+                        <div className="form-group" style={formRight}>
+                            <h7>Do not have an account?</h7>
+                            <div className="form-group">
+                                <button className="btn btn-success">Sign Up</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
