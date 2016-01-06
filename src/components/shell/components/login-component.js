@@ -5,20 +5,26 @@ var React = require('react');
 
 var LoginModal = React.createClass({
     render: function () {
-        var modalStyle = {
-            marginTop: '100px',
-        };
-        var verticalLine = {
-            height: '150px',
-            width:'1px',
-            backgroundColor:'black',
-            margin: '0 auto'
+        var mainPanel = {
+            margin: '150px auto 20px',
+            maxWidth: '600px'
         };
         var forgotPassword = {
             marginTop: '10px'
         };
+        var formLeft = {
+            float: 'left',
+            width: '280px',
+            paddingRight: '30px',
+        };
+        var formRight = {
+            float: 'right',
+            borderLeft: '1px solid #bbb',
+            width: '280px',
+            padding: '0 35px 35px'
+        };
         return (
-            <div id="loginBox" className="col-md-6 col-md-offset-3" style={modalStyle}>
+            <div id="loginBox" style={mainPanel}>
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <div className="panel-title">
@@ -26,7 +32,7 @@ var LoginModal = React.createClass({
                         </div>
                     </div>
                     <div className="panel-body">
-                        <form className="col-md-5">
+                        <div style={formLeft}>
                             <div className="form-group">
                                 <input type="text" className="form-control" placeholder="Email"/>
                             </div>
@@ -39,8 +45,13 @@ var LoginModal = React.createClass({
                                     <a href="#">Forgot Password?</a>
                                 </span>
                             </div>
-                        </form>
-                        <div style={verticalLine}/>
+                        </div>
+                        <div className="form-group" style={formRight}>
+                            <h7>Do not have an account?</h7>
+                            <div className="form-group">
+                                <button className="btn btn-success">Sign Up</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
