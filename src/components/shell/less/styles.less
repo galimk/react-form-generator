@@ -1,90 +1,55 @@
-.custom-fields-component {
-  button.action-button {
-    width: 100% !important;
+.mainPanel {
+  margin: 150px auto 20px;
+  max-width: 600px;
+}
+
+.textRight {
+  margin-top: 6px;
+  padding-right: 35px;
+}
+
+.credentialsGroup {
+  padding-right: 35px;
+  padding-bottom: 5px;
+}
+
+.marginTop{
+  margin-top:5px;
+}
+
+.leftCol {
+  float: left;
+  width: 280px;
+  border-right: 1px solid #bbb;
+}
+
+.rightCol {
+  margin-top: 5px;
+  padding-left: 340px;
+  padding-right:50px;
+}
+
+.signInUpButtons{
+  margin-top: 6px;
+  width:100%;
+}
+
+@media screen and(max-width: 600px){
+  .leftCol{
+    max-width:80%;
+    border:none;
+    padding: auto;
   }
-
-  @media screen and(max-width: 992px) {
-    .when-collapsed {
-      margin-top: 10px;
-    }
+  .signInUpButtons{
+    margin-top: 6px;
+    width:100%;
   }
-
-  @media screen and(max-width: 991px) {
-    .right {
-      margin-top: 5px !important;
-    }
-
-    .left {
-
-      margin-bottom: 5px !important;
-    }
+  .rightCol{
+    margin-top: 5px;
+    padding: 0 90px 0 0;
   }
-
-  .action-button-panel {
-    margin-top: 10px;
-
-  }
-
-  .template {
-    color: #fff;
-    background-color: #337ab7;
-  }
-
-  .template-header-editing {
-    background-color: #449d44;
-  }
-
-  .template-header {
-    padding: 10px;
-    position: relative;
-  }
-
-  .edit {
-    position: absolute;
-    right: 35px;
-    top: 12px;
-  }
-
-  .delete {
-    position: absolute;
-    right: 15px;
-    top: 12px
-  }
-
-  .header-input {
-    margin-right: 50px;
-  }
-
-  .select-item-option {
-    width: 100%;
-  }
-
-  .select-item-add {
-    margin-top: 10px;
-  }
-
-  .list-group {
-    margin-bottom: 5px;
-  }
-
-  .dont-break-out {
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-
-    -ms-word-break: break-all;
-    /* This is the dangerous one in WebKit, as it breaks things wherever */
-    word-break: break-all;
-    /* Instead use this non-standard one: */
-    word-break: break-word;
-
-    /* Adds a hyphen where the word breaks, if supported (No Blink) */
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-  }
-
-  .no-opacity {
-    opacity: 0;
+  .mainPanel {
+    margin: 150px auto 20px;
+    max-width: 330px;
   }
 }

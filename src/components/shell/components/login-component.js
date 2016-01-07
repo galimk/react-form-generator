@@ -5,52 +5,31 @@ var React = require('react');
 
 var LoginModal = React.createClass({
     render: function () {
-        var mainPanel = {
-            margin: '150px auto 20px',
-            maxWidth: '600px'
-        };
-        var forgotPassword = {
-            marginTop: '10px'
-        };
-        var formLeft = {
-            float: 'left',
-            width: '280px',
-            paddingRight: '30px',
-        };
-        var formRight = {
-            float: 'right',
-            borderLeft: '1px solid #bbb',
-            width: '280px',
-            padding: '0 35px 35px'
-        };
         return (
-            <div id="loginBox" style={mainPanel}>
+            <div id="loginBox" className="mainPanel">
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <div className="panel-title">
+                        <div className="panel-title centerText">
                             Sign in
                         </div>
                     </div>
                     <div className="panel-body">
-                        <div style={formLeft}>
-                            <div className="form-group">
+                        <div className="leftCol">
+                            <div className="form-group credentialsGroup">
                                 <input type="text" className="form-control" placeholder="Email"/>
+                                <input type="text" className="form-control marginTop" placeholder="Password"/>
                             </div>
                             <div className="form-group">
-                                <input type="text" className="form-control" placeholder="Password"/>
-                            </div>
-                            <div className="form-group">
-                                <button className="btn btn-info">Sign In</button>
-                                <span className="pull-right" style={forgotPassword}>
+                                <button className="btn btn-info">Log In</button>
+                                <span className="pull-right textRight">
                                     <a href="#">Forgot Password?</a>
                                 </span>
                             </div>
                         </div>
-                        <div className="form-group" style={formRight}>
-                            <h7>Do not have an account?</h7>
-                            <div className="form-group">
-                                <button className="btn btn-success">Sign Up</button>
-                            </div>
+                        <div className="rightCol">
+                            <button className="btn btn-success  signInUpButtons">Sign Up</button>
+                            <button className="btn btn-info  signInUpButtons">Login with FaceBook</button>
+                            <button className="btn btn-warning  signInUpButtons">Login with Google</button>
                         </div>
                     </div>
                 </div>
