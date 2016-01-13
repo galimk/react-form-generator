@@ -9,7 +9,8 @@ var LoginModal = React.createClass({
             <div id="loginBox" className="mainPanel">
                 <div className="panel panel-info">
                     <div className="panel-heading">
-                        <div className="panel-title centerText">
+                        <div className="panel-title">
+                            <i className="fa fa-sign-in fa-fw"/>
                             Sign in
                         </div>
                     </div>
@@ -17,19 +18,19 @@ var LoginModal = React.createClass({
                         <div className="leftCol">
                             <div className="form-group credentialsGroup">
                                 <input type="text" className="form-control" placeholder="Email"/>
-                                <input type="text" className="form-control marginTop" placeholder="Password"/>
+                                <input type="password" className="form-control marginTop" placeholder="Password"/>
                             </div>
                             <div className="form-group">
-                                <button className="btn btn-info">Log In</button>
+                                <a className="btn loginButton">Log In</a>
                                 <span className="pull-right textRight">
                                     <a href="#">Forgot Password?</a>
                                 </span>
                             </div>
                         </div>
                         <div className="rightCol">
-                            <a href="#" className="btn btn-success  signInUpButtons">Sign Up</a>
-                            <button className="btn signInUpButtons fb">Login with FaceBook</button>
-                            <button className="btn signInUpButtons google">Login with Google</button>
+                            <a href="#" className="btn signInUpButtons suButton">Sign Up</a>
+                            <a href="#" className="btn signInUpButtons fb">Login with FaceBook</a>
+                            <a href="#" className="btn signInUpButtons google">Login with Google</a>
                         </div>
                     </div>
                 </div>
