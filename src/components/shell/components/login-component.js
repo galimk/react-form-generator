@@ -29,8 +29,10 @@ var LoginModal = React.createClass({
                         </div>
                         <div className="rightCol">
                             <a href="#" className="btn signInUpButtons suButton">Sign Up</a>
-                            <a href="#" className="btn signInUpButtons fb">Login with FaceBook</a>
-                            <a href="#" className="btn signInUpButtons google">Login with Google</a>
+                            <a href="#" className="btn signInUpButtons fb">
+                                <i className="fa fa-facebook-official pull-left"/>Login with Facebook</a>
+                            <a href="#" className="btn signInUpButtons google">
+                               <i className="fa fa-google  pull-left"/>Login with Google</a>
                         </div>
                     </div>
                 </div>
