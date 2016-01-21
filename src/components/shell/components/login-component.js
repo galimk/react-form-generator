@@ -3,47 +3,47 @@
  */
 var React = require('react');
 var _ = require('underscore');
-var LoginModel = require('../models/loginModel');
+var LoginModel = require('../models/loginModel.js');
+
+var loginModel = new LoginModel();
+
 
 var LoginComponent = React.createClass({
-    getInitialState: function(){
+    getInitialState: function () {
         return this.setUpModelState();
     },
 
-    setUpModelState: function(){
-      var loginModelState = {
-            model:{
-            email:{
-                value: LoginModel.get('email'),
-                error: LoginModel.get('email_error')
-            },
-            password:{
-                value: LoginModel.get('password'),
-                error: LoginModel.get('password_error')
+    setUpModelState: function () {
+        var loginModelState = {
+            lModel: {
+                email: {
+                    value: loginModel.get('email'),
+                    error: loginModel.get('email_error')
+                },
+                password: {
+                    value: loginModel.get('password'),
+                    error: loginModel.get('password_error')
+                }
             }
-        }
-      };
+        };
         return loginModelState;
     },
 
-    componentDidMount: function(){
-        LoginModel.on('change', this.loginModelChanged(), this)
+    componentDidMount: function () {
+        loginModel.on('change', this.loginModelChanged(), this)
     },
 
-    componentWillUnmount: function(){
-        LoginModel.on('change', this.loginModelChanged(), this)
+    componentWillUnmount: function () {
+        loginModel.off('change', this.loginModelChanged(), this)
     },
 
-    loginModelChanged: function(){
+    loginModelChanged: function () {
         this.setState(this.setUpModelState())
     },
 
-    onSubmit: function(e){
+    onSubmit: function () {
+        var name = document.getElementsByName("Email");
         var setter = {};
-        var errorMessages = LoginModel.preValidate(e.target.name, e.target.value);
-        setter[e.target.name + '_error'] = errorMessages ? errorMessages : undefined;
-        setter[e.target.name] = e.target.value;
-        LoginModel.set(setter);
     },
 
     render: function () {
@@ -59,8 +59,8 @@ var LoginComponent = React.createClass({
                     <div className="panel-body">
                         <div className="leftCol">
                             <div className="form-group credentialsGroup">
-                                <input type="text" className="form-control" placeholder="Email"/>
-                                <input type="password" className="form-control marginTop" placeholder="Password"/>
+                                <input type="text" className="form-control" name="Email" placeholder="Email"/>
+                                <input type="password" className="form-control marginTop" name="Password" placeholder="Password"/>
                             </div>
                             <div className="form-group">
                                 <a className="btn loginButton" onclick={this.onSubmit}>Log In</a>
@@ -74,7 +74,7 @@ var LoginComponent = React.createClass({
                             <a href="#" className="btn signInUpButtons fb">
                                 <i className="fa fa-facebook-official buttonIcon"/>Login with Facebook</a>
                             <a href="#" className="btn signInUpButtons google">
-                               <i className="fa fa-google buttonIcon"/>Login with Google</a>
+                                <i className="fa fa-google buttonIcon"/>Login with Google</a>
                         </div>
                     </div>
                 </div>
