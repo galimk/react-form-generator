@@ -7,17 +7,19 @@ var _ = require('underscore');
 _.extend(Backbone.Model.prototype, Validation.mixin);
 
 var LoginModel = Backbone.Model.extend({
-    email: '',
-    password:'',
+    defaults: {
+        email: '',
+        password: ''
 
-    validation:{
+    },
+    validation: {
         email: [
             {
                 required: true,
                 msg: 'email is required'
             }
         ],
-        password:[
+        password: [
             {
                 required: true,
                 msg: 'password is required'

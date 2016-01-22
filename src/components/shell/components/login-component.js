@@ -42,7 +42,7 @@ var LoginComponent = React.createClass({
     },
 
     onSubmit: function () {
-        var name = document.getElementsByName("Email");
+        var name = document.getElementById("Email");
         var setter = {};
     },
 
@@ -59,7 +59,7 @@ var LoginComponent = React.createClass({
                     <div className="panel-body">
                         <div className="leftCol">
                             <div className="form-group credentialsGroup">
-                                <input type="text" className="form-control" name="Email" placeholder="Email"/>
+                                <input type="text" className="form-control" id="Email" placeholder="Email"/>
                                 <input type="password" className="form-control marginTop" name="Password" placeholder="Password"/>
                             </div>
                             <div className="form-group">
