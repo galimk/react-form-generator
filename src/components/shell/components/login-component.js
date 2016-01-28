@@ -44,32 +44,39 @@ var LoginComponent = React.createClass({
 
     onSubmit: function () {
         console.log('here!');
-        loginModel.validate();
-        preValidator.preValidate(loginModel, ['email', 'password']);
-
+        if (loginModel.name.error && loginModel.name.error.length > 0){
+            this.setClassName();
+        }
+        //loginModel.validate();
+        ////preValidator.preValidate(loginModel, ['email', 'password']);
     },
 
     onChange: function (e) {
         var setter = {};
+        var errorMessages = loginModel.preValidate(e.target.name.toLowerCase(),e.target.value);
+        setter[e.target.name.toLowerCase() + '_error'] = errorMessages ? errorMessages : undefined;
         setter[e.target.name.toLowerCase()] = e.target.value;
         console.log(setter);
         loginModel.set(setter);
     },
 
-    setClassName: function (name) {
-        var formGroupClass = 'form-control';
-        if (name === 'Email') {
-            if (loginModel.error && loginModel.error.length > 0) {
-                return formGroupClass += ' ' + 'has-error';
-            }
-            return formGroupClass;
-        }
-        else {
-            if (loginModel.error && loginModel.error.length > 0) {
-                return formGroupClass += ' ' + 'marginTop' + ' ' + 'has-error';
-            }
-            return formGroupClass += ' ' + 'marginTop';
-        }
+    setClassName: function () {
+        var emailClass = 'form-control has-error';
+        var passWordClass = 'form-control marginTop has-error';
+        document.getElementById('Email').className = emailClass;
+        document.getElementById('Password').className = passWordClass;
+        //if (name === 'Email') {
+        //    if (loginModel.error && loginModel.error.length > 0) {
+        //        return formGroupClass += ' ' + 'has-error';
+        //    }
+        //    return formGroupClass;
+        //}
+        //else {
+        //    if (loginModel.error && loginModel.error.length > 0) {
+        //        return formGroupClass += ' ' + 'marginTop' + ' ' + 'has-error';
+        //    }
+        //    return formGroupClass += ' ' + 'marginTop';
+        //}
     },
 
     render: function () {
@@ -86,11 +93,11 @@ var LoginComponent = React.createClass({
                         <div className="leftCol">
                             <div className="form-group credentialsGroup">
                                 <input type="text" value={this.state.lModel.email.value} onChange={this.onChange}
-                                       name="Email"
-                                       className={this.setClassName('Email')} id="Email" placeholder="Email"/>
+                                       name="Email" id="Email"
+                                       className="form-control"id="Email" placeholder="Email"/>
                                 <input type="password" value={this.state.lModel.password.value} onChange={this.onChange}
-                                       name="Password"
-                                       className={this.setClassName('Password')} id="Password" placeholder="Password"/>
+                                       name="Password" id="Password"
+                                       className="form-control marginTop" placeholder="Password"/>
                             </div>
                             <div className="form-group">
                                 <a className="btn loginButton" onClick={this.onSubmit}>Log In</a>
