@@ -3,7 +3,7 @@
   max-width: 600px;
 }
 
-.textRight {
+.ForgotPswdTextRight {
   margin-top: 7px;
   padding-right: 35px;
 }
@@ -40,77 +40,77 @@
   border-right: 1px solid #ffffff;
 }
 
-.loginButton{
-  background:#0099cc;
+.hover {
+  color: #ffffff;
+}
+
+.focus{
+  color: #ffffff;
+  outline: 0;
+}
+
+.standardButton{
   border:none;
   color:#ffffff;
   transition: all 0.3s ease 0s;
+}
+
+.loginButton{
+  background:#0099cc;
+  .standardButton;
 }
 
 .loginButton:hover{
   background:#0066cc;
-  color:#ffffff;
+  .hover;
 }
 
 .loginButton:focus{
-  color:#ffffff;
-  outline: 0;
+  .focus;
 }
 
 .suButton{
   background:#cccc00;
-  border:none;
-  color:#ffffff;
-  transition: all 0.3s ease 0s;
+  .standardButton;
 }
 
 .suButton:hover{
   background: #cc9900;
-  color:#ffffff;
+  .hover;
 }
 
 .suButton:focus{
-  color:#ffffff;
-  outline: 0;
+  .focus;
 }
 
 .fb{
   background:#3b5998;
-  color: #ffffff;
-  border: none;
-  text-align: left;
-  transition: all 0.3s ease 0s;
+  .standardButton;
 }
 
 .fb:hover{
-  color:#ffffff;
   background:#6d84b4;
+  .hover;
 }
 
 .fb:focus{
-  color:#ffffff;
-  outline: 0;
+  .focus;
 }
 
 .google{
   background:#db4437;
-  color:#ffffff;
-  border: none;
-  transition: all 0.3s ease 0s;
-  text-align: left;
+  .standardButton;
+  text-align:left;
 }
 
 .google:hover{
-  color:#ffffff;
   background:#f4b400;
+  .hover;
 }
 
 .google:focus{
-  color:#ffffff;
-  outline: 0;
+  .focus;
 }
-
-
 
 @media screen and(max-width: 600px){
   .leftCol{
