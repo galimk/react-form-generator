@@ -1,20 +1,15 @@
-.mainPanel {
+.mainLoginPanel {
   margin: 150px auto 20px;
   max-width: 600px;
+}
+
+.passwordTopMargin{
+  margin-top:5px;
 }
 
 .ForgotPswdTextRight {
   margin-top: 7px;
   padding-right: 35px;
-}
-
-.credentialsGroup {
-  padding-right: 35px;
-  padding-bottom: 5px;
-}
-
-.marginTop{
-  margin-top:5px;
 }
 
 .leftCol {
@@ -26,10 +21,15 @@
 .rightCol {
   margin-top: 5px;
   padding-left: 340px;
-  padding-right:50px;
+  padding-right: 30px;
 }
 
-.signInUpButtons{
+.credentialsGroup {
+  padding-right: 35px;
+  padding-bottom: 5px;
+}
+
+.rightColButtons{
   margin-top: 6px;
   width:100%;
 }
@@ -40,16 +40,16 @@
   border-right: 1px solid #ffffff;
 }
 
-.hover {
+.standardbtnHover {
   color: #ffffff;
 }
 
-.focus{
+.standardBtnFocus{
   color: #ffffff;
   outline: 0;
 }
 
-.standardButton{
+.standardButtonStyle{
   border:none;
   color:#ffffff;
   transition: all 0.3s ease 0s;
@@ -57,60 +57,60 @@
 
 .loginButton{
   background:#0099cc;
-  .standardButton;
+  .standardButtonStyle;
 }
 
 .loginButton:hover{
   background:#0066cc;
-  .hover;
+  .standardbtnHover;
 }
 
 .loginButton:focus{
-  .focus;
+  .standardBtnFocus;
 }
 
-.suButton{
+.signUpButton{
   background:#cccc00;
-  .standardButton;
+  .standardButtonStyle;
 }
 
-.suButton:hover{
+.signUpButton:hover{
   background: #cc9900;
-  .hover;
+  .standardbtnHover;
 }
 
-.suButton:focus{
-  .focus;
+.signUpButton:focus{
+  .standardBtnFocus;
 }
 
-.fb{
+.fbButton{
   background:#3b5998;
-  .standardButton;
   text-align: left;
+  .standardButtonStyle;
 }
 
-.fb:hover{
+.fbButton:hover{
   background:#6d84b4;
-  .hover;
+  .standardbtnHover;
 }
 
-.fb:focus{
-  .focus;
+.fbButton:focus{
+  .standardBtnFocus;
 }
 
-.google{
+.googleButton{
   background:#db4437;
-  .standardButton;
   text-align:left;
+  .standardButtonStyle;
 }
 
-.google:hover{
+.googleButton:hover{
   background:#f4b400;
-  .hover;
+  .standardbtnHover;
 }
 
-.google:focus{
-  .focus;
+.googleButton:focus{
+  .standardBtnFocus;
 }
 
 @media screen and(max-width: 600px){
@@ -125,7 +125,7 @@
     padding: 0 50px 0 0;
     margin-left: 15%;
   }
-  .mainPanel {
+  .mainLoginPanel {
     margin: 150px auto 20px;
     max-width: 330px;
   }

@@ -81,7 +81,7 @@ var LoginComponent = React.createClass({
 
     render: function () {
         return (
-            <div id="loginBox" className="mainPanel">
+            <div id="loginBox" className="mainLoginPanel">
                 <div className="panel panel-info">
                     <div className="panel-heading">
                         <div className="panel-title">
@@ -97,7 +97,7 @@ var LoginComponent = React.createClass({
                                        className="form-control"id="Email" placeholder="Email"/>
                                 <input type="password" value={this.state.lModel.password.value} onChange={this.onChange}
                                        name="Password" id="Password"
-                                       className="form-control marginTop" placeholder="Password"/>
+                                       className="form-control passwordTopMargin" placeholder="Password"/>
                             </div>
                             <div className="form-group">
                                 <a className="btn loginButton" onClick={this.onSubmit}>Log In</a>
@@ -107,10 +107,10 @@ var LoginComponent = React.createClass({
                             </div>
                         </div>
                         <div className="rightCol">
-                            <a href="#" className="btn signInUpButtons suButton">Sign Up</a>
-                            <a href="#" className="btn signInUpButtons fb">
+                            <a href="#" className="btn rightColButtons signUpButton">Sign Up</a>
+                            <a href="#" className="btn rightColButtons fbButton">
                                 <i className="fa fa-facebook-official buttonIcon"/>Login with Facebook</a>
-                            <a href="#" className="btn signInUpButtons google">
+                            <a href="#" className="btn rightColButtons googleButton">
                                 <i className="fa fa-google buttonIcon"/>Login with Google</a>
                         </div>
                     </div>
