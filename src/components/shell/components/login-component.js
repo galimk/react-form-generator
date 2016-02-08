@@ -1,85 +1,67 @@
-/**
- * Created by amirkaudinov on 12/29/15.
- */
 var React = require('react');
+var classNames = require('classnames');
 var _ = require('underscore');
 var LoginModel = require('../models/loginModel.js');
-var preValidator = require('./preValidator');
+var validator = require('./validator');
+var ModelMixin = require('./ModelStateMixin.js');
 
 var loginModel = new LoginModel();
 
+function setUpModelState(){
+    var loginModelState = {
+        lModel: {
+            email:{
+                value: loginModel.get('email')
+            },
+            password:{
+                value: loginModel.get('password')
+            }
+        }
+    };
+    return loginModelState;
+}
 
 var LoginComponent = React.createClass({
-    getInitialState: function () {
-        return this.setUpModelState();
-    },
-
-    setUpModelState: function () {
-        var loginModelState = {
-            lModel: {
-                email: {
-                    value: loginModel.get('email'),
-                    error: loginModel.get('email_error')
-                },
-                password: {
-                    value: loginModel.get('password'),
-                    error: loginModel.get('password_error')
-                }
-            }
-        };
-        return loginModelState;
-    },
-
-    componentDidMount: function () {
-        loginModel.on('change', this.loginModelChanged, this)
-    },
-
-    componentWillUnmount: function () {
-        loginModel.off('change', this.loginModelChanged, this)
-    },
-
-    loginModelChanged: function () {
-        this.setState(this.setUpModelState())
-    },
+    mixins:[ModelMixin(loginModel,setUpModelState)],
 
     onSubmit: function () {
-        console.log('here!');
-        if (loginModel.name.error && loginModel.name.error.length > 0){
-            this.setClassName();
+        var isValid = validator.validate(loginModel, ['password', 'email']);
+        var stateSetter = {
+            emailError: loginModel.get('email_error'),
+            passwordError: loginModel.get('password_error')
+        };
+
+        this.setState(stateSetter);
+        if(isValid){
+            alert('do login!');
         }
-        //loginModel.validate();
-        ////preValidator.preValidate(loginModel, ['email', 'password']);
     },
 
     onChange: function (e) {
         var setter = {};
-        var errorMessages = loginModel.preValidate(e.target.name.toLowerCase(),e.target.value);
-        setter[e.target.name.toLowerCase() + '_error'] = errorMessages ? errorMessages : undefined;
         setter[e.target.name.toLowerCase()] = e.target.value;
-        console.log(setter);
         loginModel.set(setter);
-    },
-
-    setClassName: function () {
-        var emailClass = 'form-control has-error';
-        var passWordClass = 'form-control marginTop has-error';
-        document.getElementById('Email').className = emailClass;
-        document.getElementById('Password').className = passWordClass;
-        //if (name === 'Email') {
-        //    if (loginModel.error && loginModel.error.length > 0) {
-        //        return formGroupClass += ' ' + 'has-error';
-        //    }
-        //    return formGroupClass;
-        //}
-        //else {
-        //    if (loginModel.error && loginModel.error.length > 0) {
-        //        return formGroupClass += ' ' + 'marginTop' + ' ' + 'has-error';
-        //    }
-        //    return formGroupClass += ' ' + 'marginTop';
-        //}
+        var isValid = validator.validate(loginModel, [e.target.name.toLowerCase()])
+        if(isValid){
+            var stateSetter = {};
+            stateSetter[e.target.name.toLowerCase() + 'Error'] = '';
+            this.setState(stateSetter);
+        }
     },
 
     render: function () {
+        var emailGroupClasses = classNames({
+            'credentialsGroup': true,
+            'has-error': [null, undefined, ''].indexOf(this.state.emailError) === -1,
+            'form-group': true
+        });
+
+        var passwordGroupClasses = classNames({
+            'credentialsGroup': true,
+            'has-error': [null, undefined, ''].indexOf(this.state.passwordError) === -1,
+            'form-group': true
+        });
+
         return (
             <div id="loginBox" className="mainLoginPanel">
                 <div className="panel panel-info">
@@ -91,14 +73,18 @@ var LoginComponent = React.createClass({
                     </div>
                     <div className="panel-body">
                         <div className="leftCol">
-                            <div className="form-group credentialsGroup">
+                            <div className={emailGroupClasses}>
                                 <input type="text" value={this.state.lModel.email.value} onChange={this.onChange}
                                        name="Email" id="Email"
-                                       className="form-control"id="Email" placeholder="Email"/>
+                                       className="has-error form-control" id="Email" placeholder="Email"/>
+                            </div>
+
+                            <div className={passwordGroupClasses}>
                                 <input type="password" value={this.state.lModel.password.value} onChange={this.onChange}
                                        name="Password" id="Password"
                                        className="form-control passwordTopMargin" placeholder="Password"/>
                             </div>
+
                             <div className="form-group">
                                 <a className="btn loginButton" onClick={this.onSubmit}>Log In</a>
                                 <span className="pull-right ForgotPswdTextRight">
