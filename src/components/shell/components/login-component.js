@@ -32,19 +32,24 @@ var LoginComponent = React.createClass({
         };
 
         this.setState(stateSetter);
+
         if(isValid){
             alert('do login!');
         }
     },
 
     onChange: function (e) {
-        var setter = {};
-        setter[e.target.name.toLowerCase()] = e.target.value;
-        loginModel.set(setter);
-        var isValid = validator.validate(loginModel, [e.target.name.toLowerCase()])
-        if(isValid){
-            var stateSetter = {};
-            stateSetter[e.target.name.toLowerCase() + 'Error'] = '';
+        var modelSetter = {};
+        modelSetter[e.target.name.toLowerCase()] = e.target.value;
+        loginModel.set(modelSetter);
+
+        var stateSetter = {};
+        if(e.target.value.match(/\w/)){
+            stateSetter[e.target.name.toLowerCase() + 'Error'] = null;
+            this.setState(stateSetter);
+        }
+        else {
+            stateSetter[e.target.name.toLowerCase() + 'Error'] = 1;
             this.setState(stateSetter);
         }
     },
@@ -59,7 +64,8 @@ var LoginComponent = React.createClass({
         var passwordGroupClasses = classNames({
             'credentialsGroup': true,
             'has-error': [null, undefined, ''].indexOf(this.state.passwordError) === -1,
-            'form-group': true
+            'form-group': true,
+            'passwordTopMargin': true
         });
 
         return (
