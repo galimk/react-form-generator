@@ -45,7 +45,7 @@ var LoginComponent = React.createClass({
         loginModel.set(modelSetter);
 
         var stateSetter = {};
-        if(e.target.value.match(/\w/)){
+        if(e.target.value.match(/\w/) && [null, undefined, ''].indexOf(this.state[e.target.name + 'Error']) === -1){
             stateSetter[e.target.name + 'Error'] = null;
             this.setState(stateSetter);
         }
