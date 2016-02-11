@@ -31,25 +31,22 @@ var LoginComponent = React.createClass({
             passwordError: loginModel.get('password_error')
         };
 
-        this.setState(stateSetter);
-
-        if(isValid){
+        if(!isValid) {
+            this.setState(stateSetter);
+        }
+        else {
             alert('do login!');
         }
     },
 
     onChange: function (e) {
         var modelSetter = {};
-        modelSetter[e.target.name.toLowerCase()] = e.target.value;
+        modelSetter[e.target.name] = e.target.value;
         loginModel.set(modelSetter);
 
         var stateSetter = {};
         if(e.target.value.match(/\w/)){
-            stateSetter[e.target.name.toLowerCase() + 'Error'] = null;
-            this.setState(stateSetter);
-        }
-        else {
-            stateSetter[e.target.name.toLowerCase() + 'Error'] = 1;
+            stateSetter[e.target.name + 'Error'] = null;
             this.setState(stateSetter);
         }
     },
@@ -81,13 +78,13 @@ var LoginComponent = React.createClass({
                         <div className="leftCol">
                             <div className={emailGroupClasses}>
                                 <input type="text" value={this.state.lModel.email.value} onChange={this.onChange}
-                                       name="Email" id="Email"
+                                       name="email" id="Email"
                                        className="has-error form-control" id="Email" placeholder="Email"/>
                             </div>
 
                             <div className={passwordGroupClasses}>
                                 <input type="password" value={this.state.lModel.password.value} onChange={this.onChange}
-                                       name="Password" id="Password"
+                                       name="password" id="Password"
                                        className="form-control passwordTopMargin" placeholder="Password"/>
                             </div>
 

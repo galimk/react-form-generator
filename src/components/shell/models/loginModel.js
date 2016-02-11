@@ -10,7 +10,6 @@ var LoginModel = Backbone.Model.extend({
     defaults: {
         email: '',
         password: ''
-
     },
     validation: {
         email: [
