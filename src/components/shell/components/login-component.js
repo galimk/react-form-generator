@@ -21,6 +21,10 @@ function setUpModelState(){
     return loginModelState;
 }
 
+function notNullUndefinedOrEmpty(prop){
+    return [null, undefined, ''].indexOf(prop) === -1
+}
+
 var LoginComponent = React.createClass({
     mixins:[ModelMixin(loginModel,setUpModelState)],
 
@@ -45,8 +49,9 @@ var LoginComponent = React.createClass({
         loginModel.set(modelSetter);
 
         var stateSetter = {};
-        if(e.target.value.match(/\w/) && [null, undefined, ''].indexOf(this.state[e.target.name + 'Error']) === -1){
+        if(e.target.value.match(/\w/) && notNullUndefinedOrEmpty(this.state[e.target.name + 'Error'])){
             stateSetter[e.target.name + 'Error'] = null;
+            console.log(this);
             this.setState(stateSetter);
         }
     },
@@ -54,13 +59,13 @@ var LoginComponent = React.createClass({
     render: function () {
         var emailGroupClasses = classNames({
             'credentialsGroup': true,
-            'has-error': [null, undefined, ''].indexOf(this.state.emailError) === -1,
+            'has-error': notNullUndefinedOrEmpty(this.state.emailError),
             'form-group': true
         });
 
         var passwordGroupClasses = classNames({
             'credentialsGroup': true,
-            'has-error': [null, undefined, ''].indexOf(this.state.passwordError) === -1,
+            'has-error': notNullUndefinedOrEmpty(this.state.passwordError),
             'form-group': true,
             'passwordTopMargin': true
         });
