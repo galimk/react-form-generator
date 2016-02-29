@@ -32,11 +32,12 @@ var MainPath = getPathObject('./src/components/customfields/', {
 });
 
 var ModulesPath = getPathObject('./node_modules/', {
-    BootstrapMinFile: 'bootstrap/dist/css/bootstrap.min.css',
-    BootstrapThemeMinFile: 'bootstrap/dist/css/bootstrap-theme.min.css',
     FontAwesomeCss: 'font-awesome/css/font-awesome.css',
-    FontsFolder: 'font-awesome/fonts/**/*.*',
+    FontsFolder: 'font-awesome/fonts/**/*.*'
+});
 
+var BootstrapMinFiles = getPathObject('themes/',{
+    cosmoTheme: 'cosmo/bootstrap.min.css'
 });
 
 module.exports = function (gulp) {
@@ -52,10 +53,7 @@ module.exports = function (gulp) {
             .pipe(rename({prefix: styles_id}))
             .pipe(gulp.dest(MainPath.DistDir));
 
-        gulp.src(ModulesPath.BootstrapMinFile)
-            .pipe(gulp.dest(MainPath.DistDir));
-
-        gulp.src(ModulesPath.BootstrapThemeMinFile)
+        gulp.src(BootstrapMinFiles.cosmoTheme)
             .pipe(gulp.dest(MainPath.DistDir));
 
         gulp.src(ModulesPath.FontsFolder)
