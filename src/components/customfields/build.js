@@ -36,7 +36,7 @@ var ModulesPath = getPathObject('./node_modules/', {
     FontsFolder: 'font-awesome/fonts/**/*.*'
 });
 
-var BootstrapMinFiles = getPathObject('themes/',{
+var BootstrapMinFiles = getPathObject('./src/themes/',{
     cosmoTheme: 'cosmo/bootstrap.min.css'
 });
 

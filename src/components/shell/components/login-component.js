@@ -84,7 +84,7 @@ var LoginComponent = React.createClass({
                             <div className={emailGroupClasses}>
                                 <input type="text" value={this.state.lModel.email.value} onChange={this.onChange}
                                        name="email" id="Email"
-                                       className="has-error form-control" id="Email" placeholder="Email"/>
+                                       className="form-control" id="Email" placeholder="Email"/>
                             </div>
 
                             <div className={passwordGroupClasses}>
