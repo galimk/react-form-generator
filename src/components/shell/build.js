@@ -43,7 +43,8 @@ var ModulesPath = _returnPathObject('./node_modules/', {
 
 var BootStrapThemes = _returnPathObject('./src/themes/', {
     cosmo: 'cosmo/bootstrap.min.css',
-    flatly: 'flatly/bootstrap.min.css'
+    flatly: 'flatly/bootstrap.min.css',
+    lumen: 'lumen/bootstrap.min.css'
 });
 
 module.exports = function (gulp) {

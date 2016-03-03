@@ -5,7 +5,7 @@ var source = require('vinyl-source-stream');
 var minify = require('gulp-minify');
 var buffer = require('vinyl-buffer');
 var CustomFields = require('./src/components/customfields/build');
-var StartPage = require('./src/components/shell/Build.js');
+var shell = require('./src/components/shell/Build.js');
 
 gulp.task('browserify', function () {
     browserify('./src/registry.js')
@@ -20,5 +20,5 @@ gulp.task('browserify', function () {
 
 gulp.task('default', ['browserify']);
 
-StartPage(gulp);
+shell(gulp);
 CustomFields(gulp);
