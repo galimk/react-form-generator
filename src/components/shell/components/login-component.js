@@ -99,6 +99,7 @@ var LoginComponent = React.createClass({
                                     <a href="#">Forgot Password?</a>
                                 </span>
                             </div>
+
                         </div>
                         <div className="rightCol">
                             <a href="#" className="btn rightColButtons signUpButton">Sign Up</a>
