@@ -44,7 +44,8 @@ var ModulesPath = _returnPathObject('./node_modules/', {
 var BootStrapThemes = _returnPathObject('./src/themes/', {
     cosmo: 'cosmo/bootstrap.min.css',
     flatly: 'flatly/bootstrap.min.css',
-    lumen: 'lumen/bootstrap.min.css'
+    lumen: 'lumen/bootstrap.min.css',
+    yeti: 'Yeti/bootstrap.min.css'
 });
 
 module.exports = function (gulp) {
@@ -61,7 +62,7 @@ module.exports = function (gulp) {
             .pipe(rename({prefix: styles_id}))
             .pipe(gulp.dest(MainPath.DistDir));
 
-        gulp.src(BootStrapThemes.cosmo)
+        gulp.src(BootStrapThemes.yeti)
             .pipe(gulp.dest(MainPath.DistDir));
 
         gulp.src(ModulesPath.BootStrapThemeMinFile)
