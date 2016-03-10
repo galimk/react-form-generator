@@ -37,7 +37,10 @@ var ModulesPath = getPathObject('./node_modules/', {
 });
 
 var BootstrapMinFiles = getPathObject('./src/themes/',{
-    cosmoTheme: 'cosmo/bootstrap.min.css'
+    cosmo: 'cosmo/bootstrap.min.css',
+    flatly: 'flatly/bootstrap.min.css',
+    lumen: 'lumen/bootstrap.min.css',
+    yeti: 'yeti/bootstrap.min.css'
 });
 
 module.exports = function (gulp) {
@@ -53,7 +56,7 @@ module.exports = function (gulp) {
             .pipe(rename({prefix: styles_id}))
             .pipe(gulp.dest(MainPath.DistDir));
 
-        gulp.src(BootstrapMinFiles.cosmoTheme)
+        gulp.src(BootstrapMinFiles.cosmo)
             .pipe(gulp.dest(MainPath.DistDir));
 
         gulp.src(ModulesPath.FontsFolder)
