@@ -109,7 +109,6 @@ module.exports = function (gulp) {
     gulp.task('shell-open', ['shell-connect'], function (callback) {
         gulp.src(MainPath.DistIndexHtml)
             .pipe(open({uri: 'http://localhost:9005/'}));
-        console.log('HERE!!!');
 
         fs.readFile(MainPath.IndexHtmlFile, function (err, file) {
             callback();

@@ -10,12 +10,8 @@ var loginModel = new LoginModel();
 function setUpModelState(){
     var loginModelState = {
         lModel: {
-            email:{
-                value: loginModel.get('email')
-            },
-            password:{
-                value: loginModel.get('password')
-            }
+            email: loginModel.get('email'),
+            password: loginModel.get('password')
         }
     };
     return loginModelState;
@@ -82,13 +78,13 @@ var LoginComponent = React.createClass({
                     <div className="panel-body">
                         <div className="leftCol">
                             <div className={emailGroupClasses}>
-                                <input type="text" value={this.state.lModel.email.value} onChange={this.onChange}
+                                <input type="text" value={this.state.lModel.email} onChange={this.onChange}
                                        name="email" id="Email"
                                        className="form-control" id="Email" placeholder="Email"/>
                             </div>
 
                             <div className={passwordGroupClasses}>
-                                <input type="password" value={this.state.lModel.password.value} onChange={this.onChange}
+                                <input type="password" value={this.state.lModel.password} onChange={this.onChange}
                                        name="password" id="Password"
                                        className="form-control passwordTopMargin" placeholder="Password"/>
                             </div>
