@@ -90,11 +90,9 @@ module.exports = function (gulp) {
             .pipe(gulp.dest(MainPath.DistDir));
     });
 
-    gulp.task('shell-reload', function (callback) {
+    gulp.task('shell-reload', function () {
         gulp.src(MainPath.IndexHtmlFile).pipe(connect.reload());
-        fs.readFile(MainPath.IndexHtmlFile, function (err, file) {
-            callback();
-        });
+        fs.readFile(MainPath.IndexHtmlFile, function (err, file) {});
     });
 
     gulp.task('shell-connect', function () {
@@ -106,23 +104,21 @@ module.exports = function (gulp) {
         });
     });
 
-    gulp.task('shell-open', ['shell-connect'], function (callback) {
+    gulp.task('shell-open', ['shell-connect'], function () {
         gulp.src(MainPath.DistIndexHtml)
             .pipe(open({uri: 'http://localhost:9005/'}));
 
-        fs.readFile(MainPath.IndexHtmlFile, function (err, file) {
-            callback();
-        });
+        fs.readFile(MainPath.IndexHtmlFile, function (err, file) {});
     });
 
-    gulp.task('shell-build-open', function (callback) {
+    gulp.task('shell-build-open', function () {
         return runSequence(['shell-clean', 'shell-build-js', 'shell-files-copy']
-            , 'shell-open', callback);
+            , 'shell-open');
     });
 
-    gulp.task('shell-build-reload', function (callback) {
+    gulp.task('shell-build-reload', function () {
         return runSequence(['shell-clean', 'shell-build-js', 'shell-files-copy']
-            , 'shell-reload', callback);
+            , 'shell-reload');
     });
 
     gulp.task('shell', ['shell-build-open'], function () {
