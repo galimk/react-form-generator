@@ -52,6 +52,13 @@ var LoginComponent = React.createClass({
         }
     },
 
+    keyHandler: function(e){
+        if(e.keyCode == 13){
+            this.onSubmit();
+            e.preventDefault();
+        }
+    },
+
     render: function () {
         var emailGroupClasses = classNames({
             'credentialsGroup': true,
@@ -79,12 +86,14 @@ var LoginComponent = React.createClass({
                         <div className="leftCol">
                             <div className={emailGroupClasses}>
                                 <input type="text" value={this.state.lModel.email} onChange={this.onChange}
+                                       onKeyDown={this.keyHandler}
                                        name="email" id="Email"
                                        className="form-control" id="Email" placeholder="Email"/>
                             </div>
 
                             <div className={passwordGroupClasses}>
                                 <input type="password" value={this.state.lModel.password} onChange={this.onChange}
+                                       onKeyDown={this.keyHandler}
                                        name="password" id="Password"
                                        className="form-control passwordTopMargin" placeholder="Password"/>
                             </div>
