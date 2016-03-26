@@ -4,41 +4,28 @@
 var React = require('react');
 var classnames = require('classnames');
 var _ = require('underscore');
-var ModelMixin = require('./ModelStateMixin.js');
 
-//function setUpErrModelState(){
-//    var errModel = {
-//        eModel:{
-//            emailError: this.props.modelE.get('email_error'),
-//            passwordError: this.props.modelE.get('password_error')
-//        }
-//    };
-//    return errModel;
-//}
-
-function notNullUndefinedOrEmpty(prop) {
-    return [null, undefined, ''].indexOf(prop) === -1
+function listContainsErrors(list){
+    return list.some(function(item){return item != null})
 }
 
 var LoginErrorComponent = React.createClass({
-    //mixins:[ModelMixin(this.props.modelE, setUpErrModelState)],
     render: function(){
-        var errorClassName = classnames({
-            'alert': notNullUndefinedOrEmpty(this.props.modelE.get('email_error')) ||
-            notNullUndefinedOrEmpty(this.props.modelE.get('password_error')),
-
-            'alert-dismissible': notNullUndefinedOrEmpty(this.props.modelE.get('email_error')) ||
-            notNullUndefinedOrEmpty(this.props.modelE.get('password_error')),
-
-            'alert-danger': notNullUndefinedOrEmpty(this.props.modelE.get('email_error')) ||
-                notNullUndefinedOrEmpty(this.props.modelE.get('password_error'))
+        var errorClassNames = classnames({
+            'alert-danger': listContainsErrors(this.props.errorList),
+            'alert-dismissible': listContainsErrors(this.props.errorList),
+            'errorTrans': true
         });
+
+        var errors = this.props.errorList.map(function(error, i){
+            return(
+                <h5 key={i}>{error} </h5>
+            )
+        }, this);
+
         return(
-            <div className={errorClassName}>
-                <strong>
-                    {this.props.modelE.get('email_error')}<br/>
-                    {this.props.modelE.get('password_error')}
-                </strong>
+            <div className={errorClassNames}>
+                {errors}
             </div>
         )
     }

@@ -118,7 +118,7 @@ var LoginComponent = React.createClass({
                         </div>
                     </div>
                 </div>
-                    <ErrorComponent modelE={loginModel}/>
+                    <ErrorComponent errorList={[this.state.emailError, this.state.passwordError]}/>
             </div>
         );
     }
