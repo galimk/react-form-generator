@@ -4,10 +4,11 @@ var _ = require('underscore');
 var LoginModel = require('../models/loginModel.js');
 var validator = require('./validator');
 var ModelMixin = require('./ModelStateMixin.js');
+var ErrorComponent = require('./loginError-component.js');
 
 var loginModel = new LoginModel();
 
-function setUpModelState(){
+function setUpModelState() {
     var loginModelState = {
         lModel: {
             email: loginModel.get('email'),
@@ -17,12 +18,12 @@ function setUpModelState(){
     return loginModelState;
 }
 
-function notNullUndefinedOrEmpty(prop){
+function notNullUndefinedOrEmpty(prop) {
     return [null, undefined, ''].indexOf(prop) === -1
 }
 
 var LoginComponent = React.createClass({
-    mixins:[ModelMixin(loginModel,setUpModelState)],
+    mixins: [ModelMixin(loginModel, setUpModelState)],
 
     onSubmit: function () {
         var isValid = validator.validate(loginModel, ['password', 'email']);
@@ -31,7 +32,7 @@ var LoginComponent = React.createClass({
             passwordError: loginModel.get('password_error')
         };
 
-        if(!isValid) {
+        if (!isValid) {
             this.setState(stateSetter);
         }
         else {
@@ -45,15 +46,15 @@ var LoginComponent = React.createClass({
         loginModel.set(modelSetter);
 
         var stateSetter = {};
-        if(e.target.value.match(/\w/) && notNullUndefinedOrEmpty(this.state[e.target.name + 'Error'])){
+        if (e.target.value.match(/\w/) && notNullUndefinedOrEmpty(this.state[e.target.name + 'Error'])) {
             stateSetter[e.target.name + 'Error'] = null;
             console.log(this);
             this.setState(stateSetter);
         }
     },
 
-    keyHandler: function(e){
-        if(e.keyCode == 13){
+    keyHandler: function (e) {
+        if (e.keyCode == 13) {
             this.onSubmit();
             e.preventDefault();
         }
@@ -74,47 +75,50 @@ var LoginComponent = React.createClass({
         });
 
         return (
-            <div id="loginBox" className="mainLoginPanel">
-                <div className="panel panel-info">
-                    <div className="panel-heading">
-                        <div className="panel-title">
-                            <i className="fa fa-sign-in fa-fw"/>
-                            Sign in
+            <div>
+                <div id="loginBox" className="mainLoginPanel">
+                    <div className="panel panel-info">
+                        <div className="panel-heading">
+                            <div className="panel-title">
+                                <i className="fa fa-sign-in fa-fw"/>
+                                Sign in
+                            </div>
                         </div>
-                    </div>
-                    <div className="panel-body">
-                        <div className="leftCol">
-                            <div className={emailGroupClasses}>
-                                <input type="text" value={this.state.lModel.email} onChange={this.onChange}
-                                       onKeyDown={this.keyHandler}
-                                       name="email" id="Email"
-                                       className="form-control" id="Email" placeholder="Email"/>
-                            </div>
+                        <div className="panel-body">
+                            <div className="leftCol">
+                                <div className={emailGroupClasses}>
+                                    <input type="text" value={this.state.lModel.email} onChange={this.onChange}
+                                           onKeyDown={this.keyHandler}
+                                           name="email" id="Email"
+                                           className="form-control" id="Email" placeholder="Email"/>
+                                </div>
 
-                            <div className={passwordGroupClasses}>
-                                <input type="password" value={this.state.lModel.password} onChange={this.onChange}
-                                       onKeyDown={this.keyHandler}
-                                       name="password" id="Password"
-                                       className="form-control passwordTopMargin" placeholder="Password"/>
-                            </div>
+                                <div className={passwordGroupClasses}>
+                                    <input type="password" value={this.state.lModel.password} onChange={this.onChange}
+                                           onKeyDown={this.keyHandler}
+                                           name="password" id="Password"
+                                           className="form-control passwordTopMargin" placeholder="Password"/>
+                                </div>
 
-                            <div className="form-group">
-                                <a className="btn loginButton" onClick={this.onSubmit}>Log In</a>
+                                <div className="form-group">
+                                    <a className="btn loginButton" onClick={this.onSubmit}>Log In</a>
                                 <span className="pull-right ForgotPswdTextRight">
                                     <a href="#">Forgot Password?</a>
                                 </span>
-                            </div>
+                                </div>
 
-                        </div>
-                        <div className="rightCol">
-                            <a href="#" className="btn rightColButtons signUpButton">Sign Up</a>
-                            <a href="#" className="btn rightColButtons fbButton">
-                                <i className="fa fa-facebook-official buttonIcon"/>Login with Facebook</a>
-                            <a href="#" className="btn rightColButtons googleButton">
-                                <i className="fa fa-google buttonIcon"/>Login with Google</a>
+                            </div>
+                            <div className="rightCol">
+                                <a href="#" className="btn rightColButtons signUpButton">Sign Up</a>
+                                <a href="#" className="btn rightColButtons fbButton">
+                                    <i className="fa fa-facebook-official buttonIcon"/>Login with Facebook</a>
+                                <a href="#" className="btn rightColButtons googleButton">
+                                    <i className="fa fa-google buttonIcon"/>Login with Google</a>
+                            </div>
                         </div>
                     </div>
                 </div>
+                    <ErrorComponent modelE={loginModel}/>
             </div>
         );
     }
