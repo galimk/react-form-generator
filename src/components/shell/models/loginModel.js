@@ -15,13 +15,13 @@ var LoginModel = Backbone.Model.extend({
         email: [
             {
                 required: true,
-                msg: 'email is required'
+                msg: 'Email is required'
             }
         ],
         password: [
             {
                 required: true,
-                msg: 'password is required'
+                msg: 'Password is required'
             }
         ]
     }

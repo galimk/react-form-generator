@@ -5,12 +5,6 @@ var React = require('react');
 var classnames = require('classnames');
 var _ = require('underscore');
 
-function listContainsErrors(list) {
-    return list.some(function (item) {
-        return item != null
-    })
-}
-
 var LoginErrorComponent = React.createClass({
     render: function () {
         var errorClassNames = classnames({
@@ -18,13 +12,9 @@ var LoginErrorComponent = React.createClass({
             'errorTrans': true
         });
 
-        var nonErrorClassNames = classnames({
-            'nonErrorTrans': true,
-            'errorBackground': true
-        });
-
         var errors = this.props.errorList.map(function (error, i) {
-            if (error != null || error != undefined) {
+            debugger;
+            if ([null,"",undefined].indexOf(error) ===-1) {
                 return (
                     <div className={errorClassNames} key={i}>
                         <strong className='loginErrorText'>{error}</strong>

@@ -90,14 +90,18 @@ var LoginComponent = React.createClass({
                                     <input type="text" value={this.state.lModel.email} onChange={this.onChange}
                                            onKeyDown={this.keyHandler}
                                            name="email" id="Email"
-                                           className="form-control" id="Email" placeholder="Email"/>
+                                           className="form-control" id="Email"
+                                           placeholder={notNullUndefinedOrEmpty(this.state.emailError) ?
+                                           this.state.emailError : "Email"}/>
                                 </div>
 
                                 <div className={passwordGroupClasses}>
                                     <input type="password" value={this.state.lModel.password} onChange={this.onChange}
                                            onKeyDown={this.keyHandler}
                                            name="password" id="Password"
-                                           className="form-control passwordTopMargin" placeholder="Password"/>
+                                           className="form-control passwordTopMargin"
+                                           placeholder={notNullUndefinedOrEmpty(this.state.passwordError) ?
+                                           this.state.passwordError : "Password"}/>
                                 </div>
 
                                 <div className="form-group">

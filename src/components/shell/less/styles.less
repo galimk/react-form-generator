@@ -119,9 +119,11 @@
 }
 
 .errorTrans{
+  border-radius: 3px;
   -webkit-animation-name: fadein;
-  -webkit-animation: fadein 2s;
-  max-width: 250px;
+  -webkit-animation: fadein 0.5s;
+  animation-fill-mode: forwards;
+  max-width: 200px;
   margin: -18px 20px 20px 420px;
 }
 
@@ -129,11 +131,10 @@
   margin-left: 2px;
 }
 
-@keyframes fadein{
+@-webkit-keyframes fadein{
   from{opacity: 0;}
   to{opacity: 1;}
 }
-
 
 @media screen and(max-width: 600px){
   .leftCol{
