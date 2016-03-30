@@ -113,28 +113,38 @@
   .standardBtnFocus;
 }
 
-.errorBackground{
-  background-color: #7f5006;
-  color: #ffffff;
-}
-
 .errorTrans{
   border-radius: 3px;
   -webkit-animation-name: fadein;
   -webkit-animation: fadein 0.5s;
   animation-fill-mode: forwards;
-  max-width: 200px;
+  width: 200px;
   margin: -18px 20px 20px 420px;
 }
 
-.loginErrorText{
-  margin-left: 2px;
+.nonErrorTrans{
+  border-radius: 3px;
+  -webkit-animation-name: fadeout;
+  -webkit-animation: fadeout 0.5s;
+  animation-fill-mode: forwards;
+  width: 200px;
+  margin: -18px 20px 20px 420px;
+}
+
+@-webkit-keyframes fadeout {
+  from{opacity: 1;}
+  to{opacity:0;}
 }
 
 @-webkit-keyframes fadein{
   from{opacity: 0;}
   to{opacity: 1;}
 }
+
+.loginErrorText{
+  margin-left: 2px;
+}
+
 
 @media screen and(max-width: 600px){
   .leftCol{

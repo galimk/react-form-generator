@@ -5,6 +5,7 @@ var LoginModel = require('../models/loginModel.js');
 var validator = require('./validator');
 var ModelMixin = require('./ModelStateMixin.js');
 var ErrorComponent = require('./loginError-component.js');
+var ConstantFuncs = require('./Constants/ConstantFuncs.js');
 
 var loginModel = new LoginModel();
 
@@ -16,10 +17,6 @@ function setUpModelState() {
         }
     };
     return loginModelState;
-}
-
-function notNullUndefinedOrEmpty(prop) {
-    return [null, undefined, ''].indexOf(prop) === -1
 }
 
 var LoginComponent = React.createClass({
@@ -46,7 +43,7 @@ var LoginComponent = React.createClass({
         loginModel.set(modelSetter);
 
         var stateSetter = {};
-        if (e.target.value.match(/\w/) && notNullUndefinedOrEmpty(this.state[e.target.name + 'Error'])) {
+        if (e.target.value.match(/\w/) && ConstantFuncs.notNullUndefinedOrEmpty(this.state[e.target.name + 'Error'])) {
             stateSetter[e.target.name + 'Error'] = null;
             console.log(this);
             this.setState(stateSetter);
@@ -63,13 +60,13 @@ var LoginComponent = React.createClass({
     render: function () {
         var emailGroupClasses = classNames({
             'credentialsGroup': true,
-            'has-error': notNullUndefinedOrEmpty(this.state.emailError),
+            'has-error': ConstantFuncs.notNullUndefinedOrEmpty(this.state.emailError),
             'form-group': true
         });
 
         var passwordGroupClasses = classNames({
             'credentialsGroup': true,
-            'has-error': notNullUndefinedOrEmpty(this.state.passwordError),
+            'has-error': ConstantFuncs.notNullUndefinedOrEmpty(this.state.passwordError),
             'form-group': true,
             'passwordTopMargin': true
         });
@@ -91,7 +88,7 @@ var LoginComponent = React.createClass({
                                            onKeyDown={this.keyHandler}
                                            name="email" id="Email"
                                            className="form-control" id="Email"
-                                           placeholder={notNullUndefinedOrEmpty(this.state.emailError) ?
+                                           placeholder={ConstantFuncs.notNullUndefinedOrEmpty(this.state.emailError) ?
                                            this.state.emailError : "Email"}/>
                                 </div>
 
@@ -100,7 +97,7 @@ var LoginComponent = React.createClass({
                                            onKeyDown={this.keyHandler}
                                            name="password" id="Password"
                                            className="form-control passwordTopMargin"
-                                           placeholder={notNullUndefinedOrEmpty(this.state.passwordError) ?
+                                           placeholder={ConstantFuncs.notNullUndefinedOrEmpty(this.state.passwordError) ?
                                            this.state.passwordError : "Password"}/>
                                 </div>
 

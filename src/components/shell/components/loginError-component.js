@@ -4,20 +4,36 @@
 var React = require('react');
 var classnames = require('classnames');
 var _ = require('underscore');
+var ConstantFuncs = require('./Constants/ConstantFuncs.js');
+
 
 var LoginErrorComponent = React.createClass({
     render: function () {
         var errorClassNames = classnames({
-            'errorBackground': true,
-            'errorTrans': true
+            'errorTrans': true,
+            'alert': true,
+            'alert-danger': true
+        });
+
+        var nonErrorClassNames = classnames({
+            'nonErrorTrans': true,
+            'alert': true,
+            'alert-danger': true
         });
 
         var errors = this.props.errorList.map(function (error, i) {
             debugger;
-            if ([null,"",undefined].indexOf(error) ===-1) {
+            if(ConstantFuncs.notNullUndefinedOrEmpty(error)) {
                 return (
                     <div className={errorClassNames} key={i}>
-                        <strong className='loginErrorText'>{error}</strong>
+                        <strong>{error}</strong>
+                    </div>
+                )
+            }
+            else if(error === null || error == ""){
+                return (
+                    <div className={nonErrorClassNames} key={i}>
+                        <strong>{error}</strong>
                     </div>
                 )
             }
