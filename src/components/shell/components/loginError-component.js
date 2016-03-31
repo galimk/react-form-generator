@@ -40,7 +40,7 @@ var LoginErrorComponent = React.createClass({
         }, this);
 
         return (
-            <div>
+            <div className="errorDivStyle">
                 {errors}
             </div>
         )
