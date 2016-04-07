@@ -103,7 +103,7 @@ var LoginComponent = React.createClass({
 
                                 <div className="form-group">
                                     <a className="btn loginButton leftColButtons" onClick={this.onSubmit}>Log In</a>
-                                <span className="pull-right ForgotPswdLogin">
+                                <span className="pull-right ForgotPswdbtn">
                                     <a href="#">Forgot Password?</a>
                                 </span>
                                 </div>

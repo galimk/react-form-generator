@@ -7,7 +7,7 @@
   margin-top:-10px;
 }
 
-.ForgotPswdLogin {
+.ForgotPswdbtn {
   padding-right: 35px;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .rightCol {
-  margin-top: 5px;
+  margin-top: 4px;
   padding-left: 340px;
   padding-right: 30px;
 }
@@ -121,41 +121,6 @@
   .standardBtnFocus;
 }
 
-.errorDivStyle{
-  max-width: 600px;
-  margin: -5px auto;
-}
-
-.errorTrans{
-  border-radius: 3px;
-  -webkit-animation-name: fadein;
-  -webkit-animation: fadein 0.5s;
-  animation-fill-mode: forwards;
-  margin-top: -20px;
-  padding: auto;
-  margin-right: 65%;
-}
-
-.nonErrorTrans{
-  border-radius: 3px;
-  -webkit-animation-name: fadeout;
-  -webkit-animation: fadeout 0.5s;
-  animation-fill-mode: forwards;
-  margin-top: -20px;
-  padding: auto;
-  margin-right: 65%;
-}
-
-@-webkit-keyframes fadeout {
-  from{opacity: 1;}
-  to{opacity:0;}
-}
-
-@-webkit-keyframes fadein{
-  from{opacity: 0;}
-  to{opacity: 1;}
-}
-
 @media screen and(max-width: 600px){
   .leftCol{
     max-width:80%;
@@ -171,18 +136,5 @@
   .mainLoginPanel {
     margin: 150px auto 20px;
     max-width: 330px;
-  }
-  .errorDivStyle{
-    max-width: 330px;
-    margin: -5px auto;
-  }
-  .errorTrans{
-    margin-top: -20px;
-    width: 100%;
-    text-align: center;
-  }
-  .nonErrorTrans{
-    margin-top:-20px;
-    width: 100%;
   }
 }
