@@ -4,7 +4,6 @@ var _ = require('underscore');
 var LoginModel = require('../models/loginModel.js');
 var validator = require('./validator');
 var ModelMixin = require('./ModelStateMixin.js');
-var ErrorComponent = require('./loginError-component.js');
 var ConstantFuncs = require('./Constants/ConstantFuncs.js');
 
 var loginModel = new LoginModel();
