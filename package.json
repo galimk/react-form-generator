@@ -1,5 +1,5 @@
 {
-  "name": "neon-react-components",
+  "name": "react-form-generator",
   "version": "1.0.0",
   "description": "neon react components that can be used in neon angularjs application",
   "main": "index.js",

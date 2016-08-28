@@ -12,7 +12,7 @@ gulp.task('browserify', function () {
         .transform('reactify')
         .on('error', console.error.bind(console))
         .bundle()
-        .pipe(source('neon-react-components.js'))
+        .pipe(source('react-form-generator.js'))
         .pipe(buffer())
         .pipe(minify())
         .pipe(gulp.dest('dist'));
