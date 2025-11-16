@@ -2,7 +2,7 @@ import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import clsx from 'clsx';
-import { useCallback } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { useTemplateContext } from '../../context/TemplateContext';
 import type { TemplateField } from '../../models/templates';
 import TemplatePanel from './TemplatePanel';
@@ -14,14 +14,50 @@ interface SortableTemplatePanelProps {
 
 const SortableTemplatePanel = ({ field }: SortableTemplatePanelProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  const combinedRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      setNodeRef(element);
+      setNode(element);
+    },
+    [setNodeRef],
+  );
+
+  useLayoutEffect(() => {
+    if (!node) {
+      return undefined;
+    }
+
+    const measure = () => {
+      const rect = node.getBoundingClientRect();
+      setDimensions({ width: rect.width, height: rect.height });
+    };
+
+    measure();
+
+    const observer = new ResizeObserver((entries) => {
+      if (isDragging) {
+        return;
+      }
+      const entry = entries[0];
+      setDimensions({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [node, isDragging]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    width: isDragging && dimensions.width ? `${dimensions.width}px` : undefined,
+    height: isDragging && dimensions.height ? `${dimensions.height}px` : undefined,
   };
 
   return (
-    <div ref={setNodeRef} className={clsx(styles.panel, isDragging && styles.dragging)} style={style}>
+    <div ref={combinedRef} className={clsx(styles.panel, isDragging && styles.dragging)} style={style}>
       <TemplatePanel
         field={field}
         dragHandleProps={{ ...(attributes ?? {}), ...(listeners ?? {}) }}
