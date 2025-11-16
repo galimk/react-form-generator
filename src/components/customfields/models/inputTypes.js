@@ -2,7 +2,7 @@ var _ = require('underscore');
 var React = require('react');
 var InputText = require('../../common/inputText');
 var DropDown = require('../../common/dropDown');
-var Checkbox = require('../../common/checkBox');
+var Checkbox = require('../../common/checkbox');
 var CheckboxList = require('../components/checkboxList');
 var InputTextArea = require('../../common/inputTextArea');
 
