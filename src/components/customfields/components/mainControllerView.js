@@ -1,4 +1,4 @@
-var React = require('React');
+var React = require('react');
 var TemplateView = require('./templateView');
 var TemplateCollectionModel = require('../models/templateCollectionModel');
 var TemplateModel = require('../models/templateModel');

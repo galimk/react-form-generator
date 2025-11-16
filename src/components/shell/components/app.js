@@ -1,7 +1,7 @@
 /**
  * Created by amirkaudinov on 12/24/15.
  */
-var React = require('React');
+var React = require('react');
 var LoginComponent = require('./login-component.js');
 
 var App = React.createClass({

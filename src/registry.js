@@ -1,6 +1,6 @@
 var CustomFieldsWizard = require('./components/customfields/components/mainControllerView');
 var ReactDOM = require('react-dom');
-var React = require('React');
+var React = require('react');
 
 var registry = [];
 

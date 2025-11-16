@@ -1,4 +1,4 @@
-var React = require('React');
+var React = require('react');
 var Checkbox = require('../../common/checkbox');
 var _ = require('underscore');
 var classNames = require('classnames');
