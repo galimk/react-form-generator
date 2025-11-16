@@ -1,6 +1,6 @@
-var _ = require('underscore');
+import _ from 'underscore';
 
-module.exports = {
+export default {
     validate: function (model, propertyNames) {
         var isValid = true;
         _.each(propertyNames, function (propertyName) {

@@ -1,52 +1,48 @@
-var React = require('react');
+import React from 'react';
+import PropTypes from 'prop-types';
 
-var InputText = React.createClass({
+function InputText({ name, label, onChange, placeholder, value, error }) {
+    var internalOnChange = function (e) {
+        onChange(e, name);
+    };
 
-    propTypes: {
-        name: React.PropTypes.string.isRequired,
-        label: React.PropTypes.string.isRequired,
-        onChange: React.PropTypes.func.isRequired,
-        placeholder: React.PropTypes.string,
-        value: React.PropTypes.string,
-        error: React.PropTypes.string
-    },
-
-    internalOnChange: function (e) {
-        this.props.onChange(e, this.props.name);
-    },
-
-    render: function () {
-        var wrapperClass = 'form-group';
-
-        if (this.props.error && this.props.error.length > 0) {
-            wrapperClass += ' ' + 'has-error';
-        }
-
-        return (
-            <div className={wrapperClass}>
-                <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
-
-                <div className="field">
-                    <input type="text"
-                           name={this.props.name}
-                           className="form-control"
-                           placeholder={this.props.placeholder}
-                           ref={this.props.name}
-                           value={this.props.value}
-                           onChange={this.internalOnChange}
-                        />
-
-                    <div className="help-block">
-                        <ul className="list-unstyled">
-                            <li>{this.props.error}</li>
-                        </ul>
-                    </div>
-
-                </div>
-            </div>
-        );
+    var wrapperClass = 'form-group';
+    if (error && error.length > 0) {
+        wrapperClass += ' has-error';
     }
 
-});
+    return (
+        <div className={wrapperClass}>
+            <label className="control-label" htmlFor={name}>{label}</label>
 
-module.exports = InputText;
+            <div className="field">
+                <input type="text"
+                       name={name}
+                       className="form-control"
+                       placeholder={placeholder}
+                       ref={name}
+                       value={value}
+                       onChange={internalOnChange}
+                    />
+
+                <div className="help-block">
+                    <ul className="list-unstyled">
+                        <li>{error}</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    );
+}
+
+InputText.propTypes = {
+    name: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    onChange: PropTypes.func.isRequired,
+    placeholder: PropTypes.string,
+    value: PropTypes.string,
+    error: PropTypes.string
+};
+
+export default InputText;

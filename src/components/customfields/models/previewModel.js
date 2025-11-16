@@ -1,8 +1,8 @@
-var Backbone = require('backbone');
-var _ = require('underscore');
-var InputTypes = require('./inputTypes');
+import Backbone from 'backbone';
+import _ from 'underscore';
+import InputTypes from './inputTypes';
 
-var self = {
+const self = {
     createModel: function (templates) {
         var model = Backbone.Model.extend({
             validation: self.createValidatorObject(templates)
@@ -73,6 +73,5 @@ var self = {
     }
 };
 
-
-module.exports = self;
+export default self;
 

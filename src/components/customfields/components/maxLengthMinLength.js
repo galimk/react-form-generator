@@ -1,54 +1,56 @@
-var React = require('react');
-var classNames = require('classnames');
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
-var MaxLengthMinLength = React.createClass({
-    propTypes: {
-        template: React.PropTypes.object.isRequired
-    },
+class MaxLengthMinLength extends React.Component {
+    constructor(props) {
+        super(props);
+        this.modelChanged = this.modelChanged.bind(this);
+        this.maxChanged = this.maxChanged.bind(this);
+        this.minChanged = this.minChanged.bind(this);
+        this.invokeValidation = this.invokeValidation.bind(this);
+        this.state = this.composeState();
+    }
 
-    getInitialState: function () {
-        return this.composeState();
-    },
+    componentDidMount() {
+        this.props.template.on('change', this.modelChanged, this);
+    }
 
-    composeState: function () {
+    componentWillUnmount() {
+        this.props.template.off('change', this.modelChanged, this);
+    }
+
+    composeState() {
         return {
             minLength: this.props.template.get('minLength'),
             maxLength: this.props.template.get('maxLength'),
             errorMinLength: this.props.template.get('minLength_error'),
             errorMaxLength: this.props.template.get('maxLength_error')
         };
-    },
+    }
 
-    componentDidMount: function () {
-        this.props.template.on('change', this.modelChanged, this);
-    },
-
-    componentWillUnmount: function () {
-        this.props.template.off('change', this.modelChanged, this);
-    },
-
-    modelChanged: function () {
+    modelChanged() {
         this.setState(this.composeState());
-    },
+    }
 
-    maxChanged: function (e) {
+    maxChanged(e) {
         this.props.template.set('maxLength', e.target.value);
         this.invokeValidation();
-    },
+    }
 
-    minChanged: function (e) {
+    minChanged(e) {
         this.props.template.set('minLength', e.target.value);
         this.invokeValidation();
-    },
+    }
 
-    invokeValidation: function () {
+    invokeValidation() {
         var maxLengthErrorMessage = this.props.template.preValidate('maxLength', this.props.template.get('maxLength'));
         var minLengthErrorMessage = this.props.template.preValidate('minLength', this.props.template.get('minLength'));
         this.props.template.set('maxLength_error', maxLengthErrorMessage ? maxLengthErrorMessage : undefined);
         this.props.template.set('minLength_error', minLengthErrorMessage ? minLengthErrorMessage : undefined);
-    },
+    }
 
-    render: function () {
+    render() {
         var minLengthClassNames = classNames({
             'form-group': true,
             'has-error': this.state.errorMinLength !== undefined
@@ -93,9 +95,9 @@ var MaxLengthMinLength = React.createClass({
             </div>
 
         );
-    },
+    }
 
-    getValidationErrorBlock: function (validationErrorMessage) {
+    getValidationErrorBlock(validationErrorMessage) {
         return (
             <div className="col-md-12 has-error">
                 <div className="help-block">
@@ -106,6 +108,10 @@ var MaxLengthMinLength = React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = MaxLengthMinLength;
+MaxLengthMinLength.propTypes = {
+    template: PropTypes.object.isRequired
+};
+
+export default MaxLengthMinLength;

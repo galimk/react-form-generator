@@ -1,23 +1,21 @@
-var React = require('react');
-
-var ModelStateMixin = function(model, callBack){
+const ModelStateMixin = function(model, callBack){
     return {
         getInitialState: function(){
-            return callBack(this)
+            return callBack(this);
         },
 
         componentDidMount: function(){
-            model.on('change', this._onChange, this)
+            model.on('change', this._onChange, this);
         },
 
         componentWillUnmount: function(){
-            model.off('change', this._onChange, this)
+            model.off('change', this._onChange, this);
         },
 
         _onChange: function(){
-            this.setState(callBack(this))
+            this.setState(callBack(this));
         }
-    }
+    };
 };
 
-module.exports = ModelStateMixin;
+export default ModelStateMixin;

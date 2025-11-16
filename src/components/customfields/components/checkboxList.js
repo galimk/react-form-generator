@@ -1,29 +1,30 @@
-var React = require('react');
-var Checkbox = require('../../common/checkbox');
-var _ = require('underscore');
-var classNames = require('classnames');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import classNames from 'classnames';
+import Checkbox from '../../common/checkbox';
 
-var CheckboxList = React.createClass({
-    propTypes: {
-        template: React.PropTypes.object.isRequired,
-        onChange: React.PropTypes.func,
-        values: React.PropTypes.array.isRequired,
-        error: React.PropTypes.string,
-        name: React.PropTypes.string.isRequired
-    },
+class CheckboxList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.templateChanged = this.templateChanged.bind(this);
+        this.onItemCheckedChanged = this.onItemCheckedChanged.bind(this);
+        this.getValueById = this.getValueById.bind(this);
+        this.state = this.composeState();
+    }
 
-    componentDidMount: function () {
+    componentDidMount() {
         this.props.template.on('change', this.templateChanged, this);
-    },
+    }
 
-    componentWillUnmount: function () {
+    componentWillUnmount() {
         this.props.template.off('change', this.templateChanged, this);
-    },
+    }
 
-    composeState: function () {
+    composeState() {
         var itemsArray = [];
         var modelOptions = this.props.template.get('options');
-        var checkedItems = this.props.values;
+        var checkedItems = this.props.values.slice();
 
         for (var i = 0; i < modelOptions.length; i++) {
             var id = 'chk_' + i;
@@ -39,18 +40,14 @@ var CheckboxList = React.createClass({
             label: this.props.template.get('name'),
             checkedItems: checkedItems
         };
-    },
+    }
 
-    templateChanged: function () {
+    templateChanged() {
         this.setState(this.composeState());
-    },
+    }
 
-    getInitialState: function () {
-        return this.composeState();
-    },
-
-    onItemCheckedChanged: function (val, id) {
-        var checkedItems = this.state.checkedItems;
+    onItemCheckedChanged(val, id) {
+        var checkedItems = this.state.checkedItems.slice();
         var value = this.getValueById(id);
         var itemIndex = checkedItems.indexOf(value);
 
@@ -64,31 +61,33 @@ var CheckboxList = React.createClass({
             checkedItems: checkedItems
         });
 
-        this.props.onChange({
-            target: {
-                name: this.props.name,
-                value: checkedItems
-            }
-        }, this.props.name);
+        if (this.props.onChange) {
+            this.props.onChange({
+                target: {
+                    name: this.props.name,
+                    value: checkedItems
+                }
+            }, this.props.name);
+        }
 
         this.setState(this.composeState());
-    },
+    }
 
-    getValueById: function (id) {
+    getValueById(id) {
         var found = _.findWhere(this.state.items, {id: id});
         if (found) {
             return found.text;
         }
         return null;
-    },
+    }
 
-    render: function () {
+    render() {
         var showItem = function (item) {
             return (
                 <Checkbox key={item.id} name={item.id} checked={item.checked} label={item.text}
                           onChange={this.onItemCheckedChanged}/>
-            )
-        };
+            );
+        }.bind(this);
 
         var wrapperClass = classNames({
             'form-group': true,
@@ -100,7 +99,7 @@ var CheckboxList = React.createClass({
                 <label className="control-label">{this.state.label}</label>
 
                 <div>
-                    {this.state.items.map(showItem, this)}
+                    {this.state.items.map(showItem)}
                 </div>
 
                 <div className="help-block">
@@ -113,6 +112,14 @@ var CheckboxList = React.createClass({
 
         );
     }
-});
+}
 
-module.exports = CheckboxList;
+CheckboxList.propTypes = {
+    template: PropTypes.object.isRequired,
+    onChange: PropTypes.func,
+    values: PropTypes.array.isRequired,
+    error: PropTypes.string,
+    name: PropTypes.string.isRequired
+};
+
+export default CheckboxList;

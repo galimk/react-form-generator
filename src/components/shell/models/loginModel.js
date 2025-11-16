@@ -1,12 +1,10 @@
-/**
- * Created by amirkaudinov on 12/30/15.
- */
-var Backbone = require('backbone');
-var Validation = require('backbone-validation');
-var _ = require('underscore');
+import Backbone from 'backbone';
+import Validation from 'backbone-validation';
+import _ from 'underscore';
+
 _.extend(Backbone.Model.prototype, Validation.mixin);
 
-var LoginModel = Backbone.Model.extend({
+const LoginModel = Backbone.Model.extend({
     defaults: {
         email: '',
         password: ''
@@ -27,4 +25,4 @@ var LoginModel = Backbone.Model.extend({
     }
 });
 
-module.exports = LoginModel;
+export default LoginModel;

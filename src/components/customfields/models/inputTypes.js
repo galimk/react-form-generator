@@ -1,10 +1,10 @@
-var _ = require('underscore');
-var React = require('react');
-var InputText = require('../../common/inputText');
-var DropDown = require('../../common/dropDown');
-var Checkbox = require('../../common/checkbox');
-var CheckboxList = require('../components/checkboxList');
-var InputTextArea = require('../../common/inputTextArea');
+import _ from 'underscore';
+import React from 'react';
+import InputText from '../../common/inputText';
+import DropDown from '../../common/dropDown';
+import Checkbox from '../../common/checkbox';
+import CheckboxList from '../components/checkboxList';
+import InputTextArea from '../../common/inputTextArea';
 
 var inputTypes = [
     {text: 'Text Input', key: 1, createComponent: createTextBox},
@@ -89,7 +89,7 @@ function createCheckBoxList(template, value, onChangeCallback, error) {
                          error={error}/>
 }
 
-module.exports = {
+export default {
     getInputTypesEnum: function () {
         return typesEnum;
     },

@@ -1,10 +1,8 @@
-var React = require('react');
-var classNames = require('classnames');
-var _ = require('underscore');
-var LoginModel = require('../models/loginModel.js');
-var validator = require('./validator');
-var ModelMixin = require('./ModelStateMixin.js');
-var ConstantFuncs = require('./Constants/ConstantFuncs.js');
+import React from 'react';
+import classNames from 'classnames';
+import LoginModel from '../models/loginModel';
+import validator from './validator';
+import ConstantFuncs from './Constants/ConstantFuncs';
 
 var loginModel = new LoginModel();
 
@@ -18,10 +16,32 @@ function setUpModelState() {
     return loginModelState;
 }
 
-var LoginComponent = React.createClass({
-    mixins: [ModelMixin(loginModel, setUpModelState)],
+class LoginComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.onSubmit = this.onSubmit.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.keyHandler = this.keyHandler.bind(this);
+        this.handleModelChange = this.handleModelChange.bind(this);
+        this.state = Object.assign({}, setUpModelState(), {
+            emailError: loginModel.get('email_error'),
+            passwordError: loginModel.get('password_error')
+        });
+    }
 
-    onSubmit: function () {
+    componentDidMount() {
+        loginModel.on('change', this.handleModelChange, this);
+    }
+
+    componentWillUnmount() {
+        loginModel.off('change', this.handleModelChange, this);
+    }
+
+    handleModelChange() {
+        this.setState(Object.assign({}, setUpModelState()));
+    }
+
+    onSubmit() {
         var isValid = validator.validate(loginModel, ['password', 'email']);
         var stateSetter = {
             emailError: loginModel.get('email_error'),
@@ -34,9 +54,9 @@ var LoginComponent = React.createClass({
         else {
             alert('do login!');
         }
-    },
+    }
 
-    onChange: function (e) {
+    onChange(e) {
         var modelSetter = {};
         modelSetter[e.target.name] = e.target.value;
         loginModel.set(modelSetter);
@@ -44,19 +64,20 @@ var LoginComponent = React.createClass({
         var stateSetter = {};
         if (e.target.value.match(/\w/) && ConstantFuncs.notNullUndefinedOrEmpty(this.state[e.target.name + 'Error'])) {
             stateSetter[e.target.name + 'Error'] = null;
-            console.log(this);
             this.setState(stateSetter);
         }
-    },
 
-    keyHandler: function (e) {
+        this.setState(setUpModelState());
+    }
+
+    keyHandler(e) {
         if (e.keyCode == 13) {
             this.onSubmit();
             e.preventDefault();
         }
-    },
+    }
 
-    render: function () {
+    render() {
         var emailGroupClasses = classNames({
             'credentialsGroup': true,
             'has-error': ConstantFuncs.notNullUndefinedOrEmpty(this.state.emailError),
@@ -121,6 +142,6 @@ var LoginComponent = React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = LoginComponent;
+export default LoginComponent;

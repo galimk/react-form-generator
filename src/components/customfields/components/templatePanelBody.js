@@ -1,21 +1,37 @@
-var React = require('react');
-var InputText = require('../../common/inputText');
-var DropDown = require('../../common/dropDown');
-var CheckBox = require('../../common/checkbox');
-var InputTypes = require('../models/inputTypes');
-var Options = require('./optionsList');
-var MaxLengthMinLength = require('./maxLengthMinLength');
+import React from 'react';
+import PropTypes from 'prop-types';
+import InputText from '../../common/inputText';
+import DropDown from '../../common/dropDown';
+import CheckBox from '../../common/checkbox';
+import InputTypes from '../models/inputTypes';
+import Options from './optionsList';
+import MaxLengthMinLength from './maxLengthMinLength';
 
-var TemplatePanelBody = React.createClass({
-    propTypes: {
-        template: React.PropTypes.object.isRequired
-    },
+class TemplatePanelBody extends React.Component {
+    constructor(props) {
+        super(props);
+        this.templateModelChanged = this.templateModelChanged.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.onOptionAdded = this.onOptionAdded.bind(this);
+        this.onOptionRemoved = this.onOptionRemoved.bind(this);
+        this.setOptions = this.setOptions.bind(this);
+        this.onRequiredChanged = this.onRequiredChanged.bind(this);
+        this.state = this.composeTemplateState();
+    }
 
-    getInitialState: function () {
-        return this.composeTemplateState();
-    },
+    componentDidMount() {
+        this.props.template.on('change', this.templateModelChanged, this);
+    }
 
-    composeTemplateState: function () {
+    componentWillUnmount() {
+        this.props.template.off('change', this.templateModelChanged, this);
+    }
+
+    templateModelChanged() {
+        this.setState(this.composeTemplateState());
+    }
+
+    composeTemplateState() {
         var panelBodyState = {
             template: {
                 name: {
@@ -39,25 +55,13 @@ var TemplatePanelBody = React.createClass({
             panelBodyState.template.options = {
                 value: this.props.template.get('options'),
                 error: this.props.template.get('options_error')
-            }
+            };
         }
 
         return panelBodyState;
-    },
+    }
 
-    componentDidMount: function () {
-        this.props.template.on('change', this.templateModelChanged, this)
-    },
-
-    componentWillUnmount: function () {
-        this.props.template.off('change', this.templateModelChanged, this);
-    },
-
-    templateModelChanged: function () {
-        this.setState(this.composeTemplateState());
-    },
-
-    onChange: function (e) {
+    onChange(e) {
         var setter = {};
         var errorMessages = this.props.template.preValidate(e.target.name, e.target.value);
         setter[e.target.name + '_error'] = errorMessages ? errorMessages : undefined;
@@ -66,34 +70,34 @@ var TemplatePanelBody = React.createClass({
         if (e.target.name === 'type' && InputTypes.supportsListItems(e.target.value)) {
             this.setOptions(this.props.template.get('options'));
         }
-    },
+    }
 
-    onOptionAdded: function (newOption) {
+    onOptionAdded(newOption) {
         var options = this.props.template.get('options');
         this.props.template.set({'options_error': null});
         options.push(newOption);
         this.setOptions(options);
-    },
+    }
 
-    onOptionRemoved: function (index) {
+    onOptionRemoved(index) {
         var options = this.props.template.get('options');
         options.splice(index, 1);
         this.setOptions(options);
-    },
+    }
 
-    setOptions: function (options) {
+    setOptions(options) {
         options = options ? options : [];
         var error = this.props.template.preValidate('options', options);
         this.props.template.set({'options_error': error});
         this.props.template.trigger('change', this.props.template);
-    },
+    }
 
-    onRequiredChanged: function () {
+    onRequiredChanged() {
         var required = !this.state.template.required;
         this.props.template.set('required', required);
-    },
+    }
 
-    render: function () {
+    render() {
         var options = null;
         var minMax = null;
         var type = this.state.template.type.value;
@@ -107,7 +111,7 @@ var TemplatePanelBody = React.createClass({
         }
 
         if (InputTypes.supportsMinMax(type)) {
-            minMax = <MaxLengthMinLength template={this.props.template}/>
+            minMax = <MaxLengthMinLength template={this.props.template}/>;
         }
 
         if (InputTypes.supportsPlaceholder(type)) {
@@ -115,7 +119,7 @@ var TemplatePanelBody = React.createClass({
                                      label="Placeholder"
                                      value={this.state.template.placeholder.value}
                                      error={this.state.template.placeholder.error}
-                                     onChange={this.onChange}/>
+                                     onChange={this.onChange}/>;
         }
 
         return (
@@ -158,7 +162,10 @@ var TemplatePanelBody = React.createClass({
             </div>
         );
     }
-});
+}
 
+TemplatePanelBody.propTypes = {
+    template: PropTypes.object.isRequired
+};
 
-module.exports = TemplatePanelBody;
+export default TemplatePanelBody;

@@ -1,10 +1,11 @@
-/**
- * Created by amirkaudinov on 12/24/15.
- */
-var ReactDom = require('react-dom');
-var React = require('react');
-var App = require('./components/app.js');
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './components/app';
 
 window.onload = function() {
-    ReactDom.render(<App />, document.getElementById('app'));
-}
+    var container = document.getElementById('app');
+    if (container) {
+        var root = createRoot(container);
+        root.render(<App />);
+    }
+};

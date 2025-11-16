@@ -1,36 +1,29 @@
-var React = require('react');
-var TemplateView = require('./templateView');
-var TemplateCollectionModel = require('../models/templateCollectionModel');
-var TemplateModel = require('../models/templateModel');
-var PreviewPanel = require('./previewPanel');
-var _ = require('underscore');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import TemplateView from './templateView';
+import TemplateCollectionModel from '../models/templateCollectionModel';
+import TemplateModel from '../models/templateModel';
+import PreviewPanel from './previewPanel';
 
 var TemplatesCollection = new TemplateCollectionModel();
 
-var MainControllerView = React.createClass({
-    propTypes: {
-        templates: React.PropTypes.array.isRequired,
-        saved_templates: React.PropTypes.array.isRequired
-    },
-
-    getInitialState: function () {
+class MainControllerView extends React.Component {
+    constructor(props) {
+        super(props);
+        this.populateTemplateCollection = this.populateTemplateCollection.bind(this);
+        this.state = {templates: TemplatesCollection};
         this.populateTemplateCollection();
+    }
 
-        return {templates: TemplatesCollection};
-    },
-
-    populateTemplateCollection: function () {
+    populateTemplateCollection() {
         _.each(this.props.templates, function (template) {
             var templateModel = new TemplateModel(template);
             TemplatesCollection.add(templateModel);
         });
-    },
+    }
 
-    componentWillMount: function () {
-
-    },
-
-    render: function () {
+    render() {
         return (
             <div className="container-fluid custom-fields-component">
                 <div className="row">
@@ -44,6 +37,11 @@ var MainControllerView = React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = MainControllerView;
+MainControllerView.propTypes = {
+    templates: PropTypes.array.isRequired,
+    saved_templates: PropTypes.array.isRequired
+};
+
+export default MainControllerView;

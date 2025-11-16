@@ -1,22 +1,22 @@
-var React = require('react');
+import React from 'react';
+import PropTypes from 'prop-types';
 
-var PreviewPanelRowWrapper = React.createClass({
-    propTypes: {
-        title: React.PropTypes.string.isRequired
-    },
-
-    render: function () {
-        return (
-            <div className="panel panel-success">
-                <div className="panel-heading">
-                    {this.props.title}
-                </div>
-                <div className="panel-body">
-                    {this.props.children}
-                </div>
+function PreviewPanelRowWrapper({ title, children }) {
+    return (
+        <div className="panel panel-success">
+            <div className="panel-heading">
+                {title}
             </div>
-        )
-    }
-});
+            <div className="panel-body">
+                {children}
+            </div>
+        </div>
+    );
+}
 
-module.exports = PreviewPanelRowWrapper;
+PreviewPanelRowWrapper.propTypes = {
+    title: PropTypes.string.isRequired,
+    children: PropTypes.node
+};
+
+export default PreviewPanelRowWrapper;

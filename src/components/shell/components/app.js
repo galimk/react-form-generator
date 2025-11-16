@@ -1,13 +1,8 @@
-/**
- * Created by amirkaudinov on 12/24/15.
- */
-var React = require('react');
-var LoginComponent = require('./login-component.js');
+import React from 'react';
+import LoginComponent from './login-component';
 
-var App = React.createClass({
-    render: function(){
-        return <LoginComponent />
-    }
-});
+function App() {
+    return <LoginComponent />;
+}
 
-module.exports = App;
+export default App;

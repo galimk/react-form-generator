@@ -1,8 +1,6 @@
-var MainControllerView = require('./components/mainControllerView');
-var React = require('react');
-var ReactDom = require('react-dom');
-
-// test data...
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import MainControllerView from './components/mainControllerView';
 
 var templates = [
     {
@@ -45,5 +43,10 @@ var saved_templates = [
 
 
 window.onload = function () {
-    ReactDom.render(<MainControllerView templates={templates} saved_templates={saved_templates} />, document.getElementById('app'));
+    var container = document.getElementById('app');
+    if (!container) {
+        return;
+    }
+    var root = createRoot(container);
+    root.render(<MainControllerView templates={templates} saved_templates={saved_templates} />);
 };

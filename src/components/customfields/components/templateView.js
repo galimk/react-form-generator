@@ -1,8 +1,9 @@
-var React = require('react');
-var TemplatePanel = require('./templatePanel');
-var TemplateModel = require('../models/templateModel');
-var HTML5Backend = require('react-dnd-html5-backend');
-var DragDropContext = require('react-dnd').DragDropContext;
+import React from 'react';
+import PropTypes from 'prop-types';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import TemplatePanel from './templatePanel';
+import TemplateModel from '../models/templateModel';
 
 function _getLastModel(models){
     var maxId = 0;
@@ -15,63 +16,64 @@ function _getLastModel(models){
     return maxId + 1;
 }
 
-var TemplateView = React.createClass({
-    propTypes: {
-        templates: React.PropTypes.object.isRequired
-    },
+class TemplateView extends React.Component {
+    constructor(props) {
+        super(props);
+        this.addNewField = this.addNewField.bind(this);
+        this.templatesCollectionChanged = this.templatesCollectionChanged.bind(this);
+        this.onRemove = this.onRemove.bind(this);
+        this.onMovePanel = this.onMovePanel.bind(this);
+        this.state = {templates: this.props.templates};
+    }
 
-    addNewField: function () {
+    addNewField() {
         var templates = this.props.templates;
-
+        var latestId = undefined;
         if (templates.length > 0) {
-            var latestId = _getLastModel(templates.models);
+            latestId = _getLastModel(templates.models);
         }
         templates.add(new TemplateModel({
             id: latestId,
             name: 'New Input'
         }));
-    },
+    }
 
-    getInitialState: function () {
-        return {templates: this.props.templates};
-    },
-
-    componentDidMount: function () {
+    componentDidMount() {
         this.props.templates.on('change rest add remove', this.templatesCollectionChanged, this);
-    },
+    }
 
-    componentWillUnmount: function () {
+    componentWillUnmount() {
         this.props.templates.off('change rest add remove', this.templatesCollectionChanged, this);
-    },
+    }
 
-    templatesCollectionChanged: function () {
+    templatesCollectionChanged() {
         this.setState({templates: this.props.templates});
-    },
+    }
 
-    onRemove: function (template) {
+    onRemove(template) {
         this.props.templates.remove(template);
         this.templatesCollectionChanged();
-    },
+    }
 
-    onMovePanel: function (dragIndex, hoverIndex) {
+    onMovePanel(dragIndex, hoverIndex) {
         var templatesCollection = this.props.templates;
         var dragCard = templatesCollection.models[hoverIndex];
         templatesCollection.remove(dragCard, {silent: true});
         templatesCollection.add(dragCard, {at: dragIndex});
-    },
+    }
 
-    render: function () {
+    render() {
         var showItem = function (template, index) {
             return (
                 <TemplatePanel index={index} onRemove={this.onRemove} movePanel={this.onMovePanel}
                                key={template.get('id')} template={template}/>
             );
-        };
+        }.bind(this);
 
         return (
             <div>
                 <div>
-                    {this.state.templates.map(showItem, this)}
+                    {this.state.templates.map(showItem)}
                 </div>
                 <div className="action-button-panel">
                     <button className="btn btn-default action-button" onClick={this.addNewField}>
@@ -81,6 +83,10 @@ var TemplateView = React.createClass({
             </div>
         );
     }
-});
+}
 
-module.exports = DragDropContext(HTML5Backend)(TemplateView);
+TemplateView.propTypes = {
+    templates: PropTypes.object.isRequired
+};
+
+export default DragDropContext(HTML5Backend)(TemplateView);

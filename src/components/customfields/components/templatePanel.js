@@ -1,17 +1,17 @@
-var React = require('react');
-var PubSub = require('../../../pubsub-simple');
-var classNames = require('classnames');
-var TemplatePanelBody = require('./templatePanelBody');
-var DragSource = require('react-dnd').DragSource;
-var DropTarget = require('react-dnd').DropTarget;
-var ReactDOM = require('react-dom');
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { DragSource, DropTarget } from 'react-dnd';
+import { findDOMNode } from 'react-dom';
+import PubSub from '../../../pubsub-simple';
+import TemplatePanelBody from './templatePanelBody';
 
 var panelSource = {
     beginDrag: function (props) {
         return {
             targetId: props.template.get('id'),
             id: props.template.get('id'),
-            index: props.index,
+            index: props.index
         };
     }
 };
@@ -25,7 +25,7 @@ var panelTarget = {
             return;
         }
 
-        var hoverBoundingRect = ReactDOM.findDOMNode(component).getBoundingClientRect();
+        var hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
         var hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
         var clientOffset = monitor.getClientOffset();
         var hoverClientY = clientOffset.y - hoverBoundingRect.top;
@@ -42,30 +42,25 @@ var panelTarget = {
     }
 };
 
-var TemplatePanel = React.createClass({
-    propTypes: {
-        connectDragSource: React.PropTypes.func.isRequired,
-        connectDropTarget: React.PropTypes.func.isRequired,
-        connectDragPreview: React.PropTypes.func.isRequired,
-        isDragging: React.PropTypes.bool.isRequired,
-        template: React.PropTypes.object.isRequired,
-        onRemove: React.PropTypes.func.isRequired,
-        movePanel: React.PropTypes.func.isRequired,
-        index: React.PropTypes.number.isRequired
-    },
-
-    getInitialState: function () {
-        return {
+class TemplatePanel extends React.Component {
+    constructor(props) {
+        super(props);
+        this.modelChanged = this.modelChanged.bind(this);
+        this.validationTriggered = this.validationTriggered.bind(this);
+        this.switchToEdit = this.switchToEdit.bind(this);
+        this.switchFromEdit = this.switchFromEdit.bind(this);
+        this.invokeRemove = this.invokeRemove.bind(this);
+        this.state = {
             isEditing: false,
             name: this.props.template.get('name'),
-            isValid: true,
+            isValid: true
         };
-    },
+    }
 
-    componentDidMount: function () {
+    componentDidMount() {
         var component = this;
         this.subscriptionToken = PubSub.subscribe('turn_off_editing', function (topic, triggeringComponent) {
-            if (triggeringComponent == component) {
+            if (triggeringComponent === component) {
                 return;
             }
 
@@ -75,47 +70,45 @@ var TemplatePanel = React.createClass({
         });
         this.props.template.on('change', this.modelChanged, this);
         this.props.template.on('validated', this.validationTriggered, this);
-    },
+    }
 
-    componentWillUnmount: function () {
+    componentWillUnmount() {
         PubSub.unsubscribe(this.subscriptionToken);
         this.props.template.off('change', this.modelChanged, this);
         this.props.template.off('validated', this.validationTriggered, this);
-    },
+    }
 
-    modelChanged: function () {
+    modelChanged() {
         this.props.template.validate();
         this.setState({
             name: this.props.template.get('name')
         });
-    },
+    }
 
-    validationTriggered: function (isValid) {
+    validationTriggered(isValid) {
         this.setState({
             isValid: isValid
         });
-    },
+    }
 
-    switchToEdit: function () {
+    switchToEdit() {
         PubSub.publish('turn_off_editing', this);
         this.setState({
             isEditing: true
         });
-    },
+    }
 
-    switchFromEdit: function () {
+    switchFromEdit() {
         this.setState({
             isEditing: false
         });
-    },
+    }
 
-    invokeRemove: function () {
+    invokeRemove() {
         this.props.onRemove(this.props.template);
-    },
+    }
 
-    render: function () {
-        var templateClass = "template-header";
-
+    render() {
         var header = (
             <span>
                {this.state.name}
@@ -129,8 +122,6 @@ var TemplatePanel = React.createClass({
         );
 
         if (this.state.isEditing) {
-            templateClass += ' template-header-editing';
-
             header = (
                 <span>
                     {this.state.name} - Editing
@@ -184,19 +175,29 @@ var TemplatePanel = React.createClass({
             </div>
         )));
     }
-});
+}
 
-TemplatePanel = DropTarget('TemplatePanel', panelTarget, function (connect) {
+TemplatePanel.propTypes = {
+    connectDragSource: PropTypes.func.isRequired,
+    connectDropTarget: PropTypes.func.isRequired,
+    connectDragPreview: PropTypes.func.isRequired,
+    isDragging: PropTypes.bool.isRequired,
+    template: PropTypes.object.isRequired,
+    onRemove: PropTypes.func.isRequired,
+    movePanel: PropTypes.func.isRequired,
+    index: PropTypes.number.isRequired
+};
+
+var DroppableTemplatePanel = DropTarget('TemplatePanel', panelTarget, function (connect) {
     return {connectDropTarget: connect.dropTarget()};
 })(TemplatePanel);
 
-TemplatePanel = DragSource('TemplatePanel', panelSource, function (connect, monitor) {
+var DraggableTemplatePanel = DragSource('TemplatePanel', panelSource, function (connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
         connectDragPreview: connect.dragPreview(),
         isDragging: monitor.isDragging()
     };
-})(TemplatePanel);
+})(DroppableTemplatePanel);
 
-
-module.exports = TemplatePanel;
+export default DraggableTemplatePanel;

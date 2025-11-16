@@ -1,10 +1,11 @@
-var Backbone = require('backbone');
-var Validation = require('backbone-validation');
-var InputTypes = require('./inputTypes');
-var _ = require('underscore');
+import Backbone from 'backbone';
+import Validation from 'backbone-validation';
+import _ from 'underscore';
+import InputTypes from './inputTypes';
+
 _.extend(Backbone.Model.prototype, Validation.mixin);
 
-var TemplateModel = Backbone.Model.extend({
+const TemplateModel = Backbone.Model.extend({
     getDefaultValue: function () {
         var type = this.get('type');
         switch (type) {
@@ -83,4 +84,4 @@ var TemplateModel = Backbone.Model.extend({
     }
 });
 
-module.exports = TemplateModel;
+export default TemplateModel;

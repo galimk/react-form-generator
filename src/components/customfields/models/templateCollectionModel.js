@@ -1,8 +1,8 @@
-var TemplateModel = require('./templateModel');
-var Backbone = require('backbone');
+import Backbone from 'backbone';
+import TemplateModel from './templateModel';
 
-var TemplatesCollectionModel = Backbone.Collection.extend({
+const TemplatesCollectionModel = Backbone.Collection.extend({
     model: TemplateModel
 });
 
-module.exports = TemplatesCollectionModel;
+export default TemplatesCollectionModel;

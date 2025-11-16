@@ -1,8 +1,9 @@
-var CustomFieldsWizard = require('./components/customfields/components/mainControllerView');
-var ReactDOM = require('react-dom');
-var React = require('react');
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import CustomFieldsWizard from './components/customfields/components/mainControllerView';
 
 var registry = [];
+var mountedRoots = new WeakMap();
 
 registry.push({
     name: 'CustomFieldsWizard',
@@ -21,5 +22,15 @@ window.initReactComponent = function (componentName, jsonData, dataOutputCallbac
         }
     }
 
-    ReactDOM.render(component, domElement);
+    if (!component || !domElement) {
+        return;
+    }
+
+    var root = mountedRoots.get(domElement);
+    if (!root) {
+        root = createRoot(domElement);
+        mountedRoots.set(domElement, root);
+    }
+
+    root.render(component);
 };

@@ -1,25 +1,24 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var _ = require('underscore');
-var classNames = require('classnames');
-var OptionListItem = require('./optionsListItem');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import classNames from 'classnames';
+import OptionListItem from './optionsListItem';
 
-var OptionsList = React.createClass({
-    propTypes: {
-        options: React.PropTypes.array.isRequired,
-        onAdded: React.PropTypes.func.isRequired,
-        onRemoved: React.PropTypes.func.isRequired,
-        error: React.PropTypes.string
-    },
-
-    getInitialState: function () {
-        return {
+class OptionsList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.onChange = this.onChange.bind(this);
+        this.addBtnHandler = this.addBtnHandler.bind(this);
+        this.inputKeyDownHandler = this.inputKeyDownHandler.bind(this);
+        this.internalOnAdd = this.internalOnAdd.bind(this);
+        this.onRemove = this.onRemove.bind(this);
+        this.state = {
             value: '',
             addValidationError: null
-        }
-    },
+        };
+    }
 
-    onChange: function (e) {
+    onChange(e) {
         var validationError = null;
 
         if (e.target.value.length > 255) {
@@ -38,34 +37,34 @@ var OptionsList = React.createClass({
             value: e.target.value,
             addValidationError: validationError
         });
-    },
+    }
 
-    addBtnHandler: function(e) {
+    addBtnHandler(e) {
         e.preventDefault();
         this.internalOnAdd();
-    },
+    }
 
-    inputKeyDownHandler: function (e) {
+    inputKeyDownHandler(e) {
         if (this.state.addValidationError !== null || this.state.value.trim().length === 0) {
             return;
         }
         if (e.keyCode == 13) {
             this.internalOnAdd();
         }
-    },
+    }
 
-    internalOnAdd: function() {
+    internalOnAdd() {
         this.props.onAdded(this.state.value);
         this.setState({
             value: ''
         });
-    },
+    }
 
-    onRemove: function (index) {
+    onRemove(index) {
         this.props.onRemoved(index);
-    },
+    }
 
-    render: function () {
+    render() {
         function renderOption(option, index) {
             return (
                 <li key={option} className="list-group-item list-group-item-default">
@@ -97,7 +96,6 @@ var OptionsList = React.createClass({
                     <div className="input-group">
                         <input type="text"
                                name="listItem"
-                               ref="listItem"
                                className="form-control"
                                placeholder="New List Option"
                                onKeyDown={this.inputKeyDownHandler}
@@ -118,7 +116,13 @@ var OptionsList = React.createClass({
             </div>
         );
     }
-});
+}
 
+OptionsList.propTypes = {
+    options: PropTypes.array.isRequired,
+    onAdded: PropTypes.func.isRequired,
+    onRemoved: PropTypes.func.isRequired,
+    error: PropTypes.string
+};
 
-module.exports = OptionsList;
+export default OptionsList;

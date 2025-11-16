@@ -1,16 +1,36 @@
-var React = require('react');
-var previewModel = require('../models/previewModel');
-var InputTypes = require('../models/inputTypes');
-var _ = require('underscore');
-var classnames = require('classnames');
-var PreviewPanelRowWrapper = require('./previewPanelRowWrapper');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import classnames from 'classnames';
+import previewModel from '../models/previewModel';
+import InputTypes from '../models/inputTypes';
+import PreviewPanelRowWrapper from './previewPanelRowWrapper';
 
-var PreviewPanel = React.createClass({
-    propTypes: {
-        templates: React.PropTypes.object.isRequired
-    },
+class PreviewPanel extends React.Component {
+    constructor(props) {
+        super(props);
+        this.templatesCollectionChanged = this.templatesCollectionChanged.bind(this);
+        this.modelChanged = this.modelChanged.bind(this);
+        this.runValidationHandler = this.runValidationHandler.bind(this);
+        this.clearValidationHandler = this.clearValidationHandler.bind(this);
+        this.switchLayout = this.switchLayout.bind(this);
+        this.onModelValueChanged = this.onModelValueChanged.bind(this);
+        this.state = this.getInitialStateValues();
+    }
 
-    getInitialState: function () {
+    componentDidMount() {
+        this.createValidatableModel();
+        this.props.templates.on('change rest add remove', this.templatesCollectionChanged, this);
+    }
+
+    componentWillUnmount() {
+        this.props.templates.off('change rest add remove', this.templatesCollectionChanged, this);
+        if (this.model) {
+            this.model.off('change', this.modelChanged, this);
+        }
+    }
+
+    getInitialStateValues() {
         var modelValues = [];
         _.each(this.props.templates.models, function (template) {
             modelValues['input_' + template.get('id')] = template.getDefaultValue();
@@ -22,31 +42,21 @@ var PreviewPanel = React.createClass({
             modelErrors: [],
             layoutEditable: false
         };
-    },
+    }
 
-    componentDidMount: function () {
-        this.createValidatableModel();
-        this.props.templates.on('change rest add remove', this.templatesCollectionChanged, this);
-    },
-
-    componentWillUnmount: function () {
-        this.props.templates.off('change rest add remove', this.templatesCollectionChanged, this);
-        this.model.off('change', this.modelChanged, this);
-    },
-
-    createValidatableModel: function () {
+    createValidatableModel() {
         var modelClass = previewModel.createModel(this.props.templates);
         this.model = new modelClass();
         this.model.on('change', this.modelChanged, this);
-    },
+    }
 
-    modelChanged: function () {
+    modelChanged() {
         this.setState({
             modelValues: this.composeModelValues()
         });
-    },
+    }
 
-    composeModelValues: function () {
+    composeModelValues() {
         var modelValues = [];
         var that = this;
         _.each(this.props.templates.models, function (template) {
@@ -54,21 +64,21 @@ var PreviewPanel = React.createClass({
             modelValues[inputId] = that.model.get(inputId);
         });
         return modelValues;
-    },
+    }
 
-    runValidationHandler: function () {
+    runValidationHandler() {
         this.setState({
             modelErrors: this.composeModelErrors()
         });
-    },
+    }
 
-    clearValidationHandler: function () {
+    clearValidationHandler() {
         this.setState({
             modelErrors: []
-        })
-    },
+        });
+    }
 
-    composeModelErrors: function () {
+    composeModelErrors() {
         var modelErrors = [];
         var that = this;
         _.each(this.props.templates.models, function (template) {
@@ -78,22 +88,24 @@ var PreviewPanel = React.createClass({
             modelErrors[inputId] = error;
         });
         return modelErrors;
-    },
+    }
 
-    templatesCollectionChanged: function () {
+    templatesCollectionChanged() {
         this.clearValidationHandler();
-        this.model.off('change', this.modelChanged, this);
+        if (this.model) {
+            this.model.off('change', this.modelChanged, this);
+        }
         this.createValidatableModel();
         this.setState({
-            templates: this.props.templates,
+            templates: this.props.templates
         });
-    },
+    }
 
-    switchLayout: function () {
+    switchLayout() {
         this.setState({layoutEditable: !this.state.layoutEditable});
-    },
+    }
 
-    render: function () {
+    render() {
         var getComponent = function (template, index) {
             var templateId = 'input_' + template.get('id');
             var component = InputTypes.getComponent(template,
@@ -101,12 +113,11 @@ var PreviewPanel = React.createClass({
                 this.state.modelErrors[templateId]);
 
             if (!this.state.layoutEditable) {
-                return <div key={template.get('id')}>{component}</div>
+                return <div key={template.get('id')}>{component}</div>;
             } else {
                 return <PreviewPanelRowWrapper title={'Row ' + index}
-                                               key={template.get('id')}>{component}</PreviewPanelRowWrapper>
+                                               key={template.get('id')}>{component}</PreviewPanelRowWrapper>;
             }
-
 
         };
 
@@ -139,9 +150,9 @@ var PreviewPanel = React.createClass({
                 </div>
             </div>
         );
-    },
+    }
 
-    onModelValueChanged: function (e, inputName) {
+    onModelValueChanged(e, inputName) {
         var value = null;
         if (typeof e === 'boolean') {
             value = e;
@@ -159,6 +170,10 @@ var PreviewPanel = React.createClass({
             modelErrors: modelErrors
         });
     }
-});
+}
 
-module.exports = PreviewPanel;
+PreviewPanel.propTypes = {
+    templates: PropTypes.object.isRequired
+};
+
+export default PreviewPanel;

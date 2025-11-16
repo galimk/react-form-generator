@@ -1,4 +1,4 @@
-var pubsub = {};
+const pubsub = {};
 
 (function(q) {
     var topics = {}, subUid = -1;
@@ -45,5 +45,4 @@ var pubsub = {};
     };
 }(pubsub));
 
-
-module.exports = pubsub;
+export default pubsub;
