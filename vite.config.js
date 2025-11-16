@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     viteCommonjs(),
     react({
+      include: '**/*.{js,jsx}',
       jsxRuntime: 'classic',
       fastRefresh: false,
       babel: {

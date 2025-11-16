@@ -10,7 +10,7 @@ npm install
 
 ## Available scripts
 
-- `npm run dev` – starts Vite's development server on port 5173 and serves `index.html`.
+- `npm run dev` (or `npm run start`) – starts Vite's development server on port 5173 and serves `index.html`.
 - `npm run build` – produces a production build in `dist/` using Vite + Rollup.
 - `npm run preview` – serves the contents of `dist/` locally to verify the build output.
 
