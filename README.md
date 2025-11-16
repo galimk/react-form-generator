@@ -26,3 +26,4 @@ Vite is configured with `@vitejs/plugin-react` and a project level [`.babelrc`](
 - Output bundles are written to `dist/` which is now ignored by Git.
 - When running `npm run dev`, Vite exposes the same globals that `registry.js` has always exported, so downstream apps can continue calling `window.initReactComponent`.
 - The historic standalone HTML demos under `src/components/customfields/` and `src/components/shell/` now use the `.legacy.tpl` extension so Vite treats them as templates instead of build entries. Open them manually if you still need to preview the legacy markup outside of Vite.
+- The repository no longer includes the Browserify-era `src/components/node_modules/` directory, the nested `package.json`, or the component-specific Gulp build scripts/HTML stubs, keeping Vite as the single source of truth for local builds.

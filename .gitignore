@@ -25,6 +25,9 @@ build/Release
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
+src/components/node_modules/
+src/components/customfields/node_modules/
+src/components/shell/node_modules/
 dist
 
 src/components/customfields/dist/
