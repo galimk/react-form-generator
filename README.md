@@ -12,6 +12,6 @@ npm install
 npm run dev
 ```
 
-The app uses plain React Context for sharing the template collection between the builder column and the live preview. Drag-and-drop ordering is handled by `@hello-pangea/dnd`, and validation logic lives under `src/models`.
+The app uses plain React Context for sharing the template collection between the builder column and the live preview. Drag-and-drop ordering is handled by `@dnd-kit/core` + `@dnd-kit/sortable`, and validation logic lives under `src/models`.
 
 > **Note:** If installing dependencies fails in your environment, ensure you have access to the public npm registry or configure your proxy credentials accordingly.

@@ -1,4 +1,4 @@
-import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import type { ComponentPropsWithoutRef } from 'react';
 import clsx from 'clsx';
 import { TemplateField } from '../../models/templates';
 import { useTemplateContext } from '../../context/TemplateContext';
@@ -7,7 +7,7 @@ import styles from './templatePanel.module.css';
 
 interface Props {
   field: TemplateField;
-  dragHandleProps?: DraggableProvidedDragHandleProps;
+  dragHandleProps?: ComponentPropsWithoutRef<'span'>;
   isDragging: boolean;
 }
 

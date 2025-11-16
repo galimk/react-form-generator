@@ -1,23 +1,53 @@
-import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import clsx from 'clsx';
 import { useCallback } from 'react';
 import { useTemplateContext } from '../../context/TemplateContext';
+import type { TemplateField } from '../../models/templates';
 import TemplatePanel from './TemplatePanel';
 import styles from './templateColumn.module.css';
+
+interface SortableTemplatePanelProps {
+  field: TemplateField;
+}
+
+const SortableTemplatePanel = ({ field }: SortableTemplatePanelProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} className={clsx(styles.panel, isDragging && styles.dragging)} style={style}>
+      <TemplatePanel
+        field={field}
+        dragHandleProps={{ ...(attributes ?? {}), ...(listeners ?? {}) }}
+        isDragging={isDragging}
+      />
+    </div>
+  );
+};
 
 const TemplateColumn = () => {
   const { templates, addTemplate, reorderTemplates } = useTemplateContext();
 
   const handleDragEnd = useCallback(
-    (result: DropResult) => {
-      if (!result.destination) {
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) {
         return;
       }
-      if (result.destination.index === result.source.index) {
+      const sourceIndex = templates.findIndex((template) => template.id === active.id);
+      const destinationIndex = templates.findIndex((template) => template.id === over.id);
+      if (sourceIndex === -1 || destinationIndex === -1) {
         return;
       }
-      reorderTemplates(result.source.index, result.destination.index);
+      reorderTemplates(sourceIndex, destinationIndex);
     },
-    [reorderTemplates],
+    [reorderTemplates, templates],
   );
 
   return (
@@ -31,33 +61,15 @@ const TemplateColumn = () => {
           + Add field
         </button>
       </div>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="templates">
-          {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps} className={styles.list}>
-              {templates.map((template, index) => (
-                <Draggable draggableId={template.id} index={index} key={template.id}>
-                  {(dragProvided, snapshot) => (
-                    <div
-                      ref={dragProvided.innerRef}
-                      {...dragProvided.draggableProps}
-                      className={styles.panel}
-                      style={dragProvided.draggableProps.style}
-                    >
-                      <TemplatePanel
-                        field={template}
-                        dragHandleProps={dragProvided.dragHandleProps}
-                        isDragging={snapshot.isDragging}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <DndContext onDragEnd={handleDragEnd}>
+        <SortableContext items={templates.map((template) => template.id)} strategy={verticalListSortingStrategy}>
+          <div className={styles.list}>
+            {templates.map((template) => (
+              <SortableTemplatePanel field={template} key={template.id} />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
