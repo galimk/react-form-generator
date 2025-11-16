@@ -30,14 +30,24 @@ const SortableTemplatePanel = ({ field }: SortableTemplatePanelProps) => {
       return undefined;
     }
 
+    const measure = () => {
+      const rect = node.getBoundingClientRect();
+      setDimensions({ width: rect.width, height: rect.height });
+    };
+
+    measure();
+
     const observer = new ResizeObserver((entries) => {
+      if (isDragging) {
+        return;
+      }
       const entry = entries[0];
       setDimensions({ width: entry.contentRect.width, height: entry.contentRect.height });
     });
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [node]);
+  }, [node, isDragging]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
