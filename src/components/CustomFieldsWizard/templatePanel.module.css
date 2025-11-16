@@ -1,0 +1,62 @@
+.container {
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.dragging {
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.headerText {
+  flex: 1;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0.25rem 0;
+  font-size: 1.2rem;
+}
+
+.meta {
+  margin: 0;
+  color: #64748b;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.iconButton {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  border-radius: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+
+.iconButtonActive {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: #6366f1;
+}
+
+.dragHandle {
+  cursor: grab;
+  color: #94a3b8;
+}

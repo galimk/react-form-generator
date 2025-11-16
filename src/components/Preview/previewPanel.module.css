@@ -1,0 +1,65 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.title {
+  margin: 0.2rem 0 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.previewForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.primaryButton,
+.secondaryButton,
+.iconButton {
+  border-radius: 0.75rem;
+  padding: 0.55rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background: #16a34a;
+  color: #fff;
+}
+
+.secondaryButton {
+  background: #e2e8f0;
+}
+
+.iconButton {
+  background: #e2e8f0;
+}
+
+.iconButtonActive {
+  background: #cbd5f5;
+}
+
+.errorSummary {
+  color: #dc2626;
+  font-weight: 600;
+}
