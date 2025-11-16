@@ -17,13 +17,6 @@ export default defineConfig({
       }
     })
   ],
-  esbuild: {
-    // Treat legacy .js modules inside src/ as JSX so esbuild's dependency
-    // scanner (used by optimizeDeps and ssr) parses them correctly.
-    loader: 'jsx',
-    include: /src\/.*\.js$/,
-    exclude: []
-  },
   resolve: {
     alias: {
       React: 'react'
@@ -33,7 +26,15 @@ export default defineConfig({
     // Explicitly limit dependency scanning to the main HTML entry; otherwise
     // Vite tries to crawl the legacy component HTML stubs and fails before the
     // JSX loader override above can take effect.
-    entries: ['index.html']
+    entries: ['index.html'],
+    esbuildOptions: {
+      // Force esbuild (used during dependency optimization) to parse every
+      // `.js` file as JSX so the legacy React 0.14 components don't crash the
+      // scan step before Babel/@vitejs/plugin-react run.
+      loader: {
+        '.js': 'jsx'
+      }
+    }
   },
   build: {
     target: 'es2015'
