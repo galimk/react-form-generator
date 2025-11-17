@@ -63,19 +63,20 @@ const PreviewPanel = () => {
         <div>
           <p className={styles.eyebrow}>Preview</p>
           <h2 className={styles.title}>Live form</h2>
+          <p className={styles.helper}>Toggle layout, clear values, or validate the generated form.</p>
         </div>
         <div className={styles.headerActions}>
           <button
             type="button"
-            className={clsx(styles.iconButton, layoutEditable && styles.iconButtonActive)}
+            className={clsx('secondary outline', styles.iconButton, layoutEditable && styles.iconButtonActive)}
             onClick={() => setLayoutEditable((value) => !value)}
           >
             🧱 Layout
           </button>
-          <button type="button" className={styles.secondaryButton} onClick={handleClear}>
+          <button type="button" className="secondary" onClick={handleClear}>
             Clear
           </button>
-          <button type="button" className={styles.primaryButton} onClick={handleValidate}>
+          <button type="button" className="primary" onClick={handleValidate}>
             Validate
           </button>
         </div>

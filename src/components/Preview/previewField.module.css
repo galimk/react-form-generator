@@ -13,15 +13,6 @@
   margin-left: 0.25rem;
 }
 
-input,
-textarea,
-select {
-  border-radius: 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.5);
-  padding: 0.6rem 0.75rem;
-  font-size: 1rem;
-}
-
 textarea {
   resize: vertical;
   min-height: 120px;

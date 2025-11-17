@@ -13,13 +13,18 @@
 
 .eyebrow {
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--pico-muted-color);
   letter-spacing: 0.08em;
   margin: 0;
 }
 
 .title {
   margin: 0.2rem 0 0;
+}
+
+.helper {
+  margin: 0.35rem 0 0;
+  color: var(--pico-muted-color);
 }
 
 .headerActions {
@@ -33,30 +38,9 @@
   gap: 1rem;
 }
 
-.primaryButton,
-.secondaryButton,
-.iconButton {
-  border-radius: 0.75rem;
-  padding: 0.55rem 1rem;
-  border: none;
-  cursor: pointer;
-}
-
-.primaryButton {
-  background: #16a34a;
-  color: #fff;
-}
-
-.secondaryButton {
-  background: #e2e8f0;
-}
-
-.iconButton {
-  background: #e2e8f0;
-}
-
 .iconButtonActive {
-  background: #cbd5f5;
+  background: color-mix(in srgb, var(--pico-primary) 15%, transparent);
+  border-color: var(--pico-primary);
 }
 
 .errorSummary {
