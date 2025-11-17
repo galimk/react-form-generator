@@ -18,8 +18,11 @@ const TemplateForm = ({ field }: Props) => {
   const handleChange = (
     event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
-    const { name, value, type, checked } = event.target;
-    const nextValue = type === 'checkbox' ? checked : value;
+    const { name, value, type } = event.target;
+    const nextValue =
+      event.target instanceof HTMLInputElement && type === 'checkbox'
+        ? event.target.checked
+        : value;
     const key = name as keyof TemplateField;
     updateTemplate(field.id, { [key]: nextValue });
   };
