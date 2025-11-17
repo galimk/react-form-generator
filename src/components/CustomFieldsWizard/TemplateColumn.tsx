@@ -1,8 +1,8 @@
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import clsx from 'clsx';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useTemplateContext } from '../../context/TemplateContext';
 import type { TemplateField } from '../../models/templates';
 import TemplatePanel from './TemplatePanel';
@@ -16,8 +16,9 @@ const SortableTemplatePanel = ({ field }: SortableTemplatePanelProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: isDragging ? undefined : CSS.Transform.toString(transform),
+    transition: isDragging ? undefined : transition,
+    opacity: isDragging ? 0 : 1,
   };
 
   return (
@@ -33,6 +34,8 @@ const SortableTemplatePanel = ({ field }: SortableTemplatePanelProps) => {
 
 const TemplateColumn = () => {
   const { templates, addTemplate, reorderTemplates } = useTemplateContext();
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const activeField = templates.find((template) => template.id === activeId);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -61,7 +64,14 @@ const TemplateColumn = () => {
           + Add field
         </button>
       </div>
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext
+        onDragStart={({ active }) => setActiveId(String(active.id))}
+        onDragEnd={(event) => {
+          handleDragEnd(event);
+          setActiveId(null);
+        }}
+        onDragCancel={() => setActiveId(null)}
+      >
         <SortableContext items={templates.map((template) => template.id)} strategy={verticalListSortingStrategy}>
           <div className={styles.list}>
             {templates.map((template) => (
@@ -69,6 +79,9 @@ const TemplateColumn = () => {
             ))}
           </div>
         </SortableContext>
+        <DragOverlay>
+          {activeField ? <TemplatePanel field={activeField} isDragging dragHandleProps={undefined} /> : null}
+        </DragOverlay>
       </DndContext>
     </div>
   );
