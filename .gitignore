@@ -26,6 +26,11 @@ build/Release
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
 
+dist/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
 src/components/customfields/dist/
 src/components/shell/dist
 .idea/.name
