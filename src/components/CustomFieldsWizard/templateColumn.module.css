@@ -44,6 +44,13 @@
 }
 
 .actionButton {
-  padding: 0.4rem 0.95rem;
-  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+  line-height: 1.15;
+  border-radius: calc(var(--pico-border-radius) * 0.8);
+  min-height: auto;
 }
