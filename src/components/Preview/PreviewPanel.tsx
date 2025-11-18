@@ -68,15 +68,15 @@ const PreviewPanel = () => {
         <div className={styles.headerActions}>
           <button
             type="button"
-            className={clsx('secondary outline', styles.iconButton, layoutEditable && styles.iconButtonActive)}
+            className={clsx('secondary outline', styles.iconButton, layoutEditable && styles.iconButtonActive, styles.actionButton)}
             onClick={() => setLayoutEditable((value) => !value)}
           >
             🧱 Layout
           </button>
-          <button type="button" className="secondary" onClick={handleClear}>
+          <button type="button" className={clsx('secondary', styles.actionButton)} onClick={handleClear}>
             Clear
           </button>
-          <button type="button" className="primary" onClick={handleValidate}>
+          <button type="button" className={clsx('primary', styles.actionButton)} onClick={handleValidate}>
             Validate
           </button>
         </div>
