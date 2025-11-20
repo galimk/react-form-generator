@@ -16,10 +16,10 @@ const TemplatePanel = ({ field, dragHandleProps, isDragging }: Props) => {
   const isEditing = editingId === field.id;
 
   return (
-    <div className={clsx(styles.container, isDragging && styles.dragging)}>
+    <article className={clsx('contrast', styles.container, isDragging && styles.dragging)}>
       <header className={styles.header}>
         <div className={styles.headerText}>
-          <span className={styles.subtitle}>Field</span>
+          <small className={styles.subtitle}>Field</small>
           <h3 className={styles.title}>{field.name || 'Untitled field'}</h3>
           <p className={styles.meta}>
             {field.type} {field.required ? '• required' : ''}
@@ -28,25 +28,27 @@ const TemplatePanel = ({ field, dragHandleProps, isDragging }: Props) => {
         <div className={styles.actions}>
           <button
             type="button"
-            className={clsx(styles.iconButton, isEditing && styles.iconButtonActive)}
+            className={clsx('secondary outline', styles.iconButton, isEditing && styles.iconButtonActive)}
             onClick={() => setEditing(isEditing ? null : field.id)}
+            aria-label={isEditing ? 'Close field editor' : 'Edit field settings'}
           >
             ✏️
           </button>
           <button
             type="button"
-            className={styles.iconButton}
+            className={clsx('secondary outline', styles.iconButton)}
             onClick={() => removeTemplate(field.id)}
+            aria-label="Remove field"
           >
             🗑️
           </button>
-          <span className={styles.dragHandle} {...dragHandleProps}>
+          <span className={styles.dragHandle} {...dragHandleProps} aria-label="Drag to reorder">
             ⋮⋮
           </span>
         </div>
       </header>
       {isEditing && <TemplateForm field={field} />}
-    </div>
+    </article>
   );
 };
 

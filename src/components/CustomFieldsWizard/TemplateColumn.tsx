@@ -59,8 +59,9 @@ const TemplateColumn = () => {
         <div>
           <p className={styles.eyebrow}>Builder</p>
           <h2 className={styles.title}>Custom fields</h2>
+          <p className={styles.helper}>Drag, reorder, and edit the fields that power your form.</p>
         </div>
-        <button type="button" className={styles.addButton} onClick={addTemplate}>
+        <button type="button" className={clsx('secondary', styles.actionButton)} onClick={addTemplate}>
           + Add field
         </button>
       </div>

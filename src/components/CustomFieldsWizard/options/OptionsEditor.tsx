@@ -41,7 +41,7 @@ const OptionsEditor = ({ field, error }: Props) => {
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Enter option text"
         />
-        <button type="submit" disabled={!isDraftValid}>
+        <button type="submit" className="secondary" disabled={!isDraftValid}>
           Add
         </button>
       </form>
@@ -53,7 +53,7 @@ const OptionsEditor = ({ field, error }: Props) => {
         {field.options.map((option, index) => (
           <li key={option}>
             <span>{option}</span>
-            <button type="button" onClick={() => removeOption(index)}>
+            <button type="button" className="secondary outline" onClick={() => removeOption(index)}>
               Remove
             </button>
           </li>

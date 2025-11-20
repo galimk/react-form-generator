@@ -1,16 +1,17 @@
+import clsx from 'clsx';
 import TemplateColumn from './TemplateColumn';
 import PreviewPanel from '../Preview/PreviewPanel';
 import styles from './customFieldsWizard.module.css';
 
 const CustomFieldsWizard = () => (
-  <div className={styles.shell}>
-    <div className={styles.column}>
+  <main className={clsx('container', styles.shell)}>
+    <section className={clsx('contrast', styles.column)}>
       <TemplateColumn />
-    </div>
-    <div className={styles.column}>
+    </section>
+    <section className={clsx('contrast', styles.column)}>
       <PreviewPanel />
-    </div>
-  </div>
+    </section>
+  </main>
 );
 
 export default CustomFieldsWizard;
